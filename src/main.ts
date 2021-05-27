@@ -1,4 +1,4 @@
-import { Plugin } from "obsidian";
+import { FileExplorer, Plugin } from "obsidian";
 import {
   ALxFolderNoteSettings,
   DEFAULT_SETTINGS,
@@ -8,6 +8,7 @@ import "./main.css";
 
 export default class ALxFolderNote extends Plugin {
   settings: ALxFolderNoteSettings = DEFAULT_SETTINGS;
+  fileExplorer?: FileExplorer;
 
   async onload() {
     console.log("loading alx-folder-note");
