@@ -4,18 +4,22 @@ import { clickHandler } from "modules/click-handler";
 import { TFile, AFItem, FileExplorer } from "obsidian";
 
 export function setupHide(
-  folderNoteFile: TFile,
+  folderNote: TFile | AFItem,
   list: FileExplorer["fileItems"],
   revert = false,
 ) {
-  if (!folderNoteFile) return;
-  const folderNote = list[folderNoteFile.path] as afItemMark;
-  if (!revert && !folderNote.isFolderNote) {
-    folderNote.titleEl.style.display = "none";
-    folderNote.isFolderNote = true;
-  } else if (revert && folderNote.isFolderNote) {
-    folderNote.titleEl.style.display = "";
-    folderNote.isFolderNote = undefined;
+  if (!folderNote) return;
+
+  let item: afItemMark;
+  if (folderNote instanceof TFile) item = list[folderNote.path] as afItemMark;
+  else item = folderNote as afItemMark;
+
+  if (!revert && !item.isFolderNote) {
+    item.titleEl.style.display = "none";
+    item.isFolderNote = true;
+  } else if (revert && item.isFolderNote) {
+    item.titleEl.style.display = "";
+    item.isFolderNote = undefined;
   }
 }
 
@@ -69,8 +73,12 @@ export function hideAll(plugin: ALxFolderNote, revert = false) {
   const items = plugin.fileExplorer.fileItems;
   iterateItems(items, (item: AFItem) => {
     if (isFolder(item)) {
-      const note = plugin.getFolderNote(item.file);
-      if (note) setupHide(note, items, revert);
+      if (!revert) {
+        const note = plugin.getFolderNote(item.file);
+        if (note) setupHide(note, items);
+      }
+    } else if (revert) {
+      setupHide(item, items, true);
     }
   });
 }
