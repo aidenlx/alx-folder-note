@@ -13,7 +13,7 @@ An complete rewrite of [xpgo/obsidian-folder-note-plugin](https://github.com/xpg
   - move out folder not will show note again
 - Live updates when changing settings
 
-Note: Before xpgo's permission, the [cc-card feature](https://github.com/xpgo/obsidian-folder-note-plugin#overview-of-folder) won't be ported in the near future. 
+Note: Before xpgo's permission, the [ccard feature](https://github.com/xpgo/obsidian-folder-note-plugin#overview-of-folder) won't be ported in the near future. 
 
 ## How to use
 
