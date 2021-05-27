@@ -1,7 +1,7 @@
 {
-  "name": "myplugin",
+  "name": "alx-folder-note",
   "version": "0.0.0",
-  "description": "myplugin",
+  "description": "An completely rewrite of xpgo/obsidian-folder-note-plugin",
   "main": "main.js",
   "scripts": {
     "dev": "rollup --config rollup.config.js -w",

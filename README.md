@@ -1,4 +1,6 @@
-# _MyPlugin_
+# AidenLx's Folder Note
+
+An completely rewrite of [xpgo/obsidian-folder-note-plugin](https://github.com/xpgo/obsidian-folder-note-plugin)
 
 ## Intro
 
@@ -13,7 +15,7 @@ The required API feature is only available for Obsidian v0.9.12+.
 ### From GitHub
 
 1. Download the Latest Release from the Releases section of the GitHub Repository
-2. Put files to your vault's plugins folder: `<vault>/.obsidian/plugins/_MyPlugin_`  
+2. Put files to your vault's plugins folder: `<vault>/.obsidian/plugins/alx-folder-note`  
 3. Reload Obsidian
 4. If prompted about Safe Mode, you can disable safe mode and enable the plugin.
 Otherwise, head to Settings, third-party plugins, make sure safe mode is off and

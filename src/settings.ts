@@ -1,24 +1,24 @@
-import _MyPlugin_ from "main";
+import ALxFolderNote from "main";
 import { PluginSettingTab, App, Setting } from "obsidian";
 
-export interface _MyPlugin_Settings {
+export interface ALxFolderNoteSettings {
   hello: boolean;
 }
 
-export const DEFAULT_SETTINGS: _MyPlugin_Settings = {
+export const DEFAULT_SETTINGS: ALxFolderNoteSettings = {
   hello: true,
 };
 
 type option = {
-  k: keyof _MyPlugin_Settings;
+  k: keyof ALxFolderNoteSettings;
   name: string;
   desc: string | DocumentFragment;
 };
 
-export class _MyPlugin_SettingTab extends PluginSettingTab {
-  plugin: _MyPlugin_;
+export class ALxFolderNoteSettingTab extends PluginSettingTab {
+  plugin: ALxFolderNote;
 
-  constructor(app: App, plugin: _MyPlugin_) {
+  constructor(app: App, plugin: ALxFolderNote) {
     super(app, plugin);
     this.plugin = plugin;
   }
@@ -29,7 +29,7 @@ export class _MyPlugin_SettingTab extends PluginSettingTab {
     }
   }
 
-  setOption(this: _MyPlugin_SettingTab, { k, name, desc }: option) {
+  setOption(this: ALxFolderNoteSettingTab, { k, name, desc }: option) {
     new Setting(this.containerEl)
       .setName(name)
       .setDesc(desc)
