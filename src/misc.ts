@@ -1,5 +1,10 @@
 import assertNever from "assert-never";
-import { Modifier } from "obsidian";
+import { AFItem, FolderItem, Modifier, TFolder } from "obsidian";
+
+export type afItemMark = AFItem & { evtDone?: true; isFolderNote?: true };
+
+export const isFolder = (item: AFItem): item is FolderItem =>
+  (item as FolderItem).file instanceof TFolder;
 
 export const isMac = () => navigator.userAgent.includes("Macintosh");
 
