@@ -1,3 +1,10 @@
+## [0.1.1](https://github.com/alx-plugins/alx-folder-note/compare/0.1.0...0.1.1) (2021-05-27)
+
+
+### Bug Fixes
+
+* **vault-handler.ts:** autoRename folder note not working when hideNoteInExplorer is disabled ([6c5ca94](https://github.com/alx-plugins/alx-folder-note/commit/6c5ca94f85dd812e0954c0f5c5fe868b54bfd4b1))
+
 # 0.1.0 (2021-05-27)
 
 
