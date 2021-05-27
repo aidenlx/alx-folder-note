@@ -1,5 +1,6 @@
 import ALxFolderNote from "main";
-import { PluginSettingTab, App, Setting } from "obsidian";
+import { isMac } from "misc";
+import { PluginSettingTab, App, Setting, Modifier } from "obsidian";
 
 export enum NoteLoc {
   Index,
@@ -7,17 +8,8 @@ export enum NoteLoc {
   Outside,
 }
 
-export enum Modifier {
-  /** translates to `Meta` on macOS and `Ctrl` otherwise */
-  Mod,
-  Ctrl,
-  Meta,
-  Shift,
-  Alt,
-}
-
 export interface ALxFolderNoteSettings {
-  folderNoteLoc: NoteLoc;
+  folderNotePref: NoteLoc;
   indexName: string;
   modifierForNewNote: Modifier;
   hideNoteInExplorer: boolean;
@@ -26,18 +18,12 @@ export interface ALxFolderNoteSettings {
 }
 
 export const DEFAULT_SETTINGS: ALxFolderNoteSettings = {
-  folderNoteLoc: NoteLoc.Inside,
+  folderNotePref: NoteLoc.Inside,
   indexName: "_about_",
-  modifierForNewNote: Modifier.Meta,
+  modifierForNewNote: "Meta",
   hideNoteInExplorer: true,
   autoRename: true,
   folderNoteTemplate: "# {{FOLDER_NAME}}",
-};
-
-type option = {
-  k: keyof ALxFolderNoteSettings;
-  name: string;
-  desc: string | DocumentFragment;
 };
 
 export class ALxFolderNoteSettingTab extends PluginSettingTab {
@@ -49,15 +35,15 @@ export class ALxFolderNoteSettingTab extends PluginSettingTab {
   }
 
   display(): void {
-    let { containerEl, plugin } = this;
+    let { containerEl } = this;
     containerEl.empty();
 
     this.setNoteLoc();
-    if (this.plugin.settings.folderNoteLoc === NoteLoc.Index)
+    if (this.plugin.settings.folderNotePref === NoteLoc.Index)
       this.setIndexName();
     this.setTemplate();
     this.setModifier();
-    if (this.plugin.settings.folderNoteLoc !== NoteLoc.Index)
+    if (this.plugin.settings.folderNotePref !== NoteLoc.Index)
       this.setAutoRename();
   }
 
@@ -74,9 +60,9 @@ export class ALxFolderNoteSettingTab extends PluginSettingTab {
 
         dropDown
           .addOptions(options)
-          .setValue(this.plugin.settings.folderNoteLoc.toString())
+          .setValue(this.plugin.settings.folderNotePref.toString())
           .onChange(async (value: string) => {
-            this.plugin.settings.folderNoteLoc = +value;
+            this.plugin.settings.folderNotePref = +value;
             await this.plugin.saveSettings();
           });
       });
@@ -127,28 +113,27 @@ export class ALxFolderNoteSettingTab extends PluginSettingTab {
       .setDesc("Choose a modifier to click folders with to create folder notes")
       .addDropdown((dropDown) => {
         const windowsOpts: Record<Modifier, string> = {
-          [Modifier.Mod]: "Ctrl(Cmd in macOS)",
-          [Modifier.Ctrl]: "Ctrl(Ctrl in macOS)",
-          [Modifier.Meta]: "⊞ Win",
-          [Modifier.Shift]: "Shift",
-          [Modifier.Alt]: "Alt",
+          Mod: "Ctrl(Cmd in macOS)",
+          Ctrl: "Ctrl(Ctrl in macOS)",
+          Meta: "⊞ Win",
+          Shift: "Shift",
+          Alt: "Alt",
         };
         const macOSOpts: Record<Modifier, string> = {
-          [Modifier.Mod]: "⌘ Cmd",
-          [Modifier.Ctrl]: "⌃ Control",
-          [Modifier.Meta]: "⌘ Cmd",
-          [Modifier.Shift]: "⇧ Shift",
-          [Modifier.Alt]: "⌥ Option",
+          Mod: "⌘ Cmd",
+          Ctrl: "⌃ Control",
+          Meta: "⌘ Cmd",
+          Shift: "⇧ Shift",
+          Alt: "⌥ Option",
         };
 
-        const isMac = navigator.userAgent.includes("Macintosh");
-        const options = isMac ? macOSOpts : windowsOpts;
+        const options = isMac() ? macOSOpts : windowsOpts;
 
         dropDown
           .addOptions(options)
           .setValue(this.plugin.settings.modifierForNewNote.toString())
           .onChange(async (value: string) => {
-            this.plugin.settings.modifierForNewNote = +value;
+            this.plugin.settings.modifierForNewNote = value as Modifier;
             await this.plugin.saveSettings();
           });
       });
