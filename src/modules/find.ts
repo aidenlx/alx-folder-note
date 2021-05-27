@@ -1,6 +1,6 @@
 import ALxFolderNote from "main";
 import { TFile, TFolder } from "obsidian";
-import { basename, dirname } from "path";
+import { parse, dirname } from "path";
 import { NoteLoc } from "misc";
 import assertNever from "assert-never";
 
@@ -23,25 +23,47 @@ export function findFolderNote(
   return (found as TFile) ?? null;
 }
 
+function getParent(path: string, plugin: ALxFolderNote): TFolder | null {
+  try {
+    return (
+      (plugin.app.vault.getAbstractFileByPath(
+        getParentPath(path),
+      ) as TFolder) ?? null
+    );
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+}
+
 export function findFolderFromNote(
-  this: ALxFolderNote,
-  file: TFile,
+  plugin: ALxFolderNote,
+  file: TFile | string,
 ): TFolder | null {
   try {
-    switch (this.settings.folderNotePref) {
+    let parent: TFolder | null, base: string;
+    if (file instanceof TFile) {
+      parent = file.parent;
+      base = file.basename;
+    } else {
+      parent = getParent(file, plugin);
+      base = parse(file).name;
+    }
+    if (!parent) return null;
+    switch (plugin.settings.folderNotePref) {
       case NoteLoc.Index:
-        if (file.basename === this.settings.indexName) return file.parent;
+        if (base === plugin.settings.indexName) return parent;
         else return null;
       case NoteLoc.Inside:
-        if (file.parent.name === file.name) return file.parent;
+        if (parent.name === base) return parent;
         else return null;
       case NoteLoc.Outside:
-        const found = file.parent.children.find(
-          (af) => af instanceof TFolder && af.name === file.basename,
+        const found = parent.children.find(
+          (af) => af instanceof TFolder && af.name === base,
         );
         return (found as TFolder) ?? null;
       default:
-        assertNever(this.settings.folderNotePref);
+        assertNever(plugin.settings.folderNotePref);
     }
   } catch (error) {
     console.error(error);
@@ -106,7 +128,7 @@ export function getAbstractFolderNote(
       break;
     case NoteLoc.Inside:
     case NoteLoc.Outside:
-      if (typeof src === "string") noteBaseName = basename(src);
+      if (typeof src === "string") noteBaseName = parse(src).name;
       else
         noteBaseName = src.name === "/" ? plugin.app.vault.getName() : src.name;
       break;
