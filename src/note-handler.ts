@@ -13,11 +13,9 @@ export function setupHide(
   if (!revert && !folderNote.isFolderNote) {
     folderNote.titleEl.style.display = "none";
     folderNote.isFolderNote = true;
-    // item.isFolderNote = true;
   } else if (revert && folderNote.isFolderNote) {
     folderNote.titleEl.style.display = "";
     folderNote.isFolderNote = undefined;
-    // item.isFolderNote = undefined;
   }
 }
 
