@@ -20,35 +20,46 @@ export function setupHide(
   }
 }
 
-export function setupClick(afItem: AFItem, plugin: ALxFolderNote) {
+/**
+ * @param revert when revert is true, set item.evtDone to undefined
+ */
+export function setupClick(
+  afItem: AFItem,
+  plugin: ALxFolderNote,
+  revert = false,
+) {
   const item = afItem as afItemMark;
-  if (isFolder(item) && !item.evtDone) {
-    const { titleInnerEl } = item;
-    // handle regular click
-    plugin.registerDomEvent(titleInnerEl, "click", plugin.clickHandler);
-    // handle middle click
-    plugin.registerDomEvent(titleInnerEl, "auxclick", plugin.clickHandler);
-    item.evtDone = true;
+  if (isFolder(item)) {
+    if (revert) {
+      item.evtDone = undefined;
+    } else if (!item.evtDone) {
+      const { titleInnerEl } = item;
+      // handle regular click
+      plugin.registerDomEvent(titleInnerEl, "click", plugin.clickHandler);
+      // handle middle click
+      plugin.registerDomEvent(titleInnerEl, "auxclick", plugin.clickHandler);
+      item.evtDone = true;
+    }
   }
 }
 
-export function initialize(this: ALxFolderNote) {
+export function initialize(this: ALxFolderNote, revert = false) {
   const leaves = this.app.workspace.getLeavesOfType("file-explorer");
   if (leaves.length > 1) console.error("more then one file-explorer");
   else if (leaves.length < 1) console.error("file-explorer not found");
   else {
     const fileExplorer = this.fileExplorer ?? (leaves[0].view as FileExplorer);
     this.fileExplorer = fileExplorer;
-    this.registerVaultEvent();
+    if (!revert) this.registerVaultEvent();
     // get all AbstractFile (file+folder) and attach event
     for (const key in fileExplorer.fileItems) {
       if (!Object.prototype.hasOwnProperty.call(fileExplorer.fileItems, key))
         continue;
       const item = fileExplorer.fileItems[key];
       if (isFolder(item)) {
-        setupClick(item, this);
+        setupClick(item, this, revert);
         const note = this.getFolderNote(item.file);
-        if (note) setupHide(note, fileExplorer.fileItems);
+        if (note) setupHide(note, fileExplorer.fileItems, revert);
       }
     }
   }

@@ -1,4 +1,4 @@
-import { initialize } from "note-handler";
+import { initialize, setupHide } from "note-handler";
 import { getAbstractFolderNote, findFolderNote } from "modules/find";
 import { clickHandler } from "modules/click-handler";
 import { FileExplorer, Plugin, TFile, TFolder } from "obsidian";
@@ -42,11 +42,16 @@ export default class ALxFolderNote extends Plugin {
 
     this.addSettingTab(new ALxFolderNoteSettingTab(this.app, this));
 
-    this.registerEvent(this.app.workspace.on("layout-ready", this.initialize));
+    if (this.app.workspace.layoutReady) this.initialize();
+    else
+      this.registerEvent(
+        this.app.workspace.on("layout-ready", this.initialize),
+      );
   }
 
   onunload() {
     console.log("unloading alx-folder-note");
+    this.initialize(true);
   }
 
   async loadSettings() {
