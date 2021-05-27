@@ -126,16 +126,16 @@ export class ALxFolderNoteSettingTab extends PluginSettingTab {
       .setDesc("Choose a modifier to click folders with to create folder notes")
       .addDropdown((dropDown) => {
         const windowsOpts: Record<Modifier, string> = {
-          Mod: "Ctrl(Cmd in macOS)",
-          Ctrl: "Ctrl(Ctrl in macOS)",
+          Mod: "Ctrl (Cmd in macOS)",
+          Ctrl: "Ctrl (Ctrl in macOS)",
           Meta: "⊞ Win",
           Shift: "Shift",
           Alt: "Alt",
         };
         const macOSOpts: Record<Modifier, string> = {
-          Mod: "⌘ Cmd",
+          Mod: "⌘ Cmd (Ctrl)",
           Ctrl: "⌃ Control",
-          Meta: "⌘ Cmd",
+          Meta: "⌘ Cmd (Win)",
           Shift: "⇧ Shift",
           Alt: "⌥ Option",
         };
