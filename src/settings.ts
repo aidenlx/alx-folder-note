@@ -43,6 +43,9 @@ export class ALxFolderNoteSettingTab extends PluginSettingTab {
       this.setAutoRename();
   }
 
+  templateDelayTimer?: number;
+  indexDelayTimer?: number;
+
   setNoteLoc() {
     new Setting(this.containerEl)
       .setName("Preference for Note File Location")
@@ -59,7 +62,14 @@ export class ALxFolderNoteSettingTab extends PluginSettingTab {
           .setValue(this.plugin.settings.folderNotePref.toString())
           .onChange(async (value: string) => {
             this.plugin.settings.folderNotePref = +value;
+            if (this.plugin.settings.hideNoteInExplorer) {
+              hideAll(this.plugin, true);
+              window.setTimeout(() => {
+                hideAll(this.plugin);
+              }, 200);
+            }
             await this.plugin.saveSettings();
+            this.display();
           });
       });
   }
@@ -71,8 +81,15 @@ export class ALxFolderNoteSettingTab extends PluginSettingTab {
         text
           .setValue(this.plugin.settings.indexName)
           .onChange(async (value) => {
-            this.plugin.settings.indexName = value;
-            await this.plugin.saveSettings();
+            if (this.indexDelayTimer) window.clearTimeout(this.indexDelayTimer);
+            this.indexDelayTimer = window.setTimeout(async () => {
+              this.plugin.settings.indexName = value;
+              hideAll(this.plugin, true);
+              window.setTimeout(() => {
+                hideAll(this.plugin);
+              }, 200);
+              await this.plugin.saveSettings();
+            }, 500);
           }),
       );
   }
@@ -91,13 +108,13 @@ export class ALxFolderNoteSettingTab extends PluginSettingTab {
       .addTextArea((text) => {
         text
           .setValue(this.plugin.settings.folderNoteTemplate)
-          .onChange(async (value) => {
-            try {
+          .onChange((value) => {
+            if (this.templateDelayTimer)
+              window.clearTimeout(this.templateDelayTimer);
+            this.templateDelayTimer = window.setTimeout(async () => {
               this.plugin.settings.folderNoteTemplate = value;
               await this.plugin.saveSettings();
-            } catch (e) {
-              return false;
-            }
+            }, 500);
           });
         text.inputEl.rows = 8;
         text.inputEl.cols = 50;
@@ -143,7 +160,6 @@ export class ALxFolderNoteSettingTab extends PluginSettingTab {
           .setValue(this.plugin.settings.hideNoteInExplorer)
           .onChange(async (value) => {
             this.plugin.settings.hideNoteInExplorer = value;
-            console.log(value);
             hideAll(this.plugin, !value);
             await this.plugin.saveSettings();
           }),
