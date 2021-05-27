@@ -42,9 +42,14 @@ export function clickHandler(this: ALxFolderNote, evt: MouseEvent) {
       if (!folderNote) return false;
 
       // show the note
-      await this.app.workspace.openLinkText(folderNote.path, "", createNew, {
-        active: true,
-      });
+      await this.app.workspace.openLinkText(
+        folderNote.path,
+        "",
+        createNew || evt.type === "auxclick",
+        {
+          active: true,
+        },
+      );
       return true;
     } catch (error) {
       return false;
