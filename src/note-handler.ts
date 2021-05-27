@@ -1,5 +1,6 @@
 import ALxFolderNote from "main";
 import { afItemMark, isFolder } from "misc";
+import { clickHandler } from "modules/click-handler";
 import { TFile, AFItem, FileExplorer } from "obsidian";
 
 export function setupHide(
@@ -35,9 +36,13 @@ export function setupClick(
     } else if (!item.evtDone) {
       const { titleInnerEl } = item;
       // handle regular click
-      plugin.registerDomEvent(titleInnerEl, "click", plugin.clickHandler);
+      plugin.registerDomEvent(titleInnerEl, "click", clickHandler.bind(plugin));
       // handle middle click
-      plugin.registerDomEvent(titleInnerEl, "auxclick", plugin.clickHandler);
+      plugin.registerDomEvent(
+        titleInnerEl,
+        "auxclick",
+        clickHandler.bind(plugin),
+      );
       item.evtDone = true;
     }
   }

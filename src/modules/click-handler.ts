@@ -1,8 +1,8 @@
 import ALxFolderNote from "main";
-import { TFolder } from "obsidian";
+import { TFile, TFolder } from "obsidian";
 import path from "path";
 import { isModifier } from "misc";
-import { findFolderNote } from "./find";
+import { findFolderNote, getAbstractFolderNote } from "./find";
 
 export function clickHandler(this: ALxFolderNote, evt: MouseEvent) {
   const titleInnerEl = evt.target as HTMLDivElement;
@@ -29,13 +29,12 @@ export function clickHandler(this: ALxFolderNote, evt: MouseEvent) {
       const createNew = isModifier(evt, this.settings.modifierForNewNote);
 
       // check if folder note exists
-      const { findIn, noteBaseName } = this.getAbstractFolderNote(folder);
+      const { findIn, noteBaseName } = getAbstractFolderNote(this, folder);
       let folderNote = findFolderNote(findIn, noteBaseName);
       if (createNew && !folderNote) {
-        const noteInitContent = "# " + noteBaseName; //await this.expandContent(this.initContent);
         folderNote = await this.app.vault.create(
           path.join(findIn.path, noteBaseName + ".md"),
-          noteInitContent,
+          getNewFolderNote(this.settings.folderNoteTemplate, folder),
         );
       }
 
@@ -63,4 +62,10 @@ export function clickHandler(this: ALxFolderNote, evt: MouseEvent) {
       console.error(e);
       if (evt.type === "click") titleEl.click();
     });
+}
+
+function getNewFolderNote(template: string, folder: TFolder): string {
+  return template
+    .replace(/{{FOLDER_NAME}}/g, folder.name)
+    .replace(/{{FOLDER_PATH}}/g, folder.path);
 }

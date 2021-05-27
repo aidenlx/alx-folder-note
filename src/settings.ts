@@ -89,7 +89,7 @@ export class ALxFolderNoteSettingTab extends PluginSettingTab {
           descEl.appendChild(document.createElement("br"));
           descEl.appendText("Supported placeholders:");
           descEl.appendChild(document.createElement("br"));
-          descEl.appendText("");
+          descEl.appendText("{{FOLDER_NAME}} {{FOLDER_PATH}}");
         }),
       )
       .addTextArea((text) => {

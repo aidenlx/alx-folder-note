@@ -1,6 +1,5 @@
-import { initialize, setupHide } from "note-handler";
+import { initialize } from "note-handler";
 import { getAbstractFolderNote, findFolderNote } from "modules/find";
-import { clickHandler } from "modules/click-handler";
 import { FileExplorer, Plugin, TFile, TFolder } from "obsidian";
 import {
   ALxFolderNoteSettings,
@@ -9,30 +8,27 @@ import {
 } from "settings";
 import "./main.css";
 import { onCreate, onDelete, onRename } from "modules/vault-handler";
-import { isFolder } from "misc";
 
 export default class ALxFolderNote extends Plugin {
   settings: ALxFolderNoteSettings = DEFAULT_SETTINGS;
   fileExplorer?: FileExplorer;
 
-  getAbstractFolderNote = getAbstractFolderNote.bind(this);
-  clickHandler = clickHandler.bind(this);
   initialize = initialize.bind(this);
 
   getFolderNote(path: string, folder: TFolder): TFile | null;
   getFolderNote(folder: TFolder): TFile | null;
   getFolderNote(src: TFolder | string, baseFolder?: TFolder): TFile | null {
     // @ts-ignore
-    const result = this.getAbstractFolderNote(src, baseFolder);
+    const result = getAbstractFolderNote(this, src, baseFolder);
     return findFolderNote(result.findIn, result.noteBaseName);
   }
 
   registerVaultEvent() {
     // attach events on new folder
-    this.registerEvent(this.app.vault.on("create", onCreate));
+    this.registerEvent(this.app.vault.on("create", onCreate.bind(this)));
     // include mv and rename
-    this.registerEvent(this.app.vault.on("rename", onRename));
-    this.registerEvent(this.app.vault.on("delete", onDelete));
+    this.registerEvent(this.app.vault.on("rename", onRename.bind(this)));
+    this.registerEvent(this.app.vault.on("delete", onDelete.bind(this)));
   }
 
   async onload() {

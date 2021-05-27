@@ -1,18 +1,23 @@
 import ALxFolderNote from "main";
 import { afItemMark } from "misc";
-import { TAbstractFile, TFolder } from "obsidian";
+import { TAbstractFile, TFile, TFolder } from "obsidian";
 import path from "path";
 import { NoteLoc } from "settings";
 import { setupClick, setupHide } from "../note-handler";
+import { findFolderFromNote, getAbstractFolderNote } from "./find";
 
 export function onCreate(this: ALxFolderNote, af: TAbstractFile) {
-  if (!(af instanceof TFolder)) return;
   if (!this.fileExplorer) {
     console.error("no fileExplorer");
     return;
   }
-  const afItem = this.fileExplorer.fileItems[af.path] as afItemMark;
-  setupClick(afItem, this);
+  const fileExplorer = this.fileExplorer;
+  if (af instanceof TFolder) {
+    const afItem = fileExplorer.fileItems[af.path] as afItemMark;
+    setupClick(afItem, this);
+  } else if (af instanceof TFile && findFolderFromNote.call(this, af)) {
+    setupHide(af, fileExplorer.fileItems);
+  }
 }
 
 export function onRename(
@@ -35,7 +40,7 @@ export function onRename(
     if (newNote) setupHide(newNote, fileExplorer.fileItems);
     // sync
     if (this.settings.autoRename && !newNote && oldNote) {
-      const { findIn, noteBaseName } = this.getAbstractFolderNote(af);
+      const { findIn, noteBaseName } = getAbstractFolderNote(this, af);
       this.app.vault.rename(
         oldNote,
         path.join(findIn.path, noteBaseName + ".md"),
