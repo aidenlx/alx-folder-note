@@ -1,0 +1,80 @@
+{
+  "name": "myplugin",
+  "version": "0.0.0",
+  "description": "myplugin",
+  "main": "main.js",
+  "scripts": {
+    "dev": "rollup --config rollup.config.js -w",
+    "build": "rollup --config rollup.config.js --environment BUILD:production",
+    "prettier": "prettier --write 'src/**/*.+(ts|tsx|json|html|css)'",
+    "eslint": "eslint . --ext .ts,.tsx --fix",
+    "release": "release-it"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@release-it/bumper": "^2.0.0",
+    "@release-it/conventional-changelog": "^2.0.1",
+    "@rollup/plugin-commonjs": "^15.1.0",
+    "@rollup/plugin-node-resolve": "^9.0.0",
+    "@rollup/plugin-typescript": "^6.0.0",
+    "@types/node": "^14.14.2",
+    "@typescript-eslint/eslint-plugin": "^4.23.0",
+    "@typescript-eslint/parser": "^4.23.0",
+    "cz-conventional-changelog": "^3.3.0",
+    "eslint": "^7.26.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-jsdoc": "^34.0.2",
+    "eslint-plugin-prefer-arrow": "^1.2.3",
+    "eslint-plugin-prettier": "^3.4.0",
+    "eslint-plugin-simple-import-sort": "^7.0.0",
+    "obsidian": "https://github.com/obsidianmd/obsidian-api/tarball/master",
+    "prettier": "^2.3.0",
+    "release-it": "^14.5.1",
+    "rollup": "^2.32.1",
+    "rollup-plugin-import-css": "^2.0.1",
+    "tslib": "^2.0.3",
+    "typescript": "^4.0.3"
+  },
+  "release-it": {
+    "hooks": {
+      "after:bump": "sh scripts/bump-version.sh && npm run build",
+      "after:git:release": "echo After git push, before github release",
+      "after:release": "echo Successfully released ${name} v${version} to ${repo.repository}."
+    },
+    "git": {
+      "commitMessage": "chore: release v${version}",
+      "tagName": "${version}",
+      "tagAnnotation": "Release v${version}"
+    },
+    "npm": {
+      "publish": false
+    },
+    "github": {
+      "release": true,
+      "assets": [
+        "main.js",
+        "manifest.json",
+        "styles.css"
+      ],
+      "proxy": "http://127.0.0.1:7890",
+      "releaseName": "${version}"
+    },
+    "plugins": {
+      "@release-it/bumper": {
+        "out": "manifest.json"
+      },
+      "@release-it/conventional-changelog": {
+        "preset": "angular",
+        "infile": "CHANGELOG.md"
+      }
+    }
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
+  }
+}
