@@ -1,11 +1,23 @@
 # AidenLx's Folder Note
 
-An completely rewrite of [xpgo/obsidian-folder-note-plugin](https://github.com/xpgo/obsidian-folder-note-plugin)
+An complete rewrite of [xpgo/obsidian-folder-note-plugin](https://github.com/xpgo/obsidian-folder-note-plugin)
 
-## Intro
+- Using Obsidian API in favor of pure dom parse
+- Support hiding folder note in file explorer automatically
+- Support open folder note by click on folder similar to open a file:
+  - click on folder with notes will open folder note without triggering folder collapse (collapse-indicator is still available)
+  - mid-click on folder open note in a new window
+- Two way sync between folder and its note
+  - folder notes moves with folder, even if it's outside of folder
+  - move in new file that matches folder note will hide note automatically
+  - move out folder not will show note again
+- Live updates when changing settings
+
+Note: Before xpgo's permission, the [cc-card feature](https://github.com/xpgo/obsidian-folder-note-plugin#overview-of-folder) won't be ported in the near future. 
 
 ## How to use
 
+Please visit: <https://github.com/xpgo/obsidian-folder-note-plugin#readme>
 ## Compatibility
 
 The required API feature is only available for Obsidian v0.9.12+.
