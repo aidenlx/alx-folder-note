@@ -1,7 +1,7 @@
 import ALxFolderNote from "main";
 import { TFile, TFolder } from "obsidian";
 import { basename, dirname } from "path";
-import { NoteLoc } from "settings";
+import { NoteLoc } from "misc";
 import assertNever from "assert-never";
 
 export const getParentPath = (src: string) => {

@@ -8,6 +8,12 @@ export const isFolder = (item: AFItem): item is FolderItem =>
 
 export const isMac = () => navigator.userAgent.includes("Macintosh");
 
+export enum NoteLoc {
+  Index,
+  Inside,
+  Outside,
+}
+
 export function isModifier(evt: MouseEvent, pref: Modifier): boolean {
   const { altKey, metaKey, ctrlKey, shiftKey } = evt;
   switch (pref) {

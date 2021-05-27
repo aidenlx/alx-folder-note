@@ -57,15 +57,32 @@ export function initialize(this: ALxFolderNote, revert = false) {
     this.fileExplorer = fileExplorer;
     if (!revert) this.registerVaultEvent();
     // get all AbstractFile (file+folder) and attach event
-    for (const key in fileExplorer.fileItems) {
-      if (!Object.prototype.hasOwnProperty.call(fileExplorer.fileItems, key))
-        continue;
-      const item = fileExplorer.fileItems[key];
+    iterateItems(fileExplorer.fileItems, (item: AFItem) => {
       if (isFolder(item)) {
         setupClick(item, this, revert);
-        const note = this.getFolderNote(item.file);
-        if (note) setupHide(note, fileExplorer.fileItems, revert);
       }
+    });
+    if (this.settings.hideNoteInExplorer) hideAll(this, revert);
+  }
+}
+
+export function hideAll(plugin: ALxFolderNote, revert = false) {
+  if (!plugin.fileExplorer) throw new Error("fileExplorer Missing");
+  const items = plugin.fileExplorer.fileItems;
+  iterateItems(items, (item: AFItem) => {
+    if (isFolder(item)) {
+      const note = plugin.getFolderNote(item.file);
+      if (note) setupHide(note, items, revert);
     }
+  });
+}
+
+export function iterateItems(
+  items: FileExplorer["fileItems"],
+  callback: (item: AFItem) => any,
+): void {
+  for (const key in items) {
+    if (!Object.prototype.hasOwnProperty.call(items, key)) continue;
+    callback(items[key]);
   }
 }

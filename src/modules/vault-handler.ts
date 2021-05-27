@@ -1,8 +1,7 @@
 import ALxFolderNote from "main";
-import { afItemMark } from "misc";
+import { afItemMark, NoteLoc } from "misc";
 import { TAbstractFile, TFile, TFolder } from "obsidian";
 import path from "path";
-import { NoteLoc } from "settings";
 import { setupClick, setupHide } from "../note-handler";
 import { findFolderFromNote, getAbstractFolderNote } from "./find";
 
@@ -15,7 +14,11 @@ export function onCreate(this: ALxFolderNote, af: TAbstractFile) {
   if (af instanceof TFolder) {
     const afItem = fileExplorer.fileItems[af.path] as afItemMark;
     setupClick(afItem, this);
-  } else if (af instanceof TFile && findFolderFromNote.call(this, af)) {
+  } else if (
+    af instanceof TFile &&
+    findFolderFromNote.call(this, af) &&
+    this.settings.hideNoteInExplorer
+  ) {
     setupHide(af, fileExplorer.fileItems);
   }
 }
@@ -25,13 +28,14 @@ export function onRename(
   af: TAbstractFile,
   oldPath: string,
 ) {
+  if (!this.fileExplorer) {
+    console.error("no fileExplorer");
+    return;
+  }
+  const fileExplorer = this.fileExplorer;
   if (af instanceof TFolder) {
-    if (!this.fileExplorer) {
-      console.error("no fileExplorer");
-      return;
-    }
-    const fileExplorer = this.fileExplorer;
     setupClick(fileExplorer.fileItems[af.path], this);
+    if (!this.settings.hideNoteInExplorer) return;
     // show old note
     const oldNote = this.getFolderNote(oldPath, af);
     if (oldNote) setupHide(oldNote, fileExplorer.fileItems, true);
@@ -52,7 +56,8 @@ export function onRename(
 export function onDelete(this: ALxFolderNote, af: TAbstractFile) {
   if (
     af instanceof TFolder &&
-    this.settings.folderNotePref === NoteLoc.Outside
+    this.settings.folderNotePref === NoteLoc.Outside &&
+    this.settings.hideNoteInExplorer
   ) {
     if (!this.fileExplorer) {
       console.error("no fileExplorer");

@@ -1,12 +1,7 @@
 import ALxFolderNote from "main";
-import { isMac } from "misc";
+import { isMac, NoteLoc } from "misc";
+import { hideAll } from "note-handler";
 import { PluginSettingTab, App, Setting, Modifier } from "obsidian";
-
-export enum NoteLoc {
-  Index,
-  Inside,
-  Outside,
-}
 
 export interface ALxFolderNoteSettings {
   folderNotePref: NoteLoc;
@@ -43,6 +38,7 @@ export class ALxFolderNoteSettingTab extends PluginSettingTab {
       this.setIndexName();
     this.setTemplate();
     this.setModifier();
+    this.setHide();
     if (this.plugin.settings.folderNotePref !== NoteLoc.Index)
       this.setAutoRename();
   }
@@ -147,6 +143,8 @@ export class ALxFolderNoteSettingTab extends PluginSettingTab {
           .setValue(this.plugin.settings.hideNoteInExplorer)
           .onChange(async (value) => {
             this.plugin.settings.hideNoteInExplorer = value;
+            console.log(value);
+            hideAll(this.plugin, !value);
             await this.plugin.saveSettings();
           }),
       );
