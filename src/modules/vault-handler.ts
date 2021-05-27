@@ -39,18 +39,20 @@ export function onRename(
   const fileExplorer = this.fileExplorer;
   if (af instanceof TFolder) {
     setupClick(fileExplorer.fileItems[af.path], this);
-    if (!this.settings.hideNoteInExplorer) return;
-    // show old note
     const oldNote = this.getFolderNote(oldPath, af);
-    if (oldNote) setupHide(oldNote, fileExplorer.fileItems, true);
-    // hide new note
     const newNote = this.getFolderNote(af);
-    if (newNote) setupHide(newNote, fileExplorer.fileItems);
+    if (this.settings.hideNoteInExplorer) {
+      // show old note
+      if (oldNote) setupHide(oldNote, fileExplorer.fileItems, true);
+      // hide new note
+      if (newNote) setupHide(newNote, fileExplorer.fileItems);
+    }
     // sync
     if (this.settings.autoRename && !newNote && oldNote) {
       const { findIn, noteBaseName } = getAbstractFolderNote(this, af);
       this.app.vault.rename(oldNote, join(findIn.path, noteBaseName + ".md"));
-      setupHide(oldNote, fileExplorer.fileItems);
+      if (this.settings.hideNoteInExplorer)
+        setupHide(oldNote, fileExplorer.fileItems);
     }
   } else if (af instanceof TFile) {
     let oldFolder;
