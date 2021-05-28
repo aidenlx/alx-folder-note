@@ -18,9 +18,13 @@ export default class ALxFolderNote extends Plugin {
   getFolderNote(path: string, folder: TFolder): TFile | null;
   getFolderNote(folder: TFolder): TFile | null;
   getFolderNote(src: TFolder | string, baseFolder?: TFolder): TFile | null {
-    // @ts-ignore
-    const result = getAbstractFolderNote(this, src, baseFolder);
-    return findFolderNote(result.findIn, result.noteBaseName);
+    const { findIn, noteBaseName } = getAbstractFolderNote(
+      this,
+      // @ts-ignore
+      src,
+      baseFolder,
+    );
+    return findFolderNote(this, findIn, noteBaseName);
   }
 
   registerVaultEvent() {

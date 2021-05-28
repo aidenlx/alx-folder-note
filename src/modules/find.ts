@@ -11,16 +11,20 @@ export const getParentPath = (src: string) => {
 };
 
 export function findFolderNote(
-  findIn: TFolder,
+  plugin: ALxFolderNote,
+  findIn: string,
   noteBaseName: string,
 ): TFile | null {
-  const found = findIn.children.find(
-    (af) =>
-      af instanceof TFile &&
-      af.basename === noteBaseName &&
-      af.extension === "md",
-  );
-  return (found as TFile) ?? null;
+  const findInFolder = plugin.app.vault.getAbstractFileByPath(findIn);
+  if (findInFolder && findInFolder instanceof TFolder) {
+    const found = findInFolder.children.find(
+      (af) =>
+        af instanceof TFile &&
+        af.basename === noteBaseName &&
+        af.extension === "md",
+    );
+    return (found as TFile) ?? null;
+  } else return null;
 }
 
 function getParent(path: string, plugin: ALxFolderNote): TFolder | null {
@@ -76,14 +80,14 @@ export function getAbstractFolderNote(
   path: string,
   folder: TFolder,
 ): {
-  findIn: TFolder;
+  findIn: string;
   noteBaseName: string;
 };
 export function getAbstractFolderNote(
   plugin: ALxFolderNote,
   folder: TFolder,
 ): {
-  findIn: TFolder;
+  findIn: string;
   noteBaseName: string;
 };
 export function getAbstractFolderNote(
@@ -91,36 +95,24 @@ export function getAbstractFolderNote(
   src: TFolder | string,
   baseFolder?: TFolder,
 ): {
-  findIn: TFolder;
+  findIn: string;
   noteBaseName: string;
 } {
-  const getParent = (): TFolder => {
+  const getParent = (): string => {
     if (typeof src === "string") {
-      const found = plugin.app.vault.getAbstractFileByPath(getParentPath(src));
-      if (found && found instanceof TFolder) return found;
-      else {
-        console.error(src, getParentPath(src));
-        throw new Error("invalid path given");
-      }
+      return getParentPath(src);
     } else {
       if (src.parent === undefined) {
         // root folder
-        return src;
+        return src.path;
       } else if (src.parent === null) {
         // when the folder is a deleted one
-        const parentPath = getParentPath(src.path);
-        const foundParent = plugin.app.vault.getAbstractFileByPath(parentPath);
-        if (foundParent && foundParent instanceof TFolder)
-          return foundParent as TFolder;
-        else {
-          console.error(src);
-          throw new Error("no parent folder found");
-        }
-      } else return src.parent;
+        return getParentPath(src.path);
+      } else return src.parent.path;
     }
   };
   const { indexName, folderNotePref: folderNoteLoc } = plugin.settings;
-  let findIn: TFolder, noteBaseName: string;
+  let findIn: string, noteBaseName: string;
 
   switch (folderNoteLoc) {
     case NoteLoc.Index:
@@ -140,8 +132,8 @@ export function getAbstractFolderNote(
     case NoteLoc.Inside:
       if (typeof src === "string") {
         if (!baseFolder) throw new TypeError("baseFolder not provided");
-        findIn = baseFolder;
-      } else findIn = src;
+        findIn = baseFolder.path;
+      } else findIn = src.path;
       break;
     case NoteLoc.Outside:
       findIn = getParent();

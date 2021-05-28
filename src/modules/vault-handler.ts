@@ -1,6 +1,6 @@
 import ALxFolderNote from "main";
 import { afItemMark, NoteLoc } from "misc";
-import { TAbstractFile, TFile, TFolder } from "obsidian";
+import { Modal, SuggestModal, TAbstractFile, TFile, TFolder } from "obsidian";
 import { dirname, join, extname } from "path";
 import { setupClick, setupHide } from "../note-handler";
 import {
@@ -50,7 +50,7 @@ export function onRename(
     // sync
     if (this.settings.autoRename && !newNote && oldNote) {
       const { findIn, noteBaseName } = getAbstractFolderNote(this, af);
-      this.app.vault.rename(oldNote, join(findIn.path, noteBaseName + ".md"));
+      this.app.vault.rename(oldNote, join(findIn, noteBaseName + ".md"));
       if (this.settings.hideNoteInExplorer)
         setupHide(oldNote, fileExplorer.fileItems);
     }
@@ -76,16 +76,17 @@ export function onRename(
   }
 }
 export function onDelete(this: ALxFolderNote, af: TAbstractFile) {
-  if (
-    af instanceof TFolder &&
-    this.settings.folderNotePref === NoteLoc.Outside &&
-    this.settings.hideNoteInExplorer
-  ) {
-    if (!this.fileExplorer) {
-      console.error("no fileExplorer");
-      return;
-    }
+  if (af instanceof TFolder) {
     const oldNote = this.getFolderNote(af);
-    if (oldNote) setupHide(oldNote, this.fileExplorer.fileItems, true);
+    if (
+      this.settings.folderNotePref === NoteLoc.Outside &&
+      this.settings.hideNoteInExplorer
+    ) {
+      if (!this.fileExplorer) {
+        console.error("no fileExplorer");
+        return;
+      }
+      if (oldNote) setupHide(oldNote, this.fileExplorer.fileItems, true);
+    }
   }
 }

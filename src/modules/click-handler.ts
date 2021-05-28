@@ -30,10 +30,10 @@ export function clickHandler(this: ALxFolderNote, evt: MouseEvent) {
 
       // check if folder note exists
       const { findIn, noteBaseName } = getAbstractFolderNote(this, folder);
-      let folderNote = findFolderNote(findIn, noteBaseName);
+      let folderNote = findFolderNote(this, findIn, noteBaseName);
       if (createNew && !folderNote) {
         folderNote = await this.app.vault.create(
-          path.join(findIn.path, noteBaseName + ".md"),
+          path.join(findIn, noteBaseName + ".md"),
           getNewFolderNote(this.settings.folderNoteTemplate, folder),
         );
       }
