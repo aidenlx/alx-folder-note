@@ -56,7 +56,12 @@ export function onRename(
       if (newNote) setupHide(newNote, fileExplorer.fileItems);
     }
     // sync
-    if (this.settings.autoRename && !newNote && oldNote) {
+    if (
+      this.settings.autoRename &&
+      this.settings.folderNotePref !== NoteLoc.Index &&
+      !newNote &&
+      oldNote
+    ) {
       const { findIn, noteBaseName } = getAbstractFolderNote(this, af);
       this.app.vault.rename(oldNote, join(findIn, noteBaseName + ".md"));
       if (this.settings.hideNoteInExplorer)
@@ -66,6 +71,7 @@ export function onRename(
     let oldFolder;
     if (
       extname(oldPath) === ".md" &&
+      this.settings.folderNotePref !== NoteLoc.Index &&
       this.settings.autoRename &&
       (oldFolder = findFolderFromNote(this, oldPath)) &&
       dirname(af.path) === dirname(oldPath)
