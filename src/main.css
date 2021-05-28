@@ -1,0 +1,4 @@
+.warn button.mod-warning {
+  background-color: var(--background-modifier-error);
+  color: var(--text-on-accent);
+}

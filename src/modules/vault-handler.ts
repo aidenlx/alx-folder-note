@@ -93,13 +93,18 @@ export function onDelete(this: ALxFolderNote, af: TAbstractFile) {
       (oldNote = this.getFolderNote(af))
     )
       new DeleteFolderNotePrompt(this, oldNote).open();
+  } else if (af instanceof TFile) {
+    const folder = findFolderFromNote(this, af);
+    if (folder) {
+      new DeleteFolderNotePrompt(this, folder).open();
+    }
   }
 }
 
 class DeleteFolderNotePrompt extends Modal {
-  target: TFile;
+  target: TFile | TFolder;
   plugin: ALxFolderNote;
-  constructor(plugin: ALxFolderNote, target: TFile) {
+  constructor(plugin: ALxFolderNote, target: TFile | TFolder) {
     super(plugin.app);
     this.plugin = plugin;
     this.target = target;
@@ -114,13 +119,43 @@ class DeleteFolderNotePrompt extends Modal {
     } else return this.plugin.fileExplorer;
   }
 
-  onOpen() {
+  deleteFolder(folder: TFolder) {
     let { contentEl } = this;
-    contentEl.createEl("p", {
-      text: "Seems like you've deleted a folder with folder note outside. ",
+    contentEl.createEl("p", {}, (el) => {
+      el.innerHTML =
+        "Seems like you've deleted a folder note. " +
+        "<br/>" +
+        "Would you like to delete its folder as well? ";
     });
     contentEl.createEl("p", {
-      text: "Would you like to delete folder note outside as well? ",
+      text: "Warning: the entire folder and its content will be removed",
+      cls: "mod-warning",
+    });
+    const buttonContainer = contentEl.createDiv({
+      cls: "modal-button-container",
+    });
+    buttonContainer.createEl(
+      "button",
+      { text: "Yes", cls: "mod-warning" },
+      (el) =>
+        el.onClickEvent(() => {
+          this.app.vault.delete(this.target);
+          this.close();
+        }),
+    );
+    buttonContainer.createEl("button", { text: "No" }, (el) =>
+      el.onClickEvent(() => {
+        this.close();
+      }),
+    );
+  }
+  deleteFolderNote(file: TFile) {
+    let { contentEl } = this;
+    contentEl.createEl("p", {}, (el) => {
+      el.innerHTML =
+        "Seems like you've deleted a folder with folder note outside. " +
+        "<br/>" +
+        "Would you like to delete folder note outside as well? ";
     });
     const buttonContainer = contentEl.createDiv({
       cls: "modal-button-container",
@@ -137,11 +172,17 @@ class DeleteFolderNotePrompt extends Modal {
     buttonContainer.createEl("button", { text: "No" }, (el) =>
       el.onClickEvent(() => {
         if (this.settings.hideNoteInExplorer) {
-          setupHide(this.target, this.fileExplorer.fileItems, true);
+          setupHide(file, this.fileExplorer.fileItems, true);
         }
         this.close();
       }),
     );
+  }
+
+  onOpen() {
+    this.containerEl.addClass("warn");
+    if (this.target instanceof TFile) this.deleteFolderNote(this.target);
+    else if (this.target instanceof TFolder) this.deleteFolder(this.target);
   }
 
   onClose() {
