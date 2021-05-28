@@ -1,6 +1,14 @@
 import ALxFolderNote from "main";
 import { afItemMark, NoteLoc } from "misc";
-import { Modal, SuggestModal, TAbstractFile, TFile, TFolder } from "obsidian";
+import {
+  App,
+  FileExplorer,
+  Modal,
+  SuggestModal,
+  TAbstractFile,
+  TFile,
+  TFolder,
+} from "obsidian";
 import { dirname, join, extname } from "path";
 import { setupClick, setupHide } from "../note-handler";
 import {
@@ -77,16 +85,65 @@ export function onRename(
 }
 export function onDelete(this: ALxFolderNote, af: TAbstractFile) {
   if (af instanceof TFolder) {
-    const oldNote = this.getFolderNote(af);
+    let oldNote: TFile | null;
     if (
       this.settings.folderNotePref === NoteLoc.Outside &&
-      this.settings.hideNoteInExplorer
-    ) {
-      if (!this.fileExplorer) {
-        console.error("no fileExplorer");
-        return;
-      }
-      if (oldNote) setupHide(oldNote, this.fileExplorer.fileItems, true);
-    }
+      (oldNote = this.getFolderNote(af))
+    )
+      new DeleteFolderNotePrompt(this, oldNote).open();
+  }
+}
+
+class DeleteFolderNotePrompt extends Modal {
+  target: TFile;
+  plugin: ALxFolderNote;
+  constructor(plugin: ALxFolderNote, target: TFile) {
+    super(plugin.app);
+    this.plugin = plugin;
+    this.target = target;
+  }
+
+  get settings() {
+    return this.plugin.settings;
+  }
+  get fileExplorer(): FileExplorer {
+    if (!this.plugin.fileExplorer) {
+      throw new Error("no fileExplorer");
+    } else return this.plugin.fileExplorer;
+  }
+
+  onOpen() {
+    let { contentEl } = this;
+    contentEl.createEl("p", {
+      text: "Seems like you've deleted a folder with folder note outside. ",
+    });
+    contentEl.createEl("p", {
+      text: "Would you like to delete folder note outside as well? ",
+    });
+    const buttonContainer = contentEl.createDiv({
+      cls: "modal-button-container",
+    });
+    buttonContainer.createEl(
+      "button",
+      { text: "Yes", cls: "mod-warning" },
+      (el) =>
+        el.onClickEvent(() => {
+          this.app.vault.delete(this.target);
+          this.close();
+        }),
+    );
+    buttonContainer.createEl("button", { text: "No" }, (el) =>
+      el.onClickEvent(() => {
+        if (this.settings.hideNoteInExplorer) {
+          setupHide(this.target, this.fileExplorer.fileItems, true);
+        }
+        this.close();
+      }),
+    );
+  }
+
+  onClose() {
+    let { contentEl } = this;
+    contentEl.empty();
   }
 }
