@@ -1,14 +1,6 @@
 import ALxFolderNote from "main";
 import { afItemMark, NoteLoc } from "misc";
-import {
-  App,
-  FileExplorer,
-  Modal,
-  SuggestModal,
-  TAbstractFile,
-  TFile,
-  TFolder,
-} from "obsidian";
+import { FileExplorer, Modal, TAbstractFile, TFile, TFolder } from "obsidian";
 import { dirname, join, extname } from "path";
 import { setupClick, setupHide } from "../note-handler";
 import {
@@ -26,6 +18,10 @@ export function onCreate(this: ALxFolderNote, af: TAbstractFile) {
   if (af instanceof TFolder) {
     const afItem = fileExplorer.fileItems[af.path] as afItemMark;
     setupClick(afItem, this);
+    const note = this.getFolderNote(af);
+    if (note && this.settings.hideNoteInExplorer) {
+      setupHide(note, fileExplorer.fileItems);
+    }
   } else if (
     af instanceof TFile &&
     findFolderFromNote(this, af) &&

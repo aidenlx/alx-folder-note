@@ -1,6 +1,17 @@
 import { initialize } from "note-handler";
-import { getAbstractFolderNote, findFolderNote } from "modules/find";
-import { FileExplorer, Plugin, TFile, TFolder } from "obsidian";
+import {
+  getAbstractFolderNote,
+  findFolderNote,
+  getFolderPath,
+} from "modules/find";
+import {
+  FileExplorer,
+  MarkdownView,
+  Notice,
+  Plugin,
+  TFile,
+  TFolder,
+} from "obsidian";
 import {
   ALxFolderNoteSettings,
   DEFAULT_SETTINGS,
@@ -8,6 +19,9 @@ import {
 } from "settings";
 import "./main.css";
 import { onCreate, onDelete, onRename } from "modules/vault-handler";
+import { NoteLoc } from "misc";
+import { join } from "path";
+import assertNever from "assert-never";
 
 export default class ALxFolderNote extends Plugin {
   settings: ALxFolderNoteSettings = DEFAULT_SETTINGS;
@@ -42,6 +56,20 @@ export default class ALxFolderNote extends Plugin {
 
     this.addSettingTab(new ALxFolderNoteSettingTab(this.app, this));
 
+    this.addCommand({
+      id: "create-folder-for-note",
+      name: "Make current document folder note",
+      checkCallback: (checking) => {
+        const view = this.app.workspace.activeLeaf.view as MarkdownView;
+        if (checking) {
+          return view instanceof MarkdownView;
+        } else {
+          this.createFolderForNote(view.file);
+        }
+      },
+      hotkeys: [],
+    });
+
     if (this.app.workspace.layoutReady) this.initialize();
     else
       this.registerEvent(
@@ -60,5 +88,29 @@ export default class ALxFolderNote extends Plugin {
 
   async saveSettings() {
     await this.saveData(this.settings);
+  }
+  async createFolderForNote(file: TFile) {
+    const newFolderPath = getFolderPath(this, file, true);
+    const folderExist = await this.app.vault.adapter.exists(newFolderPath);
+    if (folderExist) {
+      new Notice("Folder already exists");
+      return;
+    }
+    await this.app.vault.createFolder(newFolderPath);
+    let newNotePath: string | null;
+    switch (this.settings.folderNotePref) {
+      case NoteLoc.Index:
+        newNotePath = join(newFolderPath, this.settings.indexName + ".md");
+        break;
+      case NoteLoc.Inside:
+        newNotePath = join(newFolderPath, file.name);
+        break;
+      case NoteLoc.Outside:
+        newNotePath = null;
+        break;
+      default:
+        assertNever(this.settings.folderNotePref);
+    }
+    if (newNotePath) this.app.vault.rename(file, newNotePath);
   }
 }

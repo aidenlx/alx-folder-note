@@ -1,6 +1,6 @@
 import ALxFolderNote from "main";
 import { TFile, TFolder } from "obsidian";
-import { parse, dirname } from "path";
+import { parse, dirname, basename, join } from "path";
 import { NoteLoc } from "misc";
 import assertNever from "assert-never";
 
@@ -40,39 +40,62 @@ function getParent(path: string, plugin: ALxFolderNote): TFolder | null {
   }
 }
 
+function getFileInfo(note: TFile | string) {
+  let parent: string, base: string;
+  if (note instanceof TFile) {
+    base = note.basename;
+    parent = getParentPath(note.path);
+  } else {
+    base = parse(note).name;
+    parent = getParentPath(note);
+  }
+  return { base, parent };
+}
+
+export function getFolderPath(
+  plugin: ALxFolderNote,
+  note: TFile | string,
+  newFolder = false,
+): string {
+  const { parent, base } = getFileInfo(note);
+  const getSiblingFolder = () => {
+    if (parent === "/") return base;
+    else return join(parent, base);
+  };
+  switch (plugin.settings.folderNotePref) {
+    case NoteLoc.Index:
+    case NoteLoc.Inside:
+      if (newFolder) return getSiblingFolder();
+      else return parent;
+    case NoteLoc.Outside:
+      return getSiblingFolder();
+    default:
+      assertNever(plugin.settings.folderNotePref);
+  }
+}
+
 export function findFolderFromNote(
   plugin: ALxFolderNote,
-  file: TFile | string,
+  note: TFile | string,
 ): TFolder | null {
-  try {
-    let parent: TFolder | null, base: string;
-    if (file instanceof TFile) {
-      parent = file.parent;
-      base = file.basename;
-    } else {
-      parent = getParent(file, plugin);
-      base = parse(file).name;
-    }
-    if (!parent) return null;
-    switch (plugin.settings.folderNotePref) {
-      case NoteLoc.Index:
-        if (base === plugin.settings.indexName) return parent;
-        else return null;
-      case NoteLoc.Inside:
-        if (parent.name === base) return parent;
-        else return null;
-      case NoteLoc.Outside:
-        const found = parent.children.find(
-          (af) => af instanceof TFolder && af.name === base,
-        );
-        return (found as TFolder) ?? null;
-      default:
-        assertNever(plugin.settings.folderNotePref);
-    }
-  } catch (error) {
-    console.error(error);
-    return null;
+  const { parent, base } = getFileInfo(note);
+  // check if folder note name vaild
+  switch (plugin.settings.folderNotePref) {
+    case NoteLoc.Index:
+      if (base !== plugin.settings.indexName) return null;
+      break;
+    case NoteLoc.Inside:
+      if (base !== basename(parent)) return null;
+      break;
+    case NoteLoc.Outside:
+      break;
+    default:
+      assertNever(plugin.settings.folderNotePref);
   }
+  const path = getFolderPath(plugin, note);
+  if (path)
+    return (plugin.app.vault.getAbstractFileByPath(path) as TFolder) ?? null;
+  else return null;
 }
 
 export function getAbstractFolderNote(
