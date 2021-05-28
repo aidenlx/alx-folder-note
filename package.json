@@ -1,6 +1,6 @@
 {
   "name": "alx-folder-note",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "An completely rewrite of xpgo/obsidian-folder-note-plugin",
   "main": "main.js",
   "scripts": {

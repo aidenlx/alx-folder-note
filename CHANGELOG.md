@@ -1,3 +1,15 @@
+# [0.2.0](https://github.com/alx-plugins/alx-folder-note/compare/0.1.1...0.2.0) (2021-05-28)
+
+
+### Bug Fixes
+
+* **find.ts:** getFolderNote() throw error when move folder content ([d60e7ad](https://github.com/alx-plugins/alx-folder-note/commit/d60e7ad6c83782251f0ebf15f519dce6af815ca0))
+
+
+### Features
+
+* **vault-handler.ts:** add prompt to comfirm deletion of folder note outside ([01b5032](https://github.com/alx-plugins/alx-folder-note/commit/01b5032be0e6b3aa4f500dcca5da76dd89bc9d0b))
+
 ## [0.1.1](https://github.com/alx-plugins/alx-folder-note/compare/0.1.0...0.1.1) (2021-05-27)
 
 
