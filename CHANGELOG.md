@@ -1,3 +1,16 @@
+# [0.3.0](https://github.com/alx-plugins/alx-folder-note/compare/0.2.0...0.3.0) (2021-05-28)
+
+
+### Bug Fixes
+
+* **valut-handler.ts:** autorename no longer rename index files ([b057bd3](https://github.com/alx-plugins/alx-folder-note/commit/b057bd3bb500327906b7bb4082e146bde923a53a))
+
+
+### Features
+
+* **vault-handler.ts:** add prompt to delete folder when folder note is removed ([fdc6c28](https://github.com/alx-plugins/alx-folder-note/commit/fdc6c28a7a2af6eace89d1d2f278d7e6d4aa93a8))
+* add create-folder-for-note command ([47470ad](https://github.com/alx-plugins/alx-folder-note/commit/47470ad626a2156cf05b72686d89f9a57430deef))
+
 # [0.2.0](https://github.com/alx-plugins/alx-folder-note/compare/0.1.1...0.2.0) (2021-05-28)
 
 
