@@ -30,7 +30,7 @@ export function onCreate(this: ALxFolderNote, af: TAbstractFile) {
   ) {
     setupHide(af, fileExplorer.fileItems);
   }
-  updateCount(af, this);
+  if (this.settings.fileCountInExplorer) updateCount(af, this);
 }
 
 export function onRename(
@@ -87,7 +87,10 @@ export function onRename(
     }
   }
   // when file is moved
-  if (dirname(af.path) !== dirname(oldPath)) {
+  if (
+    this.settings.fileCountInExplorer &&
+    dirname(af.path) !== dirname(oldPath)
+  ) {
     updateCount(af, this);
     updateCount(oldPath, this);
   }
@@ -106,7 +109,7 @@ export function onDelete(this: ALxFolderNote, af: TAbstractFile) {
       new DeleteFolderNotePrompt(this, folder).open();
     }
   }
-  updateCount(af, this);
+  if (this.settings.fileCountInExplorer) updateCount(af, this);
 }
 
 class DeleteFolderNotePrompt extends Modal {

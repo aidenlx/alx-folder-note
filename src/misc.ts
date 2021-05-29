@@ -1,5 +1,5 @@
 import assertNever from "assert-never";
-import { AFItem, FolderItem, Modifier, TFolder } from "obsidian";
+import { AFItem, FileExplorer, FolderItem, Modifier, TFolder } from "obsidian";
 
 export type afItemMark = AFItem & { evtDone?: true; isFolderNote?: true };
 
@@ -12,6 +12,16 @@ export enum NoteLoc {
   Index,
   Inside,
   Outside,
+}
+
+export function iterateItems(
+  items: FileExplorer["fileItems"],
+  callback: (item: AFItem) => any,
+): void {
+  for (const key in items) {
+    if (!Object.prototype.hasOwnProperty.call(items, key)) continue;
+    callback(items[key]);
+  }
 }
 
 export function isModifier(evt: MouseEvent, pref: Modifier): boolean {

@@ -1,12 +1,8 @@
 import ALxFolderNote from "main";
-import { FileExplorer, FolderItem, TAbstractFile, TFolder } from "obsidian";
+import { isFolder, iterateItems } from "misc";
+import { AFItem, FolderItem, TAbstractFile, TFolder } from "obsidian";
 import "../styles/folder-count.css";
 import { getParentPath } from "./find";
-export function setCount(item: FolderItem) {
-  // @ts-ignore
-  const count = item.file.getFileCount() as number;
-  item.titleInnerEl.dataset["count"] = count.toString();
-}
 
 export function updateCount(
   file: string | TAbstractFile,
@@ -35,4 +31,26 @@ export function updateCount(
   } else parent = file.parent;
 
   iterate(parent);
+}
+
+export function setupCount(plugin: ALxFolderNote, revert = false) {
+  if (!plugin.fileExplorer) throw new Error("fileExplorer not found");
+
+  iterateItems(plugin.fileExplorer.fileItems, (item: AFItem) => {
+    if (!isFolder(item)) return;
+    if (revert) removeCount(item);
+    else setCount(item);
+  });
+}
+
+function setCount(item: FolderItem) {
+  if (item.file.isRoot()) return;
+  // @ts-ignore
+  const count = item.file.getFileCount() as number;
+  item.titleInnerEl.dataset["count"] = count.toString();
+}
+
+function removeCount(item: FolderItem) {
+  if (item.titleInnerEl.dataset["count"])
+    delete item.titleInnerEl.dataset["count"];
 }
