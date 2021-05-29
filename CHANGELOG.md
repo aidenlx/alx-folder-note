@@ -1,3 +1,12 @@
+# [0.4.0](https://github.com/alx-plugins/alx-folder-note/compare/0.3.0...0.4.0) (2021-05-29)
+
+
+### Features
+
+* add option to toggle fileCountInExplorer ([46688ef](https://github.com/alx-plugins/alx-folder-note/commit/46688eff1aa43bec9cb1978f0a84ad8ba9e24ae1))
+* **folder-count.ts:** auto update count when file changes ([5458bdf](https://github.com/alx-plugins/alx-folder-note/commit/5458bdf9f58159944aa523600cc231675b04100c))
+* add initial support for file count in explorer ([f520f66](https://github.com/alx-plugins/alx-folder-note/commit/f520f66ce7acbfcf73878e83d9c4ea9d371bd450))
+
 # [0.3.0](https://github.com/alx-plugins/alx-folder-note/compare/0.2.0...0.3.0) (2021-05-28)
 
 
