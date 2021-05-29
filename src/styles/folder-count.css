@@ -1,0 +1,10 @@
+.nav-folder-title-content[data-count]::after {
+  content: attr(data-count);
+  position: absolute;
+  right: 0;
+  font-size: 12px;
+  line-height: 12px;
+  border-radius: 3px;
+  padding: 2px 4px;
+  background-color: var(--background-secondary-alt);
+}

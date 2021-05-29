@@ -1,6 +1,7 @@
 import ALxFolderNote from "main";
 import { afItemMark, isFolder } from "misc";
 import { clickHandler } from "modules/click-handler";
+import { setCount } from "modules/folder-count";
 import { TFile, AFItem, FileExplorer } from "obsidian";
 
 export function setupHide(
@@ -62,6 +63,7 @@ export function initialize(this: ALxFolderNote, revert = false) {
     iterateItems(fileExplorer.fileItems, (item: AFItem) => {
       if (isFolder(item)) {
         setupClick(item, this, revert);
+        if (!item.file.isRoot()) setCount(item);
       }
     });
     if (this.settings.hideNoteInExplorer) hideAll(this, revert);

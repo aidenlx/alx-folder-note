@@ -17,7 +17,7 @@ import {
   DEFAULT_SETTINGS,
   ALxFolderNoteSettingTab,
 } from "settings";
-import "./main.css";
+import "./styles/main.css";
 import { onCreate, onDelete, onRename } from "modules/vault-handler";
 import { NoteLoc } from "misc";
 import { join } from "path";
