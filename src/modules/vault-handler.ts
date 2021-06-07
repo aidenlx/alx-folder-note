@@ -8,7 +8,6 @@ import {
   getAbstractFolderNote,
   getParentPath,
 } from "./find";
-import { updateCount } from "./folder-count";
 
 export function onCreate(this: ALxFolderNote, af: TAbstractFile) {
   if (!this.fileExplorer) {
@@ -30,7 +29,6 @@ export function onCreate(this: ALxFolderNote, af: TAbstractFile) {
   ) {
     setupHide(af, fileExplorer.fileItems);
   }
-  if (this.settings.fileCountInExplorer) updateCount(af, this);
 }
 
 export function onRename(
@@ -86,14 +84,6 @@ export function onRename(
         setupHide(af, this.fileExplorer.fileItems, !Boolean(newFolder));
     }
   }
-  // when file is moved
-  if (
-    this.settings.fileCountInExplorer &&
-    dirname(af.path) !== dirname(oldPath)
-  ) {
-    updateCount(af, this);
-    updateCount(oldPath, this);
-  }
 }
 export function onDelete(this: ALxFolderNote, af: TAbstractFile) {
   if (af instanceof TFolder) {
@@ -109,7 +99,6 @@ export function onDelete(this: ALxFolderNote, af: TAbstractFile) {
       new DeleteFolderNotePrompt(this, folder).open();
     }
   }
-  if (this.settings.fileCountInExplorer) updateCount(af, this);
 }
 
 class DeleteFolderNotePrompt extends Modal {

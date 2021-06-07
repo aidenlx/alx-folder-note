@@ -1,6 +1,5 @@
 import ALxFolderNote from "main";
 import { isMac, NoteLoc } from "misc";
-import { setupCount } from "modules/folder-count";
 import { hideAll } from "note-handler";
 import { PluginSettingTab, App, Setting, Modifier } from "obsidian";
 
@@ -11,7 +10,6 @@ export interface ALxFolderNoteSettings {
   hideNoteInExplorer: boolean;
   autoRename: boolean;
   folderNoteTemplate: string;
-  fileCountInExplorer: boolean;
 }
 
 export const DEFAULT_SETTINGS: ALxFolderNoteSettings = {
@@ -21,7 +19,6 @@ export const DEFAULT_SETTINGS: ALxFolderNoteSettings = {
   hideNoteInExplorer: true,
   autoRename: true,
   folderNoteTemplate: "# {{FOLDER_NAME}}",
-  fileCountInExplorer: false,
 };
 
 export class ALxFolderNoteSettingTab extends PluginSettingTab {
@@ -44,7 +41,6 @@ export class ALxFolderNoteSettingTab extends PluginSettingTab {
     this.setHide();
     if (this.plugin.settings.folderNotePref !== NoteLoc.Index)
       this.setAutoRename();
-    this.setCount();
   }
 
   templateDelayTimer?: number;
@@ -177,19 +173,6 @@ export class ALxFolderNoteSettingTab extends PluginSettingTab {
         toggle.setValue(this.plugin.settings.autoRename);
         toggle.onChange(async (value) => {
           this.plugin.settings.autoRename = value;
-          await this.plugin.saveSettings();
-        });
-      });
-  }
-  setCount() {
-    new Setting(this.containerEl)
-      .setName("File counts in explorer")
-      .setDesc("Show file counts in every folder in file explorer")
-      .addToggle((toggle) => {
-        toggle.setValue(this.plugin.settings.fileCountInExplorer);
-        toggle.onChange(async (value) => {
-          setupCount(this.plugin, !value);
-          this.plugin.settings.fileCountInExplorer = value;
           await this.plugin.saveSettings();
         });
       });
