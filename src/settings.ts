@@ -1,7 +1,7 @@
 import ALxFolderNote from "main";
 import { isMac, NoteLoc } from "misc";
 import { hideAll } from "note-handler";
-import { PluginSettingTab, App, Setting, Modifier } from "obsidian";
+import { PluginSettingTab, App, Setting, Modifier, debounce } from "obsidian";
 
 export interface ALxFolderNoteSettings {
   folderNotePref: NoteLoc;
@@ -43,9 +43,6 @@ export class ALxFolderNoteSettingTab extends PluginSettingTab {
       this.setAutoRename();
   }
 
-  templateDelayTimer?: number;
-  indexDelayTimer?: number;
-
   setNoteLoc() {
     new Setting(this.containerEl)
       .setName("Preference for Note File Location")
@@ -77,21 +74,19 @@ export class ALxFolderNoteSettingTab extends PluginSettingTab {
     new Setting(this.containerEl)
       .setName("Name for Index File")
       .setDesc("Set the note name to be recognized as index file for folders")
-      .addText((text) =>
+      .addText((text) => {
+        const onChange = async (value: string) => {
+          this.plugin.settings.indexName = value;
+          hideAll(this.plugin, true);
+          window.setTimeout(() => {
+            hideAll(this.plugin);
+          }, 200);
+          await this.plugin.saveSettings();
+        };
         text
           .setValue(this.plugin.settings.indexName)
-          .onChange(async (value) => {
-            if (this.indexDelayTimer) window.clearTimeout(this.indexDelayTimer);
-            this.indexDelayTimer = window.setTimeout(async () => {
-              this.plugin.settings.indexName = value;
-              hideAll(this.plugin, true);
-              window.setTimeout(() => {
-                hideAll(this.plugin);
-              }, 200);
-              await this.plugin.saveSettings();
-            }, 500);
-          }),
-      );
+          .onChange(debounce(onChange, 500, true));
+      });
   }
   setTemplate() {
     new Setting(this.containerEl)
@@ -106,16 +101,13 @@ export class ALxFolderNoteSettingTab extends PluginSettingTab {
         }),
       )
       .addTextArea((text) => {
+        const onChange = async (value: string) => {
+          this.plugin.settings.folderNoteTemplate = value;
+          await this.plugin.saveSettings();
+        };
         text
           .setValue(this.plugin.settings.folderNoteTemplate)
-          .onChange((value) => {
-            if (this.templateDelayTimer)
-              window.clearTimeout(this.templateDelayTimer);
-            this.templateDelayTimer = window.setTimeout(async () => {
-              this.plugin.settings.folderNoteTemplate = value;
-              await this.plugin.saveSettings();
-            }, 500);
-          });
+          .onChange(debounce(onChange, 500, true));
         text.inputEl.rows = 8;
         text.inputEl.cols = 50;
       });
