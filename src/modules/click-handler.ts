@@ -1,6 +1,6 @@
 import ALxFolderNote from "main";
 import { TFile, TFolder } from "obsidian";
-import path from "path";
+import { join } from "path-browserify";
 import { isModifier } from "misc";
 import { findFolderNote, getAbstractFolderNote } from "./find";
 
@@ -33,7 +33,7 @@ export function clickHandler(this: ALxFolderNote, evt: MouseEvent) {
       let folderNote = findFolderNote(this, findIn, noteBaseName);
       if (createNew && !folderNote) {
         folderNote = await this.app.vault.create(
-          path.join(findIn, noteBaseName + ".md"),
+          join(findIn, noteBaseName + ".md"),
           getNewFolderNote(this.settings.folderNoteTemplate, folder),
         );
       }

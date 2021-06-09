@@ -1,7 +1,7 @@
 import ALxFolderNote from "main";
 import { afItemMark, NoteLoc } from "misc";
 import { FileExplorer, Modal, TAbstractFile, TFile, TFolder } from "obsidian";
-import { dirname, join, extname } from "path";
+import { dirname, join, extname } from "path-browserify";
 import { setupClick, setupHide } from "../note-handler";
 import {
   findFolderFromNote,

@@ -20,7 +20,7 @@ import {
 import "./styles/main.css";
 import { onCreate, onDelete, onRename } from "modules/vault-handler";
 import { NoteLoc } from "misc";
-import { join } from "path";
+import { join } from "path-browserify";
 import assertNever from "assert-never";
 
 export default class ALxFolderNote extends Plugin {

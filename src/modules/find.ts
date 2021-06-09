@@ -1,6 +1,6 @@
 import ALxFolderNote from "main";
 import { TFile, TFolder } from "obsidian";
-import { parse, dirname, basename, join } from "path";
+import { parse, dirname, basename, join } from "path-browserify";
 import { NoteLoc } from "misc";
 import assertNever from "assert-never";
 
