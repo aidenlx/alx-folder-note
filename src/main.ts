@@ -27,7 +27,7 @@ export default class ALxFolderNote extends Plugin {
   settings: ALxFolderNoteSettings = DEFAULT_SETTINGS;
   fileExplorer?: FileExplorer;
 
-  initialize = initialize.bind(this);
+  initialize = (revert = false) => initialize(this, revert);
 
   getFolderNote(path: string, folder: TFolder): TFile | null;
   getFolderNote(folder: TFolder): TFile | null;

@@ -2,6 +2,8 @@ import ALxFolderNote from "main";
 import { afItemMark, isFolder, iterateItems } from "misc";
 import { clickHandler } from "modules/click-handler";
 import { TFile, AFItem, FileExplorer } from "obsidian";
+import { around } from "monkey-around";
+import { findFolderFromNote } from "modules/find";
 
 export function setupHide(
   folderNote: TFile | AFItem,
@@ -50,23 +52,41 @@ export function setupClick(
   }
 }
 
-export function initialize(this: ALxFolderNote, revert = false) {
-  const leaves = this.app.workspace.getLeavesOfType("file-explorer");
+export const initialize = (plugin: ALxFolderNote, revert = false) => {
+  const feInstance =
+    // @ts-ignore
+    plugin.app.internalPlugins.plugins["file-explorer"]?.instance;
+  if (feInstance) {
+    around(feInstance, {
+      revealInFolder(next) {
+        return function (this: any, ...args: any[]) {
+          if (args[0] instanceof TFile && plugin.settings.hideNoteInExplorer) {
+            const findResult = findFolderFromNote(plugin, args[0]);
+            if (findResult) args[0] = findResult;
+          }
+          return next.apply(this, args);
+        };
+      },
+    });
+  }
+
+  const leaves = plugin.app.workspace.getLeavesOfType("file-explorer");
   if (leaves.length > 1) console.error("more then one file-explorer");
   else if (leaves.length < 1) console.error("file-explorer not found");
   else {
-    const fileExplorer = this.fileExplorer ?? (leaves[0].view as FileExplorer);
-    this.fileExplorer = fileExplorer;
-    if (!revert) this.registerVaultEvent();
+    const fileExplorer =
+      plugin.fileExplorer ?? (leaves[0].view as FileExplorer);
+    plugin.fileExplorer = fileExplorer;
+    if (!revert) plugin.registerVaultEvent();
     // get all AbstractFile (file+folder) and attach event
     iterateItems(fileExplorer.fileItems, (item: AFItem) => {
       if (isFolder(item)) {
-        setupClick(item, this, revert);
+        setupClick(item, plugin, revert);
       }
     });
-    if (this.settings.hideNoteInExplorer) hideAll(this, revert);
+    if (plugin.settings.hideNoteInExplorer) hideAll(plugin, revert);
   }
-}
+};
 
 export function hideAll(plugin: ALxFolderNote, revert = false) {
   if (!plugin.fileExplorer) throw new Error("fileExplorer Missing");
