@@ -8,13 +8,14 @@ import {
   TFolder,
   Vault,
 } from "obsidian";
-import { dirname, join, extname } from "path-browserify";
+import { dirname, extname, join } from "path-browserify";
+
 import { setupClick, setupHide } from "../note-handler";
 import {
   findFolderFromNote,
   getAbstractFolderNote,
-  getParentPath,
   getFolderNote,
+  getParentPath,
 } from "./find";
 export class VaultHandler {
   get app() {

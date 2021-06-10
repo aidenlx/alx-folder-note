@@ -1,7 +1,7 @@
 import ALxFolderNote from "main";
 import { isMac, NoteLoc } from "misc";
 import { hideAll } from "note-handler";
-import { PluginSettingTab, App, Setting, Modifier, debounce } from "obsidian";
+import { App, debounce, Modifier, PluginSettingTab, Setting } from "obsidian";
 
 export interface ALxFolderNoteSettings {
   folderNotePref: NoteLoc;

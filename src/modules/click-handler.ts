@@ -1,7 +1,8 @@
 import ALxFolderNote from "main";
+import { isModifier } from "misc";
 import { TFile, TFolder } from "obsidian";
 import { join } from "path-browserify";
-import { isModifier } from "misc";
+
 import { findFolderNote, getAbstractFolderNote } from "./find";
 
 export function clickHandler(this: ALxFolderNote, evt: MouseEvent) {

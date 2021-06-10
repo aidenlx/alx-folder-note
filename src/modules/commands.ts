@@ -9,6 +9,7 @@ import {
   TFolder,
 } from "obsidian";
 import { join } from "path";
+
 import {
   findFolderFromNote,
   findFolderNote,

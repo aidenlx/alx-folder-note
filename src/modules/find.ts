@@ -1,8 +1,8 @@
-import ALxFolderNote from "main";
-import { TFile, TFolder } from "obsidian";
-import { parse, dirname, basename, join } from "path-browserify";
-import { NoteLoc } from "misc";
 import assertNever from "assert-never";
+import ALxFolderNote from "main";
+import { NoteLoc } from "misc";
+import { TFile, TFolder } from "obsidian";
+import { basename, dirname, join, parse } from "path-browserify";
 
 export const getParentPath = (src: string) => {
   const path = dirname(src);

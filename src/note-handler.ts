@@ -2,8 +2,8 @@ import ALxFolderNote from "main";
 import { afItemMark, isFolder, iterateItems } from "misc";
 import { clickHandler } from "modules/click-handler";
 import { PatchRevealInExplorer } from "modules/commands";
-import { TFile, AFItem, FileExplorer } from "obsidian";
 import { getFolderNote } from "modules/find";
+import { AFItem, FileExplorer, TFile } from "obsidian";
 
 export function setupHide(
   folderNote: TFile | AFItem,

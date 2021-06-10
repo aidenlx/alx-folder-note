@@ -1,21 +1,22 @@
-import { getFolderPath } from "modules/find";
-import { AFItem, FileExplorer, Notice, Plugin, TFile, TFolder } from "obsidian";
-import {
-  ALxFolderNoteSettings,
-  DEFAULT_SETTINGS,
-  ALxFolderNoteSettingTab,
-} from "settings";
 import "./styles/main.css";
-import { VaultHandler } from "modules/vault-handler";
-import { isFolder, iterateItems, NoteLoc } from "misc";
-import { join } from "path-browserify";
+
 import assertNever from "assert-never";
+import { isFolder, iterateItems, NoteLoc } from "misc";
 import {
-  AddOptionsForNote,
   AddOptionsForFolder,
+  AddOptionsForNote,
   PatchRevealInExplorer,
 } from "modules/commands";
-import { setupClick, hideAll } from "note-handler";
+import { getFolderPath } from "modules/find";
+import { VaultHandler } from "modules/vault-handler";
+import { hideAll, setupClick } from "note-handler";
+import { AFItem, FileExplorer, Notice, Plugin, TFile, TFolder } from "obsidian";
+import { join } from "path-browserify";
+import {
+  ALxFolderNoteSettings,
+  ALxFolderNoteSettingTab,
+  DEFAULT_SETTINGS,
+} from "settings";
 
 export default class ALxFolderNote extends Plugin {
   settings: ALxFolderNoteSettings = DEFAULT_SETTINGS;
