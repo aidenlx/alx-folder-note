@@ -14,6 +14,7 @@ import {
   findFolderFromNote,
   findFolderNote,
   getAbstractFolderNote,
+  getFolderNote,
 } from "./find";
 
 /** Add Make doc folder note and delete linked folder command */
@@ -75,7 +76,7 @@ export const AddOptionsForNote = (plugin: ALxFolderNote) => {
         af.extension === "md"
       ) {
         const folderResult = findFolderFromNote(plugin, af);
-        if (!folderResult)
+        if (!folderResult) {
           menu.addItem((item) =>
             item
               .setIcon("create-new")
@@ -86,7 +87,23 @@ export const AddOptionsForNote = (plugin: ALxFolderNote) => {
                   plugin.app.workspace.openLinkText(af.path, "", false);
               }),
           );
-        else if (source !== "link-context-menu") {
+          if (af.parent && !getFolderNote(plugin, af.parent))
+            menu.addItem((item) =>
+              item
+                .setIcon("link")
+                .setTitle("Link to Parent Folder")
+                .onClick(() => {
+                  const { findIn, noteBaseName } = getAbstractFolderNote(
+                    plugin,
+                    af.parent,
+                  );
+                  plugin.app.vault.rename(
+                    af,
+                    join(findIn, noteBaseName + ".md"),
+                  );
+                }),
+            );
+        } else if (source !== "link-context-menu") {
           menu.addItem((item) =>
             item
               .setIcon("trash")
