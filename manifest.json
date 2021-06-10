@@ -1,7 +1,7 @@
 {
   "id": "alx-folder-note",
   "name": "AidenLx's Folder Note",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "minAppVersion": "0.12.5",
   "description": "An completely rewrite of xpgo/obsidian-folder-note-plugin",
   "author": "",

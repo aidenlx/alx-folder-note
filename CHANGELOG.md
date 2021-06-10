@@ -1,3 +1,22 @@
+# [0.5.0](https://github.com/alx-plugins/alx-folder-note/compare/0.4.0...0.5.0) (2021-06-10)
+
+
+### Bug Fixes
+
+* **settings.ts:** fix folder note hide fails when toggle deleteOutsideNoteWithFolder ([4eabf9b](https://github.com/alx-plugins/alx-folder-note/commit/4eabf9bb7dadd0137cbeffa22db47a4bca277837))
+
+
+### Features
+
+* add commands for folder note/folder operation ([a936d25](https://github.com/alx-plugins/alx-folder-note/commit/a936d2537c37f9a4588ad4cff1e6ca87234ee1ed))
+* add debounce to vault events ([9db2a46](https://github.com/alx-plugins/alx-folder-note/commit/9db2a46fbad2b54762f33c09ae3b740fffd17af8))
+* revealInFolder now jump to folder when folder note is hidden ([069b109](https://github.com/alx-plugins/alx-folder-note/commit/069b109b3596b6de4f31c6759dd0819b876d2272))
+
+
+### Reverts
+
+* remove fileCountInExplorer ([df9b68a](https://github.com/alx-plugins/alx-folder-note/commit/df9b68a6776c3755905d5f640c97ed9b31cf02f1))
+
 # [0.4.0](https://github.com/alx-plugins/alx-folder-note/compare/0.3.0...0.4.0) (2021-05-29)
 
 
