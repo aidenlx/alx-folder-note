@@ -1,23 +1,16 @@
 import ALxFolderNote from "main";
 import { around } from "monkey-around";
-import {
-  FileExplorer,
-  MarkdownView,
-  Menu,
-  Modal,
-  TFile,
-  TFolder,
-} from "obsidian";
-
-import {
-  findFolderFromNote,
-  findFolderNote,
-  getFolderNote,
-  getFolderNotePath,
-} from "./find";
+import { MarkdownView, Menu, Modal, TFile, TFolder } from "obsidian";
 
 /** Add Make doc folder note and delete linked folder command */
 export const AddOptionsForNote = (plugin: ALxFolderNote) => {
+  const {
+    createFolderForNote,
+    getFolderFromNote,
+    getFolderNote,
+    getFolderNotePath,
+  } = plugin.finder;
+
   plugin.addCommand({
     id: "make-doc-folder-note",
     name: "Make current document folder note",
@@ -26,7 +19,7 @@ export const AddOptionsForNote = (plugin: ALxFolderNote) => {
       if (checking) {
         return view instanceof MarkdownView;
       } else {
-        plugin.createFolderForNote(view.file);
+        createFolderForNote(view.file);
       }
     },
     hotkeys: [],
@@ -37,9 +30,7 @@ export const AddOptionsForNote = (plugin: ALxFolderNote) => {
     checkCallback: (checking) => {
       const view = plugin.app.workspace.activeLeaf.view as MarkdownView;
       const folderResult =
-        view instanceof MarkdownView
-          ? findFolderFromNote(plugin, view.file)
-          : null;
+        view instanceof MarkdownView ? getFolderFromNote(view.file) : null;
       if (checking) {
         return folderResult !== null;
       } else if (folderResult) {
@@ -54,9 +45,7 @@ export const AddOptionsForNote = (plugin: ALxFolderNote) => {
     checkCallback: (checking) => {
       const view = plugin.app.workspace.activeLeaf.view as MarkdownView;
       const folderResult =
-        view instanceof MarkdownView
-          ? findFolderFromNote(plugin, view.file)
-          : null;
+        view instanceof MarkdownView ? getFolderFromNote(view.file) : null;
       if (checking) {
         return folderResult !== null;
       } else if (folderResult) {
@@ -74,25 +63,25 @@ export const AddOptionsForNote = (plugin: ALxFolderNote) => {
         af instanceof TFile &&
         af.extension === "md"
       ) {
-        const folderResult = findFolderFromNote(plugin, af);
+        const folderResult = getFolderFromNote(af);
         if (!folderResult) {
           menu.addItem((item) =>
             item
               .setIcon("create-new")
               .setTitle("Make Doc Folder Note")
               .onClick(() => {
-                plugin.createFolderForNote(af);
+                createFolderForNote(af);
                 if (source === "link-context-menu")
                   plugin.app.workspace.openLinkText(af.path, "", false);
               }),
           );
-          if (af.parent && !getFolderNote(plugin, af.parent))
+          if (af.parent && !getFolderNote(af.parent))
             menu.addItem((item) =>
               item
                 .setIcon("link")
                 .setTitle("Link to Parent Folder")
                 .onClick(() => {
-                  const { path } = getFolderNotePath(plugin, af.parent);
+                  const { path } = getFolderNotePath(af.parent);
                   plugin.app.vault.rename(af, path);
                 }),
             );
@@ -112,9 +101,10 @@ export const AddOptionsForNote = (plugin: ALxFolderNote) => {
 };
 
 export const AddOptionsForFolder = (plugin: ALxFolderNote) => {
+  const { getFolderNotePath, findFolderNote } = plugin.finder;
   const addItem = (af: TFolder, menu: Menu) => {
-    const { info, path } = getFolderNotePath(plugin, af);
-    const noteResult = findFolderNote(plugin, ...info);
+    const { info, path } = getFolderNotePath(af);
+    const noteResult = findFolderNote(...info);
     if (noteResult)
       menu.addItem((item) =>
         item
@@ -142,6 +132,8 @@ export const AddOptionsForFolder = (plugin: ALxFolderNote) => {
 };
 
 export const PatchRevealInExplorer = (plugin: ALxFolderNote) => {
+  const { getFolderFromNote } = plugin.finder;
+
   const feInstance =
     // @ts-ignore
     plugin.app.internalPlugins.plugins["file-explorer"]?.instance;
@@ -150,7 +142,7 @@ export const PatchRevealInExplorer = (plugin: ALxFolderNote) => {
       revealInFolder: (next) => {
         return function (this: any, ...args: any[]) {
           if (args[0] instanceof TFile && plugin.settings.hideNoteInExplorer) {
-            const findResult = findFolderFromNote(plugin, args[0]);
+            const findResult = getFolderFromNote(args[0]);
             if (findResult) args[0] = findResult;
           }
           return next.apply(this, args);
@@ -173,11 +165,6 @@ class DeleteWarning extends Modal {
 
   get settings() {
     return this.plugin.settings;
-  }
-  get fileExplorer(): FileExplorer {
-    if (!this.plugin.fileExplorer) {
-      throw new Error("no fileExplorer");
-    } else return this.plugin.fileExplorer;
   }
 
   deleteFolder() {

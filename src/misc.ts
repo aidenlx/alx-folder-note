@@ -1,5 +1,6 @@
 import assertNever from "assert-never";
-import { AFItem, FileExplorer, FolderItem, Modifier, TFolder } from "obsidian";
+import { AFItem, FolderItem, Modifier, TAbstractFile, TFolder } from "obsidian";
+import { dirname, join } from "path-browserify";
 
 export type afItemMark = AFItem & { evtDone?: true; isFolderNote?: true };
 
@@ -13,16 +14,6 @@ export enum NoteLoc {
   Inside,
   Outside,
 }
-
-export const iterateItems = (
-  items: FileExplorer["fileItems"],
-  callback: (item: AFItem) => any,
-): void => {
-  for (const key in items) {
-    if (!Object.prototype.hasOwnProperty.call(items, key)) continue;
-    callback(items[key]);
-  }
-};
 
 export const isModifier = (evt: MouseEvent, pref: Modifier): boolean => {
   const { altKey, metaKey, ctrlKey, shiftKey } = evt;
@@ -40,4 +31,16 @@ export const isModifier = (evt: MouseEvent, pref: Modifier): boolean => {
     default:
       assertNever(pref);
   }
+};
+
+/**
+ * @param newName include extension
+ */
+export const getRenamedPath = (af: TAbstractFile, newName: string) =>
+  join(getParentPath(af.path), newName);
+
+export const getParentPath = (src: string) => {
+  const path = dirname(src);
+  if (path === ".") return "/";
+  else return path;
 };

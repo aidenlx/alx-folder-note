@@ -1,6 +1,6 @@
 import ALxFolderNote from "main";
 import { isMac, NoteLoc } from "misc";
-import { hideAll } from "note-handler";
+import FEHandler from "modules/fe-handler";
 import { App, debounce, Modifier, PluginSettingTab, Setting } from "obsidian";
 
 export interface ALxFolderNoteSettings {
@@ -25,6 +25,11 @@ export const DEFAULT_SETTINGS: ALxFolderNoteSettings = {
 
 export class ALxFolderNoteSettingTab extends PluginSettingTab {
   plugin: ALxFolderNote;
+
+  private get feHandler(): FEHandler {
+    if (this.plugin.feHandler) return this.plugin.feHandler;
+    else throw new Error("Missing feHandler");
+  }
 
   constructor(app: App, plugin: ALxFolderNote) {
     super(app, plugin);
@@ -78,9 +83,9 @@ export class ALxFolderNoteSettingTab extends PluginSettingTab {
           .onChange(async (value: string) => {
             this.plugin.settings.folderNotePref = +value;
             if (this.plugin.settings.hideNoteInExplorer) {
-              hideAll(this.plugin, true);
+              this.feHandler.hideAll(true);
               window.setTimeout(() => {
-                hideAll(this.plugin);
+                this.feHandler.hideAll();
               }, 200);
             }
             await this.plugin.saveSettings();
@@ -95,9 +100,9 @@ export class ALxFolderNoteSettingTab extends PluginSettingTab {
       .addText((text) => {
         const onChange = async (value: string) => {
           this.plugin.settings.indexName = value;
-          hideAll(this.plugin, true);
+          this.feHandler.hideAll(true);
           window.setTimeout(() => {
-            hideAll(this.plugin);
+            this.feHandler.hideAll();
           }, 200);
           await this.plugin.saveSettings();
         };
@@ -170,7 +175,7 @@ export class ALxFolderNoteSettingTab extends PluginSettingTab {
           .setValue(this.plugin.settings.hideNoteInExplorer)
           .onChange(async (value) => {
             this.plugin.settings.hideNoteInExplorer = value;
-            hideAll(this.plugin, !value);
+            this.feHandler.hideAll(!value);
             await this.plugin.saveSettings();
           }),
       );

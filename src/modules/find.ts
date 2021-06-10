@@ -1,63 +1,12 @@
 import assertNever from "assert-never";
 import ALxFolderNote from "main";
-import { NoteLoc } from "misc";
-import { TFile, TFolder } from "obsidian";
-import { basename, dirname, join, parse } from "path-browserify";
+import { getParentPath, NoteLoc } from "misc";
+import { Notice, TFile, TFolder } from "obsidian";
+import { basename, join, parse } from "path-browserify";
 
-export const getParentPath = (src: string) => {
-  const path = dirname(src);
-  if (path === ".") return "/";
-  else return path;
-};
-
-export const getFolderNote = (
-  ...args:
-    | [plugin: ALxFolderNote, path: string, folder: TFolder]
-    | [plugin: ALxFolderNote, folder: TFolder]
-): TFile | null => {
-  const [plugin] = args;
-  let result;
-  if (typeof args[1] === "string" && args[2]) {
-    const [, path, folder] = args;
-    result = getFolderNotePath(plugin, path, folder).info;
-  } else if (typeof args[1] !== "string") {
-    const [, folder] = args;
-    result = getFolderNotePath(plugin, folder).info;
-  } else throw new TypeError("Invaild Arguments");
-  return findFolderNote(plugin, ...result);
-};
-
-export const findFolderNote = (
-  plugin: ALxFolderNote,
-  findIn: string,
-  noteBaseName: string,
-): TFile | null => {
-  const findInFolder = plugin.app.vault.getAbstractFileByPath(findIn);
-  if (findInFolder && findInFolder instanceof TFolder) {
-    const found = findInFolder.children.find(
-      (af) =>
-        af instanceof TFile &&
-        af.basename === noteBaseName &&
-        af.extension === "md",
-    );
-    return (found as TFile) ?? null;
-  } else return null;
-};
-
-const getParent = (path: string, plugin: ALxFolderNote): TFolder | null => {
-  try {
-    return (
-      (plugin.app.vault.getAbstractFileByPath(
-        getParentPath(path),
-      ) as TFolder) ?? null
-    );
-  } catch (error) {
-    console.error(error);
-    return null;
-  }
-};
-
-const getFileInfo = (note: TFile | string) => {
+const getFileInfo = (
+  note: TFile | string,
+): { base: string; parent: string } => {
   let parent: string, base: string;
   if (note instanceof TFile) {
     base = note.basename;
@@ -69,107 +18,167 @@ const getFileInfo = (note: TFile | string) => {
   return { base, parent };
 };
 
-export const getFolderPath = (
-  plugin: ALxFolderNote,
-  note: TFile | string,
-  newFolder = false,
-): string => {
-  const { parent, base } = getFileInfo(note);
-  const getSiblingFolder = () => {
-    if (parent === "/") return base;
-    else return join(parent, base);
-  };
-  switch (plugin.settings.folderNotePref) {
-    case NoteLoc.Index:
-    case NoteLoc.Inside:
-      if (newFolder) return getSiblingFolder();
-      else return parent;
-    case NoteLoc.Outside:
-      return getSiblingFolder();
-    default:
-      assertNever(plugin.settings.folderNotePref);
-  }
-};
-
-export const findFolderFromNote = (
-  plugin: ALxFolderNote,
-  note: TFile | string,
-): TFolder | null => {
-  const { parent, base } = getFileInfo(note);
-  // check if folder note name vaild
-  switch (plugin.settings.folderNotePref) {
-    case NoteLoc.Index:
-      if (base !== plugin.settings.indexName) return null;
-      break;
-    case NoteLoc.Inside:
-      if (base !== basename(parent)) return null;
-      break;
-    case NoteLoc.Outside:
-      break;
-    default:
-      assertNever(plugin.settings.folderNotePref);
-  }
-  const path = getFolderPath(plugin, note);
-  if (path)
-    return (plugin.app.vault.getAbstractFileByPath(path) as TFolder) ?? null;
-  else return null;
-};
-
 type folderNotePath = {
   info: [findIn: string, noteBaseName: string];
   path: string;
 };
-export const getFolderNotePath = (
-  ...args:
-    | [plugin: ALxFolderNote, path: string, folder: TFolder]
-    | [plugin: ALxFolderNote, folder: TFolder]
-): folderNotePath => {
-  const [plugin, src, baseFolder] = args;
-  const getParent = (): string => {
-    if (typeof src === "string") {
-      return getParentPath(src);
-    } else {
-      if (src.parent === undefined) {
-        // root folder
-        return src.path;
-      } else if (src.parent === null) {
-        // when the folder is a deleted one
-        return getParentPath(src.path);
-      } else return src.parent.path;
+export default class NoteFinder {
+  plugin: ALxFolderNote;
+  constructor(plugin: ALxFolderNote) {
+    this.plugin = plugin;
+  }
+
+  private get settings() {
+    return this.plugin.settings;
+  }
+  private get app() {
+    return this.plugin.app;
+  }
+
+  // Get Folder from Folder Note
+
+  /**
+   * Get path of given note/notePath's folder based on setting
+   * @param note notePath or note TFile
+   * @param newFolder if the path is used to create new folder
+   * @returns folder path
+   */
+  getFolderPath = (note: TFile | string, newFolder = false): string => {
+    const { parent, base } = getFileInfo(note);
+    const getSiblingFolder = () => {
+      if (parent === "/") return base;
+      else return join(parent, base);
+    };
+    switch (this.settings.folderNotePref) {
+      case NoteLoc.Index:
+      case NoteLoc.Inside:
+        if (newFolder) return getSiblingFolder();
+        else return parent;
+      case NoteLoc.Outside:
+        return getSiblingFolder();
+      default:
+        assertNever(this.settings.folderNotePref);
     }
   };
-  const { indexName, folderNotePref: folderNoteLoc } = plugin.settings;
-  let findIn: string, noteBaseName: string;
 
-  switch (folderNoteLoc) {
-    case NoteLoc.Index:
-      noteBaseName = indexName;
-      break;
-    case NoteLoc.Inside:
-    case NoteLoc.Outside:
-      if (typeof src === "string") noteBaseName = parse(src).name;
-      else
-        noteBaseName = src.name === "/" ? plugin.app.vault.getName() : src.name;
-      break;
-    default:
-      assertNever(folderNoteLoc);
-  }
-  switch (folderNoteLoc) {
-    case NoteLoc.Index:
-    case NoteLoc.Inside:
-      if (typeof src === "string") {
-        if (!baseFolder) throw new TypeError("baseFolder not provided");
-        findIn = baseFolder.path;
-      } else findIn = src.path;
-      break;
-    case NoteLoc.Outside:
-      findIn = getParent();
-      break;
-    default:
-      assertNever(folderNoteLoc);
-  }
-  return {
-    info: [findIn, noteBaseName],
-    path: join(findIn, noteBaseName + ".md"),
+  createFolderForNote = async (file: TFile) => {
+    const newFolderPath = this.getFolderPath(file, true);
+    const folderExist = await this.app.vault.adapter.exists(newFolderPath);
+    if (folderExist) {
+      new Notice("Folder already exists");
+      return;
+    }
+    await this.app.vault.createFolder(newFolderPath);
+    let newNotePath: string | null;
+    switch (this.settings.folderNotePref) {
+      case NoteLoc.Index:
+        newNotePath = join(newFolderPath, this.settings.indexName + ".md");
+        break;
+      case NoteLoc.Inside:
+        newNotePath = join(newFolderPath, file.name);
+        break;
+      case NoteLoc.Outside:
+        newNotePath = null;
+        break;
+      default:
+        assertNever(this.settings.folderNotePref);
+    }
+    if (newNotePath) this.app.vault.rename(file, newNotePath);
   };
-};
+
+  getFolderFromNote = (note: TFile | string): TFolder | null => {
+    const { parent, base } = getFileInfo(note);
+    // check if folder note name vaild
+    switch (this.settings.folderNotePref) {
+      case NoteLoc.Index:
+        if (base !== this.settings.indexName) return null;
+        break;
+      case NoteLoc.Inside:
+        if (base !== basename(parent)) return null;
+        break;
+      case NoteLoc.Outside:
+        break;
+      default:
+        assertNever(this.settings.folderNotePref);
+    }
+    const path = this.getFolderPath(note);
+    if (path)
+      return (this.app.vault.getAbstractFileByPath(path) as TFolder) ?? null;
+    else return null;
+  };
+
+  // Get Folder Note from Folder
+
+  getFolderNote = (
+    ...args: Parameters<NoteFinder["getFolderNotePath"]>
+  ): TFile | null => {
+    const result = this.getFolderNotePath(...args).info;
+    return this.findFolderNote(...result);
+  };
+
+  findFolderNote = (findIn: string, noteBaseName: string): TFile | null => {
+    const findInFolder = this.app.vault.getAbstractFileByPath(findIn);
+    if (findInFolder && findInFolder instanceof TFolder) {
+      const found = findInFolder.children.find(
+        (af) =>
+          af instanceof TFile &&
+          af.basename === noteBaseName &&
+          af.extension === "md",
+      );
+      return (found as TFile) ?? null;
+    } else return null;
+  };
+
+  getFolderNotePath = (
+    ...args: [path: string, folder: TFolder] | [folder: TFolder]
+  ): folderNotePath => {
+    const [src, baseFolder] = args;
+    const getParent = (): string => {
+      if (typeof src === "string") {
+        return getParentPath(src);
+      } else {
+        if (src.parent === undefined) {
+          // root folder
+          return src.path;
+        } else if (src.parent === null) {
+          // when the folder is a deleted one
+          return getParentPath(src.path);
+        } else return src.parent.path;
+      }
+    };
+    const { indexName, folderNotePref: folderNoteLoc } = this.settings;
+    let findIn: string, noteBaseName: string;
+
+    switch (folderNoteLoc) {
+      case NoteLoc.Index:
+        noteBaseName = indexName;
+        break;
+      case NoteLoc.Inside:
+      case NoteLoc.Outside:
+        if (typeof src === "string") noteBaseName = parse(src).name;
+        else
+          noteBaseName = src.name === "/" ? this.app.vault.getName() : src.name;
+        break;
+      default:
+        assertNever(folderNoteLoc);
+    }
+    switch (folderNoteLoc) {
+      case NoteLoc.Index:
+      case NoteLoc.Inside:
+        if (typeof src === "string") {
+          if (!baseFolder) throw new TypeError("baseFolder not provided");
+          findIn = baseFolder.path;
+        } else findIn = src.path;
+        break;
+      case NoteLoc.Outside:
+        findIn = getParent();
+        break;
+      default:
+        assertNever(folderNoteLoc);
+    }
+    return {
+      info: [findIn, noteBaseName],
+      path: join(findIn, noteBaseName + ".md"),
+    };
+  };
+}

@@ -1,5 +1,6 @@
 import ALxFolderNote from "main";
-import { afItemMark, NoteLoc } from "misc";
+import { afItemMark, getRenamedPath, NoteLoc } from "misc";
+import FEHandler from "modules/fe-handler";
 import {
   debounce,
   Notice,
@@ -8,29 +9,27 @@ import {
   TFolder,
   Vault,
 } from "obsidian";
-import { dirname, extname, join } from "path-browserify";
+import { dirname, extname } from "path-browserify";
 
-import { setupClick, setupHide } from "../note-handler";
-import {
-  findFolderFromNote,
-  getFolderNote,
-  getFolderNotePath,
-  getParentPath,
-} from "./find";
-export class VaultHandler {
-  get app() {
+export default class VaultHandler {
+  private get app() {
     return this.plugin.app;
   }
-  get vault() {
+  private get vault() {
     return this.plugin.app.vault;
   }
-  get fileExplorer() {
-    return this.plugin.fileExplorer;
+  private get feHandler(): FEHandler {
+    if (this.plugin.feHandler) return this.plugin.feHandler;
+    else throw new Error("Missing feHandler");
   }
-  get settings() {
+  private get settings() {
     return this.plugin.settings;
   }
+  private get finder() {
+    return this.plugin.finder;
+  }
   plugin: ALxFolderNote;
+
   constructor(plugin: ALxFolderNote) {
     this.plugin = plugin;
   }
@@ -56,11 +55,13 @@ export class VaultHandler {
   };
 
   waitingList: Function[] = [];
-  private setupClick = (afItem: Parameters<typeof setupClick>[0]) => {
-    this.do(() => setupClick(afItem, this.plugin));
+  private setClickForAfItem = (
+    ...args: Parameters<FEHandler["setClickForAfItem"]>
+  ) => {
+    this.do(() => this.feHandler.setClickForAfItem(...args));
   };
-  private setupHide = (...args: Parameters<typeof setupHide>) => {
-    this.do(() => setupHide(...args));
+  private setupHide = (...args: Parameters<FEHandler["setupHide"]>) => {
+    this.do(() => this.feHandler.setupHide(...args));
   };
   private fileRename = (...args: Parameters<Vault["rename"]>) => {
     this.do(() => this.vault.rename(...args));
@@ -70,73 +71,64 @@ export class VaultHandler {
   };
 
   onCreate = (af: TAbstractFile) => {
-    if (!this.fileExplorer) {
+    if (!this.feHandler) {
       console.error("no fileExplorer");
       return;
     }
-    const fileExplorer = this.fileExplorer;
     if (af instanceof TFolder) {
-      const afItem = fileExplorer.fileItems[af.path] as afItemMark;
-      this.setupClick(afItem);
-      const note = getFolderNote(this.plugin, af);
+      const afItem = this.feHandler.getAfItem(af.path) as afItemMark;
+      this.setClickForAfItem(afItem);
+      const note = this.finder.getFolderNote(af);
       if (note && this.settings.hideNoteInExplorer) {
-        this.setupHide(note, fileExplorer.fileItems);
+        this.setupHide(note);
       }
     } else if (
       af instanceof TFile &&
-      findFolderFromNote(this.plugin, af) &&
+      this.finder.getFolderFromNote(af) &&
       this.settings.hideNoteInExplorer
     ) {
-      this.setupHide(af, fileExplorer.fileItems);
+      this.setupHide(af);
     }
   };
   onRename = (af: TAbstractFile, oldPath: string) => {
-    if (!this.fileExplorer) {
-      console.error("no fileExplorer");
-      return;
-    }
-    const fileExplorer = this.fileExplorer;
     if (af instanceof TFolder) {
-      this.setupClick(fileExplorer.fileItems[af.path]);
-      const oldNote = getFolderNote(this.plugin, oldPath, af);
-      const newNote = getFolderNote(this.plugin, af);
+      this.setClickForAfItem(af.path);
+      const oldNote = this.finder.getFolderNote(oldPath, af);
+      const newNote = this.finder.getFolderNote(af);
       if (this.settings.hideNoteInExplorer) {
         // show old note
-        if (oldNote) this.setupHide(oldNote, fileExplorer.fileItems, true);
+        if (oldNote) this.setupHide(oldNote, true);
         // hide new note
-        if (newNote) this.setupHide(newNote, fileExplorer.fileItems);
+        if (newNote) this.setupHide(newNote);
       }
-      // sync
+      // sync note name with folder
       if (
         this.settings.autoRename &&
         this.settings.folderNotePref !== NoteLoc.Index &&
         !newNote &&
         oldNote
       ) {
-        const { path } = getFolderNotePath(this.plugin, af);
+        const { path } = this.finder.getFolderNotePath(af);
         this.fileRename(oldNote, path);
-        if (this.settings.hideNoteInExplorer)
-          this.setupHide(oldNote, fileExplorer.fileItems);
+        if (this.settings.hideNoteInExplorer) this.setupHide(oldNote);
       }
     } else if (af instanceof TFile) {
       let oldFolder;
+      // sync folder name with note
       if (
         extname(oldPath) === ".md" &&
         this.settings.folderNotePref !== NoteLoc.Index &&
         this.settings.autoRename &&
-        (oldFolder = findFolderFromNote(this.plugin, oldPath)) &&
+        (oldFolder = this.finder.getFolderFromNote(oldPath)) &&
         dirname(af.path) === dirname(oldPath)
       ) {
         // rename only
-        this.fileRename(
-          oldFolder,
-          join(getParentPath(oldFolder.path), af.basename),
-        );
+        this.fileRename(oldFolder, getRenamedPath(oldFolder, af.basename));
       } else if (af.extension === "md") {
         // check if new location contains matched folder
-        const newFolder = findFolderFromNote(this.plugin, af);
+        const newFolder = this.finder.getFolderFromNote(af);
         if (this.settings.hideNoteInExplorer)
-          this.setupHide(af, this.fileExplorer.fileItems, !Boolean(newFolder));
+          this.setupHide(af, !Boolean(newFolder));
       }
     }
   };
@@ -146,14 +138,12 @@ export class VaultHandler {
       if (
         this.settings.hideNoteInExplorer &&
         this.settings.folderNotePref === NoteLoc.Outside &&
-        (oldNote = getFolderNote(this.plugin, af))
+        (oldNote = this.finder.getFolderNote(af))
       )
-        if (this.fileExplorer) {
-          if (this.settings.deleteOutsideNoteWithFolder) {
-            this.fileDelete(oldNote);
-            new Notice(`Folder note ${oldNote.basename} deleted`);
-          } else this.setupHide(oldNote, this.fileExplorer.fileItems, true);
-        } else console.error("missing fileExplorer");
+        if (this.settings.deleteOutsideNoteWithFolder) {
+          this.fileDelete(oldNote);
+          new Notice(`Folder note ${oldNote.basename} deleted`);
+        } else this.setupHide(oldNote, true);
     }
   };
 }
