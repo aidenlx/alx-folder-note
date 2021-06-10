@@ -8,13 +8,12 @@ import {
   TFile,
   TFolder,
 } from "obsidian";
-import { join } from "path";
 
 import {
   findFolderFromNote,
   findFolderNote,
-  getAbstractFolderNote,
   getFolderNote,
+  getFolderNotePath,
 } from "./find";
 
 /** Add Make doc folder note and delete linked folder command */
@@ -93,14 +92,8 @@ export const AddOptionsForNote = (plugin: ALxFolderNote) => {
                 .setIcon("link")
                 .setTitle("Link to Parent Folder")
                 .onClick(() => {
-                  const { findIn, noteBaseName } = getAbstractFolderNote(
-                    plugin,
-                    af.parent,
-                  );
-                  plugin.app.vault.rename(
-                    af,
-                    join(findIn, noteBaseName + ".md"),
-                  );
+                  const { path } = getFolderNotePath(plugin, af.parent);
+                  plugin.app.vault.rename(af, path);
                 }),
             );
         } else if (source !== "link-context-menu") {
@@ -120,8 +113,8 @@ export const AddOptionsForNote = (plugin: ALxFolderNote) => {
 
 export const AddOptionsForFolder = (plugin: ALxFolderNote) => {
   const addItem = (af: TFolder, menu: Menu) => {
-    const { findIn, noteBaseName } = getAbstractFolderNote(plugin, af);
-    const noteResult = findFolderNote(plugin, findIn, noteBaseName);
+    const { info, path } = getFolderNotePath(plugin, af);
+    const noteResult = findFolderNote(plugin, ...info);
     if (noteResult)
       menu.addItem((item) =>
         item
@@ -135,10 +128,7 @@ export const AddOptionsForFolder = (plugin: ALxFolderNote) => {
           .setIcon("create-new")
           .setTitle("Create Folder Note")
           .onClick(() =>
-            plugin.app.vault.create(
-              join(findIn, noteBaseName + ".md"),
-              plugin.getNewFolderNote(af),
-            ),
+            plugin.app.vault.create(path, plugin.getNewFolderNote(af)),
           ),
       );
   };

@@ -16,15 +16,15 @@ export const getFolderNote = (
     | [plugin: ALxFolderNote, folder: TFolder]
 ): TFile | null => {
   const [plugin] = args;
-  let r;
+  let result;
   if (typeof args[1] === "string" && args[2]) {
     const [, path, folder] = args;
-    r = getAbstractFolderNote(plugin, path, folder);
+    result = getFolderNotePath(plugin, path, folder).info;
   } else if (typeof args[1] !== "string") {
     const [, folder] = args;
-    r = getAbstractFolderNote(plugin, folder);
+    result = getFolderNotePath(plugin, folder).info;
   } else throw new TypeError("Invaild Arguments");
-  return findFolderNote(plugin, r.findIn, r.noteBaseName);
+  return findFolderNote(plugin, ...result);
 };
 
 export const findFolderNote = (
@@ -115,14 +115,15 @@ export const findFolderFromNote = (
   else return null;
 };
 
-export const getAbstractFolderNote = (
+type folderNotePath = {
+  info: [findIn: string, noteBaseName: string];
+  path: string;
+};
+export const getFolderNotePath = (
   ...args:
     | [plugin: ALxFolderNote, path: string, folder: TFolder]
     | [plugin: ALxFolderNote, folder: TFolder]
-): {
-  findIn: string;
-  noteBaseName: string;
-} => {
+): folderNotePath => {
   const [plugin, src, baseFolder] = args;
   const getParent = (): string => {
     if (typeof src === "string") {
@@ -167,5 +168,8 @@ export const getAbstractFolderNote = (
     default:
       assertNever(folderNoteLoc);
   }
-  return { findIn, noteBaseName };
+  return {
+    info: [findIn, noteBaseName],
+    path: join(findIn, noteBaseName + ".md"),
+  };
 };

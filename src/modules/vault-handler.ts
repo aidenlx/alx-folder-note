@@ -13,8 +13,8 @@ import { dirname, extname, join } from "path-browserify";
 import { setupClick, setupHide } from "../note-handler";
 import {
   findFolderFromNote,
-  getAbstractFolderNote,
   getFolderNote,
+  getFolderNotePath,
   getParentPath,
 } from "./find";
 export class VaultHandler {
@@ -113,8 +113,8 @@ export class VaultHandler {
         !newNote &&
         oldNote
       ) {
-        const { findIn, noteBaseName } = getAbstractFolderNote(this.plugin, af);
-        this.fileRename(oldNote, join(findIn, noteBaseName + ".md"));
+        const { path } = getFolderNotePath(this.plugin, af);
+        this.fileRename(oldNote, path);
         if (this.settings.hideNoteInExplorer)
           this.setupHide(oldNote, fileExplorer.fileItems);
       }
