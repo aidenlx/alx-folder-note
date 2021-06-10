@@ -56,7 +56,6 @@ export class ALxFolderNoteSettingTab extends PluginSettingTab {
           .setValue(this.plugin.settings.deleteOutsideNoteWithFolder)
           .onChange(async (value) => {
             this.plugin.settings.deleteOutsideNoteWithFolder = value;
-            hideAll(this.plugin, !value);
             await this.plugin.saveSettings();
           }),
       );
