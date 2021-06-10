@@ -4,14 +4,7 @@ import {
   findFolderNote,
   getFolderPath,
 } from "modules/find";
-import {
-  FileExplorer,
-  MarkdownView,
-  Notice,
-  Plugin,
-  TFile,
-  TFolder,
-} from "obsidian";
+import { FileExplorer, Notice, Plugin, TFile, TFolder } from "obsidian";
 import {
   ALxFolderNoteSettings,
   DEFAULT_SETTINGS,
@@ -22,6 +15,7 @@ import { onCreate, onDelete, onRename } from "modules/vault-handler";
 import { NoteLoc } from "misc";
 import { join } from "path-browserify";
 import assertNever from "assert-never";
+import { AddOptionsForNote, AddOptionsForFolder } from "modules/commands";
 
 export default class ALxFolderNote extends Plugin {
   settings: ALxFolderNoteSettings = DEFAULT_SETTINGS;
@@ -41,6 +35,11 @@ export default class ALxFolderNote extends Plugin {
     return findFolderNote(this, findIn, noteBaseName);
   }
 
+  getNewFolderNote = (folder: TFolder): string =>
+    this.settings.folderNoteTemplate
+      .replace(/{{FOLDER_NAME}}/g, folder.name)
+      .replace(/{{FOLDER_PATH}}/g, folder.path);
+
   registerVaultEvent() {
     // attach events on new folder
     this.registerEvent(this.app.vault.on("create", onCreate.bind(this)));
@@ -56,19 +55,8 @@ export default class ALxFolderNote extends Plugin {
 
     this.addSettingTab(new ALxFolderNoteSettingTab(this.app, this));
 
-    this.addCommand({
-      id: "create-folder-for-note",
-      name: "Make current document folder note",
-      checkCallback: (checking) => {
-        const view = this.app.workspace.activeLeaf.view as MarkdownView;
-        if (checking) {
-          return view instanceof MarkdownView;
-        } else {
-          this.createFolderForNote(view.file);
-        }
-      },
-      hotkeys: [],
-    });
+    AddOptionsForNote(this);
+    AddOptionsForFolder(this);
     this.app.workspace.onLayoutReady(this.initialize);
   }
 

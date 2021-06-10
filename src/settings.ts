@@ -5,6 +5,7 @@ import { PluginSettingTab, App, Setting, Modifier, debounce } from "obsidian";
 
 export interface ALxFolderNoteSettings {
   folderNotePref: NoteLoc;
+  deleteOutsideNoteWithFolder: boolean;
   indexName: string;
   modifierForNewNote: Modifier;
   hideNoteInExplorer: boolean;
@@ -14,6 +15,7 @@ export interface ALxFolderNoteSettings {
 
 export const DEFAULT_SETTINGS: ALxFolderNoteSettings = {
   folderNotePref: NoteLoc.Inside,
+  deleteOutsideNoteWithFolder: true,
   indexName: "_about_",
   modifierForNewNote: "Meta",
   hideNoteInExplorer: true,
@@ -36,11 +38,28 @@ export class ALxFolderNoteSettingTab extends PluginSettingTab {
     this.setNoteLoc();
     if (this.plugin.settings.folderNotePref === NoteLoc.Index)
       this.setIndexName();
+    else if (this.plugin.settings.folderNotePref === NoteLoc.Outside)
+      this.setDeleteWithFolder();
     this.setTemplate();
     this.setModifier();
     this.setHide();
     if (this.plugin.settings.folderNotePref !== NoteLoc.Index)
       this.setAutoRename();
+  }
+
+  setDeleteWithFolder() {
+    new Setting(this.containerEl)
+      .setName("Delete Outside Note with Folder")
+      .setDesc("Delete folder note outside when folder is deleted")
+      .addToggle((toggle) =>
+        toggle
+          .setValue(this.plugin.settings.deleteOutsideNoteWithFolder)
+          .onChange(async (value) => {
+            this.plugin.settings.deleteOutsideNoteWithFolder = value;
+            hideAll(this.plugin, !value);
+            await this.plugin.saveSettings();
+          }),
+      );
   }
 
   setNoteLoc() {

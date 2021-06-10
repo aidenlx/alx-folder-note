@@ -1,9 +1,8 @@
 import ALxFolderNote from "main";
 import { afItemMark, isFolder, iterateItems } from "misc";
 import { clickHandler } from "modules/click-handler";
+import { PatchRevealInExplorer } from "modules/commands";
 import { TFile, AFItem, FileExplorer } from "obsidian";
-import { around } from "monkey-around";
-import { findFolderFromNote } from "modules/find";
 
 export function setupHide(
   folderNote: TFile | AFItem,
@@ -53,23 +52,7 @@ export function setupClick(
 }
 
 export const initialize = (plugin: ALxFolderNote, revert = false) => {
-  const feInstance =
-    // @ts-ignore
-    plugin.app.internalPlugins.plugins["file-explorer"]?.instance;
-  if (feInstance) {
-    around(feInstance, {
-      revealInFolder(next) {
-        return function (this: any, ...args: any[]) {
-          if (args[0] instanceof TFile && plugin.settings.hideNoteInExplorer) {
-            const findResult = findFolderFromNote(plugin, args[0]);
-            if (findResult) args[0] = findResult;
-          }
-          return next.apply(this, args);
-        };
-      },
-    });
-  }
-
+  PatchRevealInExplorer(plugin);
   const leaves = plugin.app.workspace.getLeavesOfType("file-explorer");
   if (leaves.length > 1) console.error("more then one file-explorer");
   else if (leaves.length < 1) console.error("file-explorer not found");

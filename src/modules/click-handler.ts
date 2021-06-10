@@ -34,7 +34,7 @@ export function clickHandler(this: ALxFolderNote, evt: MouseEvent) {
       if (createNew && !folderNote) {
         folderNote = await this.app.vault.create(
           join(findIn, noteBaseName + ".md"),
-          getNewFolderNote(this.settings.folderNoteTemplate, folder),
+          this.getNewFolderNote(folder),
         );
       }
 
@@ -62,10 +62,4 @@ export function clickHandler(this: ALxFolderNote, evt: MouseEvent) {
       console.error(e);
       if (evt.type === "click") titleEl.click();
     });
-}
-
-function getNewFolderNote(template: string, folder: TFolder): string {
-  return template
-    .replace(/{{FOLDER_NAME}}/g, folder.name)
-    .replace(/{{FOLDER_PATH}}/g, folder.path);
 }
