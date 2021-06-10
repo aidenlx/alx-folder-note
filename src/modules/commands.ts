@@ -41,7 +41,7 @@ export const AddOptionsForNote = (plugin: ALxFolderNote) => {
   });
   plugin.addCommand({
     id: "delete-with-linked-folder",
-    name: "Delete foler note with linked folder",
+    name: "Delete note and linked folder",
     checkCallback: (checking) => {
       const view = plugin.app.workspace.activeLeaf.view as MarkdownView;
       const folderResult =
@@ -89,7 +89,7 @@ export const AddOptionsForNote = (plugin: ALxFolderNote) => {
           menu.addItem((item) =>
             item
               .setIcon("trash")
-              .setTitle("Delete Note with Linked Folder")
+              .setTitle("Delete Note and Linked Folder")
               .onClick(() => {
                 new DeleteWarning(plugin, af, folderResult).open();
               }),
