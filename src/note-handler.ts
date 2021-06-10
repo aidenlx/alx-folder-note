@@ -1,15 +1,14 @@
 import ALxFolderNote from "main";
 import { afItemMark, isFolder, iterateItems } from "misc";
 import { clickHandler } from "modules/click-handler";
-import { PatchRevealInExplorer } from "modules/commands";
 import { getFolderNote } from "modules/find";
 import { AFItem, FileExplorer, TFile } from "obsidian";
 
-export function setupHide(
+export const setupHide = (
   folderNote: TFile | AFItem,
   list: FileExplorer["fileItems"],
   revert = false,
-) {
+) => {
   if (!folderNote) return;
 
   let item: afItemMark;
@@ -23,16 +22,16 @@ export function setupHide(
     item.titleEl.style.display = "";
     item.isFolderNote = undefined;
   }
-}
+};
 
 /**
  * @param revert when revert is true, set item.evtDone to undefined
  */
-export function setupClick(
+export const setupClick = (
   afItem: AFItem,
   plugin: ALxFolderNote,
   revert = false,
-) {
+) => {
   const item = afItem as afItemMark;
   if (isFolder(item)) {
     if (revert) {
@@ -50,9 +49,9 @@ export function setupClick(
       item.evtDone = true;
     }
   }
-}
+};
 
-export function hideAll(plugin: ALxFolderNote, revert = false) {
+export const hideAll = (plugin: ALxFolderNote, revert = false) => {
   if (!plugin.fileExplorer) throw new Error("fileExplorer Missing");
   const items = plugin.fileExplorer.fileItems;
   iterateItems(items, (item: AFItem) => {
@@ -65,4 +64,4 @@ export function hideAll(plugin: ALxFolderNote, revert = false) {
       setupHide(item, items, true);
     }
   });
-}
+};

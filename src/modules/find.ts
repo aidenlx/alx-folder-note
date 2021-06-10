@@ -27,11 +27,11 @@ export const getFolderNote = (
   return findFolderNote(plugin, r.findIn, r.noteBaseName);
 };
 
-export function findFolderNote(
+export const findFolderNote = (
   plugin: ALxFolderNote,
   findIn: string,
   noteBaseName: string,
-): TFile | null {
+): TFile | null => {
   const findInFolder = plugin.app.vault.getAbstractFileByPath(findIn);
   if (findInFolder && findInFolder instanceof TFolder) {
     const found = findInFolder.children.find(
@@ -42,9 +42,9 @@ export function findFolderNote(
     );
     return (found as TFile) ?? null;
   } else return null;
-}
+};
 
-function getParent(path: string, plugin: ALxFolderNote): TFolder | null {
+const getParent = (path: string, plugin: ALxFolderNote): TFolder | null => {
   try {
     return (
       (plugin.app.vault.getAbstractFileByPath(
@@ -55,9 +55,9 @@ function getParent(path: string, plugin: ALxFolderNote): TFolder | null {
     console.error(error);
     return null;
   }
-}
+};
 
-function getFileInfo(note: TFile | string) {
+const getFileInfo = (note: TFile | string) => {
   let parent: string, base: string;
   if (note instanceof TFile) {
     base = note.basename;
@@ -67,13 +67,13 @@ function getFileInfo(note: TFile | string) {
     parent = getParentPath(note);
   }
   return { base, parent };
-}
+};
 
-export function getFolderPath(
+export const getFolderPath = (
   plugin: ALxFolderNote,
   note: TFile | string,
   newFolder = false,
-): string {
+): string => {
   const { parent, base } = getFileInfo(note);
   const getSiblingFolder = () => {
     if (parent === "/") return base;
@@ -89,12 +89,12 @@ export function getFolderPath(
     default:
       assertNever(plugin.settings.folderNotePref);
   }
-}
+};
 
-export function findFolderFromNote(
+export const findFolderFromNote = (
   plugin: ALxFolderNote,
   note: TFile | string,
-): TFolder | null {
+): TFolder | null => {
   const { parent, base } = getFileInfo(note);
   // check if folder note name vaild
   switch (plugin.settings.folderNotePref) {
@@ -113,31 +113,17 @@ export function findFolderFromNote(
   if (path)
     return (plugin.app.vault.getAbstractFileByPath(path) as TFolder) ?? null;
   else return null;
-}
+};
 
-export function getAbstractFolderNote(
-  plugin: ALxFolderNote,
-  path: string,
-  folder: TFolder,
+export const getAbstractFolderNote = (
+  ...args:
+    | [plugin: ALxFolderNote, path: string, folder: TFolder]
+    | [plugin: ALxFolderNote, folder: TFolder]
 ): {
   findIn: string;
   noteBaseName: string;
-};
-export function getAbstractFolderNote(
-  plugin: ALxFolderNote,
-  folder: TFolder,
-): {
-  findIn: string;
-  noteBaseName: string;
-};
-export function getAbstractFolderNote(
-  plugin: ALxFolderNote,
-  src: TFolder | string,
-  baseFolder?: TFolder,
-): {
-  findIn: string;
-  noteBaseName: string;
-} {
+} => {
+  const [plugin, src, baseFolder] = args;
   const getParent = (): string => {
     if (typeof src === "string") {
       return getParentPath(src);
@@ -182,4 +168,4 @@ export function getAbstractFolderNote(
       assertNever(folderNoteLoc);
   }
   return { findIn, noteBaseName };
-}
+};

@@ -14,17 +14,17 @@ export enum NoteLoc {
   Outside,
 }
 
-export function iterateItems(
+export const iterateItems = (
   items: FileExplorer["fileItems"],
   callback: (item: AFItem) => any,
-): void {
+): void => {
   for (const key in items) {
     if (!Object.prototype.hasOwnProperty.call(items, key)) continue;
     callback(items[key]);
   }
-}
+};
 
-export function isModifier(evt: MouseEvent, pref: Modifier): boolean {
+export const isModifier = (evt: MouseEvent, pref: Modifier): boolean => {
   const { altKey, metaKey, ctrlKey, shiftKey } = evt;
   switch (pref) {
     case "Mod":
@@ -40,4 +40,4 @@ export function isModifier(evt: MouseEvent, pref: Modifier): boolean {
     default:
       assertNever(pref);
   }
-}
+};

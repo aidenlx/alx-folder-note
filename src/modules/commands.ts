@@ -140,7 +140,7 @@ export const PatchRevealInExplorer = (plugin: ALxFolderNote) => {
     plugin.app.internalPlugins.plugins["file-explorer"]?.instance;
   if (feInstance) {
     around(feInstance, {
-      revealInFolder(next) {
+      revealInFolder: (next) => {
         return function (this: any, ...args: any[]) {
           if (args[0] instanceof TFile && plugin.settings.hideNoteInExplorer) {
             const findResult = findFolderFromNote(plugin, args[0]);
