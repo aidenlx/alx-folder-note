@@ -3,6 +3,7 @@ import { afItemMark, isFolder, iterateItems } from "misc";
 import { clickHandler } from "modules/click-handler";
 import { PatchRevealInExplorer } from "modules/commands";
 import { TFile, AFItem, FileExplorer } from "obsidian";
+import { getFolderNote } from "modules/find";
 
 export function setupHide(
   folderNote: TFile | AFItem,
@@ -51,33 +52,13 @@ export function setupClick(
   }
 }
 
-export const initialize = (plugin: ALxFolderNote, revert = false) => {
-  PatchRevealInExplorer(plugin);
-  const leaves = plugin.app.workspace.getLeavesOfType("file-explorer");
-  if (leaves.length > 1) console.error("more then one file-explorer");
-  else if (leaves.length < 1) console.error("file-explorer not found");
-  else {
-    const fileExplorer =
-      plugin.fileExplorer ?? (leaves[0].view as FileExplorer);
-    plugin.fileExplorer = fileExplorer;
-    if (!revert) plugin.registerVaultEvent();
-    // get all AbstractFile (file+folder) and attach event
-    iterateItems(fileExplorer.fileItems, (item: AFItem) => {
-      if (isFolder(item)) {
-        setupClick(item, plugin, revert);
-      }
-    });
-    if (plugin.settings.hideNoteInExplorer) hideAll(plugin, revert);
-  }
-};
-
 export function hideAll(plugin: ALxFolderNote, revert = false) {
   if (!plugin.fileExplorer) throw new Error("fileExplorer Missing");
   const items = plugin.fileExplorer.fileItems;
   iterateItems(items, (item: AFItem) => {
     if (isFolder(item)) {
       if (!revert) {
-        const note = plugin.getFolderNote(item.file);
+        const note = getFolderNote(plugin, item.file);
         if (note) setupHide(note, items);
       }
     } else if (revert) {

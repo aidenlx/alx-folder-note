@@ -1,52 +1,52 @@
-import { initialize } from "note-handler";
-import {
-  getAbstractFolderNote,
-  findFolderNote,
-  getFolderPath,
-} from "modules/find";
-import { FileExplorer, Notice, Plugin, TFile, TFolder } from "obsidian";
+import { getFolderPath } from "modules/find";
+import { AFItem, FileExplorer, Notice, Plugin, TFile, TFolder } from "obsidian";
 import {
   ALxFolderNoteSettings,
   DEFAULT_SETTINGS,
   ALxFolderNoteSettingTab,
 } from "settings";
 import "./styles/main.css";
-import { onCreate, onDelete, onRename } from "modules/vault-handler";
-import { NoteLoc } from "misc";
+import { VaultHandler } from "modules/vault-handler";
+import { isFolder, iterateItems, NoteLoc } from "misc";
 import { join } from "path-browserify";
 import assertNever from "assert-never";
-import { AddOptionsForNote, AddOptionsForFolder } from "modules/commands";
+import {
+  AddOptionsForNote,
+  AddOptionsForFolder,
+  PatchRevealInExplorer,
+} from "modules/commands";
+import { setupClick, hideAll } from "note-handler";
 
 export default class ALxFolderNote extends Plugin {
   settings: ALxFolderNoteSettings = DEFAULT_SETTINGS;
   fileExplorer?: FileExplorer;
 
-  initialize = (revert = false) => initialize(this, revert);
+  initialize = (revert = false) => {
+    PatchRevealInExplorer(this);
+    const leaves = this.app.workspace.getLeavesOfType("file-explorer");
+    if (leaves.length > 1) console.error("more then one file-explorer");
+    else if (leaves.length < 1) console.error("file-explorer not found");
+    else {
+      const fileExplorer =
+        this.fileExplorer ?? (leaves[0].view as FileExplorer);
+      this.fileExplorer = fileExplorer;
+      if (!revert) this.vaultHandler.registerEvent();
+      // get all AbstractFile (file+folder) and attach event
+      iterateItems(fileExplorer.fileItems, (item: AFItem) => {
+        if (isFolder(item)) {
+          setupClick(item, this, revert);
+        }
+      });
+      if (this.settings.hideNoteInExplorer) hideAll(this, revert);
+    }
+  };
 
-  getFolderNote(path: string, folder: TFolder): TFile | null;
-  getFolderNote(folder: TFolder): TFile | null;
-  getFolderNote(src: TFolder | string, baseFolder?: TFolder): TFile | null {
-    const { findIn, noteBaseName } = getAbstractFolderNote(
-      this,
-      // @ts-ignore
-      src,
-      baseFolder,
-    );
-    return findFolderNote(this, findIn, noteBaseName);
-  }
+  vaultHandler = new VaultHandler(this);
 
   getNewFolderNote = (folder: TFolder): string =>
     this.settings.folderNoteTemplate
       .replace(/{{FOLDER_NAME}}/g, folder.name)
       .replace(/{{FOLDER_PATH}}/g, folder.path);
-
-  registerVaultEvent() {
-    // attach events on new folder
-    this.registerEvent(this.app.vault.on("create", onCreate.bind(this)));
-    // include mv and rename
-    this.registerEvent(this.app.vault.on("rename", onRename.bind(this)));
-    this.registerEvent(this.app.vault.on("delete", onDelete.bind(this)));
-  }
 
   async onload() {
     console.log("loading alx-folder-note");

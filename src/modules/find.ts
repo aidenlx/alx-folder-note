@@ -10,6 +10,23 @@ export const getParentPath = (src: string) => {
   else return path;
 };
 
+export const getFolderNote = (
+  ...args:
+    | [plugin: ALxFolderNote, path: string, folder: TFolder]
+    | [plugin: ALxFolderNote, folder: TFolder]
+): TFile | null => {
+  const [plugin] = args;
+  let r;
+  if (typeof args[1] === "string" && args[2]) {
+    const [, path, folder] = args;
+    r = getAbstractFolderNote(plugin, path, folder);
+  } else if (typeof args[1] !== "string") {
+    const [, folder] = args;
+    r = getAbstractFolderNote(plugin, folder);
+  } else throw new TypeError("Invaild Arguments");
+  return findFolderNote(plugin, r.findIn, r.noteBaseName);
+};
+
 export function findFolderNote(
   plugin: ALxFolderNote,
   findIn: string,
