@@ -69,12 +69,7 @@ export default class ALxFolderNote extends Plugin {
       },
       hotkeys: [],
     });
-
-    if (this.app.workspace.layoutReady) this.initialize();
-    else
-      this.registerEvent(
-        this.app.workspace.on("layout-ready", this.initialize),
-      );
+    this.app.workspace.onLayoutReady(this.initialize);
   }
 
   onunload() {
