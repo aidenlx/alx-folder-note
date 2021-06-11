@@ -2,3 +2,17 @@
   background-color: var(--background-modifier-error);
   color: var(--text-on-accent);
 }
+
+body:not(.alx-no-hide-note) .nav-file.alx-folder-note > .nav-file-title {
+  display: none;
+}
+
+.nav-folder.alx-folder-with-note
+  > .nav-folder-title
+  > .nav-folder-title-content {
+  /* color: var(--text-accent); */
+  text-decoration-line: underline;
+  text-decoration-color: var(--text-faint);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 1px;
+}

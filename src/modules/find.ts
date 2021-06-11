@@ -1,6 +1,6 @@
 import assertNever from "assert-never";
 import ALxFolderNote from "main";
-import { getParentPath, NoteLoc } from "misc";
+import { getParentPath, isMd, NoteLoc } from "misc";
 import { Notice, TFile, TFolder } from "obsidian";
 import { basename, join, parse } from "path-browserify";
 
@@ -87,6 +87,7 @@ export default class NoteFinder {
   };
 
   getFolderFromNote = (note: TFile | string): TFolder | null => {
+    if (!isMd(note)) return null;
     const { parent, base } = getFileInfo(note);
     // check if folder note name vaild
     switch (this.settings.folderNotePref) {

@@ -1,11 +1,25 @@
 import assertNever from "assert-never";
-import { AFItem, FolderItem, Modifier, TAbstractFile, TFolder } from "obsidian";
-import { dirname, join } from "path-browserify";
+import {
+  AFItem,
+  FolderItem,
+  Modifier,
+  TAbstractFile,
+  TFile,
+  TFolder,
+} from "obsidian";
+import { dirname, extname, join } from "path-browserify";
 
-export type afItemMark = AFItem & { evtDone?: true; isFolderNote?: true };
+export type afItemMark = AFItem & {
+  evtDone?: true;
+  isFolderNote?: true;
+  isFolderWithNote?: true;
+};
 
 export const isFolder = (item: AFItem): item is FolderItem =>
   (item as FolderItem).file instanceof TFolder;
+
+export const isMd = (file: TFile | string) =>
+  typeof file === "string" ? extname(file) === ".md" : file.extension === "md";
 
 export const isMac = () => navigator.userAgent.includes("Macintosh");
 

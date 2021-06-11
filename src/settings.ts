@@ -3,6 +3,8 @@ import { isMac, NoteLoc } from "misc";
 import FEHandler from "modules/fe-handler";
 import { App, debounce, Modifier, PluginSettingTab, Setting } from "obsidian";
 
+export const noHideMark = "alx-no-hide-note";
+
 export interface ALxFolderNoteSettings {
   folderNotePref: NoteLoc;
   deleteOutsideNoteWithFolder: boolean;
@@ -34,6 +36,13 @@ export class ALxFolderNoteSettingTab extends PluginSettingTab {
   constructor(app: App, plugin: ALxFolderNote) {
     super(app, plugin);
     this.plugin = plugin;
+  }
+
+  updateMark() {
+    this.feHandler.markAll(true);
+    window.setTimeout(() => {
+      this.feHandler.markAll();
+    }, 200);
   }
 
   display(): void {
@@ -82,12 +91,7 @@ export class ALxFolderNoteSettingTab extends PluginSettingTab {
           .setValue(this.plugin.settings.folderNotePref.toString())
           .onChange(async (value: string) => {
             this.plugin.settings.folderNotePref = +value;
-            if (this.plugin.settings.hideNoteInExplorer) {
-              this.feHandler.hideAll(true);
-              window.setTimeout(() => {
-                this.feHandler.hideAll();
-              }, 200);
-            }
+            this.updateMark();
             await this.plugin.saveSettings();
             this.display();
           });
@@ -100,10 +104,7 @@ export class ALxFolderNoteSettingTab extends PluginSettingTab {
       .addText((text) => {
         const onChange = async (value: string) => {
           this.plugin.settings.indexName = value;
-          this.feHandler.hideAll(true);
-          window.setTimeout(() => {
-            this.feHandler.hideAll();
-          }, 200);
+          this.updateMark();
           await this.plugin.saveSettings();
         };
         text
@@ -175,15 +176,15 @@ export class ALxFolderNoteSettingTab extends PluginSettingTab {
           .setValue(this.plugin.settings.hideNoteInExplorer)
           .onChange(async (value) => {
             this.plugin.settings.hideNoteInExplorer = value;
-            this.feHandler.hideAll(!value);
+            document.body.toggleClass(noHideMark, !value);
             await this.plugin.saveSettings();
           }),
       );
   }
   setAutoRename() {
     new Setting(this.containerEl)
-      .setName("Auto Rename")
-      .setDesc("Keep folder note and folder in sync")
+      .setName("Auto Sync")
+      .setDesc("Keep name and location of folder note and folder in sync")
       .addToggle((toggle) => {
         toggle.setValue(this.plugin.settings.autoRename);
         toggle.onChange(async (value) => {

@@ -1,6 +1,9 @@
 import ALxFolderNote from "main";
 import { afItemMark, isFolder } from "misc";
-import { AFItem, FileExplorer, TFile } from "obsidian";
+import { AFItem, FileExplorer, TAbstractFile, TFile, TFolder } from "obsidian";
+
+const folderNoteClass = "alx-folder-note";
+const folderClass = "alx-folder-with-note";
 
 /** File Explorer Handler */
 export default class FEHandler {
@@ -17,29 +20,33 @@ export default class FEHandler {
     this.fileExplorer = explorer;
   }
 
-  setupHide = (folderNote: TFile | AFItem, revert = false) => {
-    if (!folderNote) return;
-    const list = this.fileExplorer.fileItems;
-    let item: afItemMark;
-    if (folderNote instanceof TFile) item = list[folderNote.path] as afItemMark;
-    else item = folderNote as afItemMark;
+  setMark = (target: AFItem | TAbstractFile, revert = false) => {
+    if (!target) return;
+    let item: afItemMark | null;
+    if (target instanceof TAbstractFile) item = this.getAfItem(target.path);
+    else item = target as afItemMark;
 
-    if (!revert && !item.isFolderNote) {
-      item.titleEl.style.display = "none";
-      item.isFolderNote = true;
-    } else if (revert && item.isFolderNote) {
-      item.titleEl.style.display = "";
-      item.isFolderNote = undefined;
+    if (!item) {
+      console.error("no afitem found for file %o", target);
+      return;
+    }
+
+    if (isFolder(item) && revert === !!item.isFolderWithNote) {
+      item.el.toggleClass(folderClass, !revert);
+      item.isFolderWithNote = revert ? undefined : true;
+    } else if (revert === !!item.isFolderNote) {
+      item.el.toggleClass(folderNoteClass, !revert);
+      item.isFolderNote = revert ? undefined : true;
     }
   };
 
-  getAfItem = (path: string): AFItem | null =>
+  getAfItem = (path: string): afItemMark | null =>
     this.fileExplorer.fileItems[path] ?? null;
 
   /**
    * @param revert when revert is true, set item.evtDone to undefined
    */
-  setClickForAfItem = (itemOrPath: AFItem | string, revert = false) => {
+  setClick = (itemOrPath: AFItem | string, revert = false) => {
     const item: afItemMark | null =
       typeof itemOrPath === "string" ? this.getAfItem(itemOrPath) : itemOrPath;
     if (!item) {
@@ -68,17 +75,30 @@ export default class FEHandler {
     }
   };
 
-  hideAll = (revert = false) => {
+  markAll = (revert = false) => {
     this.iterateItems((item: AFItem) => {
-      if (isFolder(item)) {
-        if (!revert) {
-          const note = this.finder.getFolderNote(item.file);
-          if (note) this.setupHide(note);
-        }
+      if (isFolder(item) && !revert) {
+        this.markFolderNote(item.file);
       } else if (revert) {
-        this.setupHide(item, true);
+        this.setMark(item, true);
       }
     });
+  };
+
+  markFolderNote = (af: TAbstractFile): boolean => {
+    const { getFolderNote, getFolderFromNote } = this.finder;
+
+    let found: TAbstractFile | null = null;
+    if (af instanceof TFile) found = getFolderFromNote(af);
+    else if (af instanceof TFolder) found = getFolderNote(af);
+
+    if (found) {
+      this.setMark(found);
+      this.setMark(af);
+    } else {
+      this.setMark(af, true);
+    }
+    return !!found;
   };
 
   iterateItems = (callback: (item: AFItem) => any): void => {

@@ -3,6 +3,7 @@ import { isFolder } from "misc";
 import { PatchRevealInExplorer } from "modules/commands";
 import FEHandler from "modules/fe-handler";
 import { AFItem, FileExplorer } from "obsidian";
+import { noHideMark } from "settings";
 
 export default function initialize(this: ALxFolderNote, revert = false) {
   PatchRevealInExplorer(this);
@@ -14,16 +15,17 @@ export default function initialize(this: ALxFolderNote, revert = false) {
     const feHandler = new FEHandler(this, fileExplorer);
     this.feHandler = feHandler;
     /** get all AbstractFile (file+folder) and attach event */
-    const setupClick = () => {
+    const setupClick = (re: boolean) => {
       feHandler.iterateItems((item: AFItem) => {
         if (isFolder(item)) {
-          feHandler.setClickForAfItem(item, revert);
+          feHandler.setClick(item, re);
         }
       });
     };
 
     if (!revert) this.vaultHandler.registerEvent();
-    setupClick();
-    if (this.settings.hideNoteInExplorer) feHandler.hideAll(revert);
+    setupClick(revert);
+    feHandler.markAll(revert);
+    document.body.toggleClass(noHideMark, !this.settings.hideNoteInExplorer);
   }
 }
