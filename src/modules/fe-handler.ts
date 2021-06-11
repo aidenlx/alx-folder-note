@@ -1,6 +1,13 @@
 import ALxFolderNote from "main";
 import { afItemMark, isFolder } from "misc";
-import { AFItem, FileExplorer, TAbstractFile, TFile, TFolder } from "obsidian";
+import {
+  AFItem,
+  debounce,
+  FileExplorer,
+  TAbstractFile,
+  TFile,
+  TFolder,
+} from "obsidian";
 
 const folderNoteClass = "alx-folder-note";
 const folderClass = "alx-folder-with-note";
@@ -9,6 +16,20 @@ const folderClass = "alx-folder-with-note";
 export default class FEHandler {
   plugin: ALxFolderNote;
   fileExplorer: FileExplorer;
+
+  update = debounce(
+    () => {
+      for (const [path, revert] of this.waitingList) {
+        this.setMarkInternal(path, revert);
+      }
+      this.waitingList.clear();
+    },
+    200,
+    true,
+  );
+
+  waitingList: Map<string, boolean> = new Map();
+
   get finder() {
     return this.plugin.finder;
   }
@@ -20,17 +41,12 @@ export default class FEHandler {
     this.fileExplorer = explorer;
   }
 
-  setMark = (target: AFItem | TAbstractFile, revert = false) => {
-    if (!target) return;
-    let item: afItemMark | null;
-    if (target instanceof TAbstractFile) item = this.getAfItem(target.path);
-    else item = target as afItemMark;
-
+  private setMarkInternal = (path: string, revert: boolean) => {
+    const item = this.getAfItem(path);
     if (!item) {
-      console.error("no afitem found for file %o", target);
+      console.error("no afitem found for path %s", path);
       return;
     }
-
     if (isFolder(item) && revert === !!item.isFolderWithNote) {
       item.el.toggleClass(folderClass, !revert);
       item.isFolderWithNote = revert ? undefined : true;
@@ -38,6 +54,16 @@ export default class FEHandler {
       item.el.toggleClass(folderNoteClass, !revert);
       item.isFolderNote = revert ? undefined : true;
     }
+  };
+
+  setMark = (target: AFItem | TAbstractFile, revert = false) => {
+    if (!target) return;
+    if (target instanceof TAbstractFile) {
+      this.waitingList.set(target.path, revert);
+    } else {
+      this.waitingList.set(target.file.path, revert);
+    }
+    this.update();
   };
 
   getAfItem = (path: string): afItemMark | null =>

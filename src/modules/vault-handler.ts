@@ -41,37 +41,6 @@ export default class VaultHandler {
     this.plugin.registerEvent(this.vault.on("delete", this.onDelete));
   };
 
-  private do = (action: () => void) => {
-    this.waitingList.push(action);
-    this.update();
-  };
-
-  update = debounce(
-    () => {
-      this.waitingList.forEach((action) => action());
-      this.waitingList.length = 0;
-    },
-    200,
-    true,
-  );
-
-  waitingList: Function[] = [];
-  private setClick: warp<FEHandler["setClick"]> = (...args) => {
-    this.do(() => this.feHandler.setClick(...args));
-  };
-  private setMark: warp<FEHandler["setMark"]> = (...args) => {
-    this.do(() => this.feHandler.setMark(...args));
-  };
-  private markFolderNote: warp<FEHandler["markFolderNote"]> = (...args) => {
-    this.do(() => this.feHandler.markFolderNote(...args));
-  };
-  private fileRename: warp<Vault["rename"]> = (...args) => {
-    this.do(() => this.vault.rename(...args));
-  };
-  private fileDelete: warp<Vault["delete"]> = (...args) => {
-    this.do(() => this.vault.delete(...args));
-  };
-
   onCreate = (af: TAbstractFile) => {
     if (!this.feHandler) {
       console.error("no fileExplorer");
@@ -83,26 +52,26 @@ export default class VaultHandler {
         console.error("no afitem found for filepath", af.path);
         return;
       }
-      this.setClick(afItem);
-      this.markFolderNote(af);
+      this.feHandler.setClick(afItem);
+      this.feHandler.markFolderNote(af);
     } else if (af instanceof TFile) {
-      this.markFolderNote(af);
+      this.feHandler.markFolderNote(af);
     }
   };
   onRename = (af: TAbstractFile, oldPath: string) => {
     const { getFolderNote, getFolderFromNote, getFolderNotePath } = this.finder;
 
     if (af instanceof TFolder) {
-      this.setClick(af.path);
+      this.feHandler.setClick(af.path);
       const oldNote = getFolderNote(oldPath, af);
       const newNote = getFolderNote(af);
       // update folder mark
-      this.setMark(af, !newNote);
+      this.feHandler.setMark(af, !newNote);
       // show old note
-      if (oldNote) this.setMark(oldNote, true);
+      if (oldNote) this.feHandler.setMark(oldNote, true);
       // hide new note
       if (newNote) {
-        this.setMark(newNote);
+        this.feHandler.setMark(newNote);
       }
       // sync note name with folder
       if (
@@ -112,8 +81,8 @@ export default class VaultHandler {
         oldNote
       ) {
         const { path } = getFolderNotePath(af);
-        this.fileRename(oldNote, path);
-        this.setMark(oldNote);
+        this.vault.rename(oldNote, path);
+        this.feHandler.setMark(oldNote);
       }
     } else if (af instanceof TFile) {
       const oldFolder = getFolderFromNote(oldPath);
@@ -126,18 +95,18 @@ export default class VaultHandler {
           dirname(af.path) === dirname(oldPath)
         ) {
           // rename only
-          this.fileRename(oldFolder, getRenamedPath(oldFolder, af.basename));
+          this.vault.rename(oldFolder, getRenamedPath(oldFolder, af.basename));
         } else {
-          if (oldFolder) this.setMark(oldFolder, true);
+          if (oldFolder) this.feHandler.setMark(oldFolder, true);
           // check if new location contains matched folder
-          this.markFolderNote(af);
+          this.feHandler.markFolderNote(af);
         }
       } else if (isMd(oldPath) !== isMd(af)) {
         if (isMd(oldPath)) {
           const oldFolder = getFolderFromNote(oldPath);
-          if (oldFolder) this.setMark(oldFolder, true);
+          if (oldFolder) this.feHandler.setMark(oldFolder, true);
         } else {
-          this.markFolderNote(af);
+          this.feHandler.markFolderNote(af);
         }
       }
     }
@@ -151,12 +120,12 @@ export default class VaultHandler {
         (oldNote = getFolderNote(af))
       )
         if (this.settings.deleteOutsideNoteWithFolder) {
-          this.fileDelete(oldNote);
+          this.vault.delete(oldNote);
           new Notice(`Folder note ${oldNote.basename} deleted`);
-        } else this.setMark(oldNote, true);
+        } else this.feHandler.setMark(oldNote, true);
     } else if (af instanceof TFile) {
       const oldFolder = getFolderFromNote(af);
-      if (oldFolder) this.setMark(oldFolder, true);
+      if (oldFolder) this.feHandler.setMark(oldFolder, true);
     }
   };
 }
