@@ -1,3 +1,11 @@
+# [0.6.0](https://github.com/alx-plugins/alx-folder-note/compare/0.5.0...0.6.0) (2021-06-11)
+
+
+### Features
+
+* add underline to folder with note ([faeba8f](https://github.com/alx-plugins/alx-folder-note/commit/faeba8fab9d4ac78d09e83844a19ed8726266418))
+* **commands.ts:** add command to link current note to parent folder ([0fe327d](https://github.com/alx-plugins/alx-folder-note/commit/0fe327dd0421c6cf30676bc072f96b016c0ca1eb))
+
 # [0.5.0](https://github.com/alx-plugins/alx-folder-note/compare/0.4.0...0.5.0) (2021-06-10)
 
 
