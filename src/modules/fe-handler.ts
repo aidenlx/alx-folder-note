@@ -44,7 +44,7 @@ export default class FEHandler {
   private setMarkInternal = (path: string, revert: boolean) => {
     const item = this.getAfItem(path);
     if (!item) {
-      console.error("no afitem found for path %s", path);
+      console.warn("no afitem found for path %s, escaping...", path);
       return;
     }
     if (isFolder(item) && revert === !!item.isFolderWithNote) {
