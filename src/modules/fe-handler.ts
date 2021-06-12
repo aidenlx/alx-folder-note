@@ -72,11 +72,13 @@ export default class FEHandler {
   /**
    * @param revert when revert is true, set item.evtDone to undefined
    */
-  setClick = (itemOrPath: AFItem | string, revert = false) => {
+  setClick = (itemOrFolder: AFItem | TFolder, revert = false) => {
     const item: afItemMark | null =
-      typeof itemOrPath === "string" ? this.getAfItem(itemOrPath) : itemOrPath;
+      itemOrFolder instanceof TFolder
+        ? this.getAfItem(itemOrFolder.path)
+        : itemOrFolder;
     if (!item) {
-      console.error("item not found with path %s", itemOrPath);
+      console.error("item not found with path %s", itemOrFolder);
       return;
     }
     if (isFolder(item)) {
