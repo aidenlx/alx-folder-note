@@ -1,16 +1,24 @@
 import ALxFolderNote from "main";
 import { getRenamedPath, isMd, NoteLoc } from "misc";
 import FEHandler from "modules/fe-handler";
-import { Notice, TAbstractFile, TFile, TFolder } from "obsidian";
+import {
+  FileManager,
+  Notice,
+  TAbstractFile,
+  TFile,
+  TFolder,
+  Vault,
+} from "obsidian";
 import { basename, dirname } from "path-browserify";
 
 export default class VaultHandler {
-  private get vault() {
-    return this.plugin.app.vault;
-  }
-  private get fileManager() {
-    return this.plugin.app.fileManager;
-  }
+  // @ts-ignore
+  private on: Vault["on"] = (...args) => this.plugin.app.vault.on(...args);
+  private delete: Vault["delete"] = (...args) =>
+    this.plugin.app.vault.delete(...args);
+  private rename: FileManager["renameFile"] = (...args) =>
+    this.plugin.app.fileManager.renameFile(...args);
+
   private get feHandler(): FEHandler {
     if (this.plugin.feHandler) return this.plugin.feHandler;
     else throw new Error("Missing feHandler");
@@ -28,9 +36,9 @@ export default class VaultHandler {
   }
 
   registerEvent = () => {
-    this.plugin.registerEvent(this.vault.on("create", this.onChange));
-    this.plugin.registerEvent(this.vault.on("rename", this.onChange));
-    this.plugin.registerEvent(this.vault.on("delete", this.onDelete));
+    this.plugin.registerEvent(this.on("create", this.onChange));
+    this.plugin.registerEvent(this.on("rename", this.onChange));
+    this.plugin.registerEvent(this.on("delete", this.onDelete));
   };
 
   private shouldRename(af: TAbstractFile, oldPath?: string): boolean {
@@ -101,7 +109,7 @@ export default class VaultHandler {
 
       if (this.shouldRename(af, oldPath))
         if (!newExists) {
-          this.fileManager.renameFile(oldLinked, renameTo);
+          this.rename(oldLinked, renameTo);
           return;
         } else {
           const target =
@@ -124,7 +132,7 @@ export default class VaultHandler {
         return;
 
       if (this.settings.deleteOutsideNoteWithFolder) {
-        this.vault.delete(oldNote);
+        this.delete(oldNote);
       } else this.feHandler.setMark(oldNote, true);
     } else if (af instanceof TFile && isMd(af)) {
       const oldFolder = getFolderFromNote(af);

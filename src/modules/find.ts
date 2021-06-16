@@ -31,8 +31,8 @@ export default class NoteFinder {
   private get settings() {
     return this.plugin.settings;
   }
-  private get app() {
-    return this.plugin.app;
+  private get vault() {
+    return this.plugin.app.vault;
   }
 
   // Get Folder from Folder Note
@@ -63,12 +63,13 @@ export default class NoteFinder {
 
   createFolderForNote = async (file: TFile) => {
     const newFolderPath = this.getFolderPath(file, true);
-    const folderExist = await this.app.vault.adapter.exists(newFolderPath);
+    // @ts-ignore
+    const folderExist: boolean = await this.vault.exists(newFolderPath);
     if (folderExist) {
       new Notice("Folder already exists");
       return;
     }
-    await this.app.vault.createFolder(newFolderPath);
+    await this.vault.createFolder(newFolderPath);
     let newNotePath: string | null;
     switch (this.settings.folderNotePref) {
       case NoteLoc.Index:
@@ -83,7 +84,7 @@ export default class NoteFinder {
       default:
         assertNever(this.settings.folderNotePref);
     }
-    if (newNotePath) this.app.vault.rename(file, newNotePath);
+    if (newNotePath) this.vault.rename(file, newNotePath);
   };
 
   getFolderFromNote = (note: TFile | string): TFolder | null => {
@@ -104,7 +105,7 @@ export default class NoteFinder {
     }
     const path = this.getFolderPath(note);
     if (path)
-      return (this.app.vault.getAbstractFileByPath(path) as TFolder) ?? null;
+      return (this.vault.getAbstractFileByPath(path) as TFolder) ?? null;
     else return null;
   };
 
@@ -118,7 +119,7 @@ export default class NoteFinder {
   };
 
   findFolderNote = (findIn: string, noteBaseName: string): TFile | null => {
-    const findInFolder = this.app.vault.getAbstractFileByPath(findIn);
+    const findInFolder = this.vault.getAbstractFileByPath(findIn);
     if (findInFolder && findInFolder instanceof TFolder) {
       const found = findInFolder.children.find(
         (af) =>
@@ -157,8 +158,7 @@ export default class NoteFinder {
       case NoteLoc.Inside:
       case NoteLoc.Outside:
         if (typeof src === "string") noteBaseName = parse(src).name;
-        else
-          noteBaseName = src.name === "/" ? this.app.vault.getName() : src.name;
+        else noteBaseName = src.name === "/" ? this.vault.getName() : src.name;
         break;
       default:
         assertNever(folderNoteLoc);
