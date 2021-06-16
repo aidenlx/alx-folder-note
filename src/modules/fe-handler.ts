@@ -20,7 +20,7 @@ export default class FEHandler {
   update = debounce(
     () => {
       for (const [path, revert] of this.waitingList) {
-        this.setMarkInternal(path, revert);
+        this._setMark(path, revert);
       }
       this.waitingList.clear();
     },
@@ -41,7 +41,7 @@ export default class FEHandler {
     this.fileExplorer = explorer;
   }
 
-  private setMarkInternal = (path: string, revert: boolean) => {
+  private _setMark = (path: string, revert: boolean) => {
     const item = this.getAfItem(path);
     if (!item) {
       console.warn("no afitem found for path %s, escaping...", path);
