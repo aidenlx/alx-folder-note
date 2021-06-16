@@ -8,6 +8,9 @@ export default class VaultHandler {
   private get vault() {
     return this.plugin.app.vault;
   }
+  private get fileManager() {
+    return this.plugin.app.fileManager;
+  }
   private get feHandler(): FEHandler {
     if (this.plugin.feHandler) return this.plugin.feHandler;
     else throw new Error("Missing feHandler");
@@ -98,7 +101,7 @@ export default class VaultHandler {
 
       if (this.shouldRename(af, oldPath))
         if (!newExists) {
-          this.vault.rename(oldLinked, renameTo);
+          this.fileManager.renameFile(oldLinked, renameTo);
           return;
         } else {
           const target =
