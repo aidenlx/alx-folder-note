@@ -9,6 +9,8 @@ import {
   TFolder,
 } from "obsidian";
 
+import getClickHandler from "./click-handler";
+
 const folderNoteClass = "alx-folder-note";
 const folderClass = "alx-folder-with-note";
 
@@ -16,6 +18,13 @@ const folderClass = "alx-folder-with-note";
 export default class FEHandler {
   plugin: ALxFolderNote;
   fileExplorer: FileExplorer;
+  clickHandler: (evt: MouseEvent) => void;
+
+  constructor(plugin: ALxFolderNote, explorer: FileExplorer) {
+    this.plugin = plugin;
+    this.clickHandler = getClickHandler(plugin);
+    this.fileExplorer = explorer;
+  }
 
   update = debounce(
     () => {
@@ -35,10 +44,6 @@ export default class FEHandler {
   }
   get files() {
     return this.fileExplorer.files;
-  }
-  constructor(plugin: ALxFolderNote, explorer: FileExplorer) {
-    this.plugin = plugin;
-    this.fileExplorer = explorer;
   }
 
   private _setMark = (path: string, revert: boolean) => {
@@ -87,16 +92,12 @@ export default class FEHandler {
       } else if (!item.evtDone) {
         const { titleInnerEl } = item;
         // handle regular click
-        this.plugin.registerDomEvent(
-          titleInnerEl,
-          "click",
-          this.plugin.clickHandler,
-        );
+        this.plugin.registerDomEvent(titleInnerEl, "click", this.clickHandler);
         // handle middle click
         this.plugin.registerDomEvent(
           titleInnerEl,
           "auxclick",
-          this.plugin.clickHandler,
+          this.clickHandler,
         );
         item.evtDone = true;
       }

@@ -1,7 +1,6 @@
 import "./styles/main.css";
 
 import initialize from "initialize";
-import getClickHandler from "modules/click-handler";
 import { AddOptionsForFolder, AddOptionsForNote } from "modules/commands";
 import FEHandler from "modules/fe-handler";
 import NoteFinder from "modules/find";
@@ -19,7 +18,6 @@ export default class ALxFolderNote extends Plugin {
   vaultHandler = new VaultHandler(this);
   finder = new NoteFinder(this);
   initialize = initialize.bind(this);
-  clickHandler = getClickHandler(this);
 
   async onload() {
     console.log("loading alx-folder-note");
