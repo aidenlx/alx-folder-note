@@ -138,7 +138,7 @@ export const PatchRevealInExplorer = (plugin: ALxFolderNote) => {
     // @ts-ignore
     plugin.app.internalPlugins.plugins["file-explorer"]?.instance;
   if (feInstance) {
-    around(feInstance, {
+    const remover = around(feInstance, {
       revealInFolder: (next) => {
         return function (this: any, ...args: any[]) {
           if (args[0] instanceof TFile && plugin.settings.hideNoteInExplorer) {
@@ -149,6 +149,7 @@ export const PatchRevealInExplorer = (plugin: ALxFolderNote) => {
         };
       },
     });
+    plugin.register(remover);
   }
 };
 
