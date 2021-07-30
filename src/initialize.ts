@@ -1,4 +1,4 @@
-import ALxFolderNote from "main";
+import ALxFolderNote from "fn-main";
 import { isFolder } from "misc";
 import { PatchRevealInExplorer } from "modules/commands";
 import FEHandler from "modules/fe-handler";

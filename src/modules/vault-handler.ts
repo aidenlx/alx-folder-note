@@ -1,4 +1,4 @@
-import ALxFolderNote from "main";
+import ALxFolderNote from "fn-main";
 import { getRenamedPath, isMd, NoteLoc } from "misc";
 import FEHandler from "modules/fe-handler";
 import {

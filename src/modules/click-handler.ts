@@ -1,4 +1,4 @@
-import ALxFolderNote from "main";
+import ALxFolderNote from "fn-main";
 import { isModifier } from "misc";
 import { TFolder } from "obsidian";
 

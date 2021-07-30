@@ -1,5 +1,5 @@
 import assertNever from "assert-never";
-import ALxFolderNote from "main";
+import ALxFolderNote from "fn-main";
 import { getParentPath, isMd, NoteLoc } from "misc";
 import { Notice, TFile, TFolder } from "obsidian";
 import { basename, join, parse } from "path-browserify";

@@ -1,4 +1,4 @@
-import ALxFolderNote from "main";
+import ALxFolderNote from "fn-main";
 import { around } from "monkey-around";
 import { MarkdownView, Menu, Modal, TFile, TFolder } from "obsidian";
 
