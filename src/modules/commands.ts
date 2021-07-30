@@ -14,21 +14,15 @@ export const AddOptionsForNote = (plugin: ALxFolderNote) => {
   plugin.addCommand({
     id: "make-doc-folder-note",
     name: "Make current document folder note",
-    checkCallback: (checking) => {
-      const view = plugin.app.workspace.activeLeaf.view as MarkdownView;
-      if (checking) {
-        return view instanceof MarkdownView;
-      } else {
-        createFolderForNote(view.file);
-      }
+    editorCallback: (_editor, view) => {
+      createFolderForNote(view.file);
     },
     hotkeys: [],
   });
   plugin.addCommand({
     id: "delete-linked-folder",
     name: "Delete linked folder",
-    checkCallback: (checking) => {
-      const view = plugin.app.workspace.activeLeaf.view as MarkdownView;
+    editorCheckCallback: (checking, _editor, view) => {
       const folderResult =
         view instanceof MarkdownView ? getFolderFromNote(view.file) : null;
       if (checking) {
@@ -42,8 +36,7 @@ export const AddOptionsForNote = (plugin: ALxFolderNote) => {
   plugin.addCommand({
     id: "delete-with-linked-folder",
     name: "Delete note and linked folder",
-    checkCallback: (checking) => {
-      const view = plugin.app.workspace.activeLeaf.view as MarkdownView;
+    editorCheckCallback: (checking, _editor, view) => {
       const folderResult =
         view instanceof MarkdownView ? getFolderFromNote(view.file) : null;
       if (checking) {
@@ -55,7 +48,7 @@ export const AddOptionsForNote = (plugin: ALxFolderNote) => {
     hotkeys: [],
   });
   plugin.registerEvent(
-    plugin.app.workspace.on("file-menu", (menu, af, source, leaf) => {
+    plugin.app.workspace.on("file-menu", (menu, af, source) => {
       if (
         (source === "file-explorer-context-menu" ||
           source === "pane-more-options" ||
