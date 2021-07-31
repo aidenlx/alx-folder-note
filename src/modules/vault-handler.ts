@@ -1,6 +1,3 @@
-import ALxFolderNote from "fn-main";
-import { getRenamedPath, isMd, NoteLoc } from "misc";
-import FEHandler from "modules/fe-handler";
 import {
   FileManager,
   Notice,
@@ -9,7 +6,11 @@ import {
   TFolder,
   Vault,
 } from "obsidian";
-import { basename, dirname } from "path-browserify";
+import { basename, dirname } from "path";
+
+import ALxFolderNote from "../fn-main";
+import { getRenamedPath, isMd, NoteLoc } from "../misc";
+import FEHandler from "../modules/fe-handler";
 
 export default class VaultHandler {
   // @ts-ignore

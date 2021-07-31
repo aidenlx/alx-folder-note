@@ -1,8 +1,9 @@
 import assertNever from "assert-never";
-import ALxFolderNote from "fn-main";
-import { getParentPath, isMd, NoteLoc } from "misc";
 import { Notice, TFile, TFolder } from "obsidian";
-import { basename, join, parse } from "path-browserify";
+import { basename, join, parse } from "path";
+
+import ALxFolderNote from "../fn-main";
+import { getParentPath, isMd, NoteLoc } from "../misc";
 
 const getFileInfo = (
   note: TFile | string,

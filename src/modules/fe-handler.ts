@@ -1,5 +1,3 @@
-import ALxFolderNote from "fn-main";
-import { afItemMark, isFolder } from "misc";
 import {
   AFItem,
   debounce,
@@ -9,6 +7,8 @@ import {
   TFolder,
 } from "obsidian";
 
+import ALxFolderNote from "../fn-main";
+import { afItemMark, isFolder } from "../misc";
 import getClickHandler from "./click-handler";
 
 const folderNoteClass = "alx-folder-note";

@@ -1,16 +1,17 @@
 import "./styles/main.css";
 
-import initialize from "initialize";
-import { AddOptionsForFolder, AddOptionsForNote } from "modules/commands";
-import FEHandler from "modules/fe-handler";
-import NoteFinder from "modules/find";
-import VaultHandler from "modules/vault-handler";
 import { Plugin, TFolder } from "obsidian";
+
+import initialize from "./initialize";
+import { AddOptionsForFolder, AddOptionsForNote } from "./modules/commands";
+import FEHandler from "./modules/fe-handler";
+import NoteFinder from "./modules/find";
+import VaultHandler from "./modules/vault-handler";
 import {
   ALxFolderNoteSettings,
   ALxFolderNoteSettingTab,
   DEFAULT_SETTINGS,
-} from "settings";
+} from "./settings";
 
 export default class ALxFolderNote extends Plugin {
   settings: ALxFolderNoteSettings = DEFAULT_SETTINGS;

@@ -7,7 +7,7 @@ import {
   TFile,
   TFolder,
 } from "obsidian";
-import { dirname, extname, join } from "path-browserify";
+import { dirname, extname, join } from "path";
 
 export type afItemMark = AFItem & {
   evtDone?: true;

@@ -1,9 +1,10 @@
-import ALxFolderNote from "fn-main";
-import { isFolder } from "misc";
-import { PatchRevealInExplorer } from "modules/commands";
-import FEHandler from "modules/fe-handler";
 import { AFItem, FileExplorer } from "obsidian";
-import { noHideMark } from "settings";
+
+import ALxFolderNote from "./fn-main";
+import { isFolder } from "./misc";
+import { PatchRevealInExplorer } from "./modules/commands";
+import FEHandler from "./modules/fe-handler";
+import { noHideMark } from "./settings";
 
 export default function initialize(this: ALxFolderNote, revert = false) {
   PatchRevealInExplorer(this);

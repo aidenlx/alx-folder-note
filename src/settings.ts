@@ -1,7 +1,8 @@
-import ALxFolderNote from "fn-main";
-import { isMac, NoteLoc } from "misc";
-import FEHandler from "modules/fe-handler";
 import { App, debounce, Modifier, PluginSettingTab, Setting } from "obsidian";
+
+import ALxFolderNote from "./fn-main";
+import { isMac, NoteLoc } from "./misc";
+import FEHandler from "./modules/fe-handler";
 
 export const noHideMark = "alx-no-hide-note";
 

@@ -1,6 +1,7 @@
-import ALxFolderNote from "fn-main";
 import { around } from "monkey-around";
 import { MarkdownView, Menu, Modal, TFile, TFolder } from "obsidian";
+
+import ALxFolderNote from "../fn-main";
 
 /** Add Make doc folder note and delete linked folder command */
 export const AddOptionsForNote = (plugin: ALxFolderNote) => {

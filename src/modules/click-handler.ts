@@ -1,6 +1,7 @@
-import ALxFolderNote from "fn-main";
-import { isModifier } from "misc";
 import { TFolder } from "obsidian";
+
+import ALxFolderNote from "../fn-main";
+import { isModifier } from "../misc";
 
 const getClickHandler = (plugin: ALxFolderNote) => (evt: MouseEvent) => {
   const titleInnerEl = evt.target as HTMLDivElement;
