@@ -3,6 +3,7 @@
     "baseUrl": "src",
     "outDir": "",
     "inlineSourceMap": true,
+    "jsx": "react",
     "inlineSources": true,
     "module": "ESNext",
     "target": "es6",
@@ -14,5 +15,5 @@
     "allowSyntheticDefaultImports": true,
     "lib": ["dom", "es5", "scripthost", "es2015"]
   },
-  "include": ["src/**/*.ts"]
+  "include": ["src/**/*"]
 }

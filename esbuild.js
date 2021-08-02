@@ -34,7 +34,7 @@ const isProd = process.env.BUILD === "production";
 
 (async () => {
   try {
-    build({
+    await build({
       entryPoints: ["src/fn-main.ts"],
       bundle: true,
       watch: !isProd,

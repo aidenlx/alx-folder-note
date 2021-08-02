@@ -6,6 +6,11 @@ import FEHandler from "./modules/fe-handler";
 
 export const noHideMark = "alx-no-hide-note";
 
+enum TitleSource {
+  filename,
+  heading1,
+  frontmatter,
+}
 export interface ALxFolderNoteSettings {
   folderNotePref: NoteLoc;
   deleteOutsideNoteWithFolder: boolean;
@@ -14,6 +19,10 @@ export interface ALxFolderNoteSettings {
   hideNoteInExplorer: boolean;
   autoRename: boolean;
   folderNoteTemplate: string;
+  folderOverview: {
+    h1AsTitleSource: boolean;
+    briefMax: number;
+  };
 }
 
 export const DEFAULT_SETTINGS: ALxFolderNoteSettings = {
@@ -24,6 +33,10 @@ export const DEFAULT_SETTINGS: ALxFolderNoteSettings = {
   hideNoteInExplorer: true,
   autoRename: true,
   folderNoteTemplate: "# {{FOLDER_NAME}}",
+  folderOverview: {
+    h1AsTitleSource: true,
+    briefMax: 64,
+  },
 };
 
 export class ALxFolderNoteSettingTab extends PluginSettingTab {

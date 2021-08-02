@@ -2,6 +2,7 @@ import "./styles/main.css";
 
 import { Plugin, TFolder } from "obsidian";
 
+import { FOLDERV_ID, GetFolderVHandler } from "./components/load";
 import initialize from "./initialize";
 import { AddOptionsForFolder, AddOptionsForNote } from "./modules/commands";
 import FEHandler from "./modules/fe-handler";
@@ -30,6 +31,11 @@ export default class ALxFolderNote extends Plugin {
     AddOptionsForNote(this);
     AddOptionsForFolder(this);
     this.app.workspace.onLayoutReady(this.initialize);
+
+    this.registerMarkdownCodeBlockProcessor(
+      FOLDERV_ID,
+      GetFolderVHandler(this),
+    );
   }
 
   onunload() {
