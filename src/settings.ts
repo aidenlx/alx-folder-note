@@ -23,6 +23,10 @@ export interface ALxFolderNoteSettings {
     h1AsTitleSource: boolean;
     briefMax: number;
   };
+  breadcrumbs: {
+    parentsFieldName: string;
+    childrenFieldName: string;
+  };
 }
 
 export const DEFAULT_SETTINGS: ALxFolderNoteSettings = {
@@ -36,6 +40,10 @@ export const DEFAULT_SETTINGS: ALxFolderNoteSettings = {
   folderOverview: {
     h1AsTitleSource: true,
     briefMax: 64,
+  },
+  breadcrumbs: {
+    parentsFieldName: "parent",
+    childrenFieldName: "child",
   },
 };
 

@@ -4,6 +4,7 @@ import { Plugin, TFolder } from "obsidian";
 
 import { FOLDERV_ID, GetFolderVHandler } from "./components/load";
 import initialize from "./initialize";
+import { BreadMeta, updateBreadMeta } from "./modules/bread-meta";
 import { AddOptionsForFolder, AddOptionsForNote } from "./modules/commands";
 import FEHandler from "./modules/fe-handler";
 import NoteFinder from "./modules/find";
@@ -13,7 +14,6 @@ import {
   ALxFolderNoteSettingTab,
   DEFAULT_SETTINGS,
 } from "./settings";
-
 export default class ALxFolderNote extends Plugin {
   settings: ALxFolderNoteSettings = DEFAULT_SETTINGS;
   feHandler?: FEHandler;
@@ -21,8 +21,18 @@ export default class ALxFolderNote extends Plugin {
   finder = new NoteFinder(this);
   initialize = initialize.bind(this);
 
+  breadMeta: BreadMeta = { parents: new Map(), children: new Map() };
+  updateBreadMeta = updateBreadMeta.bind(this);
+
   async onload() {
     console.log("loading alx-folder-note");
+
+    this.app.metadataCache.on("finished", () => {
+      this.updateBreadMeta();
+    });
+    this.app.metadataCache.on("changed", (file) => {
+      if (file.extension === "md") this.updateBreadMeta(file);
+    });
 
     await this.loadSettings();
 
