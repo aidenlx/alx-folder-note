@@ -13,13 +13,13 @@ import React, {
 
 import { Context } from "./load";
 import {
+  FileInfo,
   FileType,
   getFileType,
   getIcon,
   LinkType,
   ObInternalLink,
   ObTag,
-  statToText,
 } from "./tools";
 
 interface FileCardProps {
@@ -53,11 +53,9 @@ export const FileCard = ({ src, cover, linkType }: FileCardProps) => {
   const [tags, setTags] = useState<Set<string>>(getTags(src, plugin.app));
 
   const fileIcon = useMemo(
-      () => getIcon(getFileType(src.extension)),
-      [src.extension],
-    ),
-    // linkIcon = useMemo(() => linkType, [linkType]),
-    statText = useMemo(() => statToText(stat), [stat]);
+    () => getIcon(getFileType(src.extension)),
+    [src.extension],
+  );
 
   useEffect(() => {
     getBriefInfo(src, plugin.app).then((info) => setBrief(info));
@@ -97,7 +95,11 @@ export const FileCard = ({ src, cover, linkType }: FileCardProps) => {
     <Card
       title={<ObInternalLink linktext={src.path}>{title}</ObInternalLink>}
       cover={cover}
-      extra={<Tooltip title={statText}>{fileIcon}</Tooltip>}
+      extra={
+        <Tooltip title={<FileInfo stat={stat} type={linkType} />}>
+          {fileIcon}
+        </Tooltip>
+      }
       size="small"
       style={{
         height: "100%",

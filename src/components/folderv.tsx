@@ -4,6 +4,7 @@ import { Col, Result, Row } from "antd";
 import { TFile, TFolder } from "obsidian";
 import React, { useContext, useEffect } from "react";
 
+import { getSoftChildren } from "../modules/bread-meta";
 import { FileCard } from "./file-card";
 import { Context } from "./load";
 import { LinkType, nameSort, NoContextError } from "./tools";
@@ -38,18 +39,27 @@ export const FolderOverview = ({ target }: FolderOverviewProps) => {
 
   const folder = plugin.app.vault.getAbstractFileByPath(target);
   if (folder && folder instanceof TFolder) {
-    const fileList = folder.children
-      .sort((a, b) => nameSort(a.name, b.name))
-      .filter((af) => af instanceof TFile) as TFile[];
+    const fileList: [file: TFile, type: LinkType][] = folder.children
+      .filter((af) => af instanceof TFile)
+      .map((file) => [file as TFile, LinkType.hard]);
+    let folderNote;
+    if ((folderNote = plugin.finder.getFolderNote(folder))) {
+      for (const file of getSoftChildren(folderNote, plugin)) {
+        if (fileList.every((f) => f[0].path !== file.path))
+          fileList.push([file, LinkType.soft]);
+      }
+    }
+    fileList.sort((a, b) => nameSort(a[0].name, b[0].name));
+
     return (
       <Row wrap gutter={[16, 16]}>
-        {fileList.map((file) => (
+        {fileList.map((val) => (
           <Col
-            key={file.path}
+            key={val[0].path}
             flex="12em 1 0"
             style={{ maxHeight: "15em", maxWidth: "20em" }}
           >
-            <FileCard linkType={LinkType.hard} src={file} />
+            <FileCard linkType={val[1]} src={val[0]} />
           </Col>
         ))}
       </Row>

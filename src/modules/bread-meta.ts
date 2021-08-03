@@ -24,6 +24,40 @@ export function updateBreadMeta(this: ALxFolderNote, files?: TFile | TFile[]) {
   this.app.metadataCache.trigger("bread-meta-resolved", this.breadMeta);
 }
 
+export const getSoftChildren = (file: TFile, plugin: ALxFolderNote) => {
+  const { parents, children } = plugin.breadMeta;
+  const { metadataCache, vault } = plugin.app;
+  const roughMatch = (linktext: string) =>
+    linktext.endsWith(file.basename) || linktext.endsWith(file.name);
+  const childrenList: TFile[] = [];
+  const pushToList = (file: TFile) => {
+    if (childrenList.every((f) => f.path !== file.path))
+      childrenList.push(file);
+  };
+  for (const [path, linktexts] of parents) {
+    let match = false;
+    linktexts.forEach((v) => {
+      if (roughMatch(v)) match = true;
+    });
+    if (
+      match &&
+      [...linktexts]
+        .filter((v) => roughMatch(v))
+        .map((v) => metadataCache.getFirstLinkpathDest(v, path))
+        .some((parent) => parent && parent.path === file.path)
+    ) {
+      const result = vault.getAbstractFileByPath(path);
+      if (result && result instanceof TFile) pushToList(result);
+      else console.warn("unable to find file from path %s", path, parents);
+    }
+  }
+  children.get(file.path)?.forEach((v) => {
+    const result = metadataCache.getFirstLinkpathDest(v, file.path);
+    if (result) pushToList(result);
+  });
+  return childrenList;
+};
+
 const setBreadMetaForFile = (
   plugin: ALxFolderNote,
   file: TFile,

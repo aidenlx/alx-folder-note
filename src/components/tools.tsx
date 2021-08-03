@@ -72,11 +72,19 @@ export const ObTag = ({ tag }: { tag: string }) => (
   </a>
 );
 
-export const statToText = ({ ctime, mtime, size }: FileStats) => (
+export const FileInfo = ({
+  stat: { ctime, mtime, size },
+  type,
+}: {
+  stat: FileStats;
+  type: LinkType;
+}) => (
   <div>
     <div>Last Modified: {moment(ctime).format("YYYY-MM-DD HH:mm")}</div>
     <div>Created: {moment(mtime).format("YYYY-MM-DD HH:mm")}</div>
-    <div>Size: {bytes(size)}</div>
+    <div>
+      {type === LinkType.hard ? "Hard" : "Soft"} Link; Size: {bytes(size)}
+    </div>
   </div>
 );
 
