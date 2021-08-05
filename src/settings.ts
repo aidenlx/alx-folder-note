@@ -3,14 +3,10 @@ import { App, debounce, Modifier, PluginSettingTab, Setting } from "obsidian";
 import ALxFolderNote from "./fn-main";
 import { isMac, NoteLoc } from "./misc";
 import FEHandler from "./modules/fe-handler";
+import { RelationInField } from "./modules/relation-cache";
 
 export const noHideMark = "alx-no-hide-note";
 
-enum TitleSource {
-  filename,
-  heading1,
-  frontmatter,
-}
 export interface ALxFolderNoteSettings {
   folderNotePref: NoteLoc;
   deleteOutsideNoteWithFolder: boolean;
@@ -23,9 +19,8 @@ export interface ALxFolderNoteSettings {
     h1AsTitleSource: boolean;
     briefMax: number;
   };
-  breadcrumbs: {
-    parentsFieldName: string;
-    childrenFieldName: string;
+  relation: {
+    fieldNames: Record<RelationInField, string>;
   };
 }
 
@@ -41,9 +36,11 @@ export const DEFAULT_SETTINGS: ALxFolderNoteSettings = {
     h1AsTitleSource: true,
     briefMax: 64,
   },
-  breadcrumbs: {
-    parentsFieldName: "parent",
-    childrenFieldName: "child",
+  relation: {
+    fieldNames: {
+      parents: "parent",
+      children: "children",
+    },
   },
 };
 

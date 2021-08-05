@@ -4,7 +4,6 @@ import { Col, Result, Row } from "antd";
 import { TFile, TFolder } from "obsidian";
 import React, { useContext, useEffect } from "react";
 
-import { getSoftChildren } from "../modules/bread-meta";
 import { FileCard } from "./file-card";
 import { Context } from "./load";
 import { LinkType, nameSort, NoContextError } from "./tools";
@@ -42,13 +41,13 @@ export const FolderOverview = ({ target }: FolderOverviewProps) => {
     const fileList: [file: TFile, type: LinkType][] = folder.children
       .filter((af) => af instanceof TFile)
       .map((file) => [file as TFile, LinkType.hard]);
-    let folderNote;
-    if ((folderNote = plugin.finder.getFolderNote(folder))) {
-      for (const file of getSoftChildren(folderNote, plugin)) {
-        if (fileList.every((f) => f[0].path !== file.path))
-          fileList.push([file, LinkType.soft]);
-      }
-    }
+    // let folderNote;
+    // if ((folderNote = plugin.finder.getFolderNote(folder))) {
+    //   for (const file of plugin.relationCache.getChildren) {
+    //     if (fileList.every((f) => f[0].path !== file.path))
+    //       fileList.push([file, LinkType.soft]);
+    //   }
+    // }
     fileList.sort((a, b) => nameSort(a[0].name, b[0].name));
 
     return (

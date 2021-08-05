@@ -36,9 +36,13 @@ export enum FileType {
 export enum LinkType {
   /** Children of folder */
   hard,
-  /** Defined in front-matter/ Dataview inline fields*/
-  soft,
+  /** outgoing, defined within the target file */
+  softOut,
+  /** incoming link to target file, defined in external file */
+  softIn,
 }
+/** Defined in front-matter/ Dataview inline fields*/
+export type SoftLink = LinkType.softIn | LinkType.softOut;
 
 export const ObInternalLink = ({
   linktext,

@@ -4,10 +4,10 @@ import { Plugin, TFolder } from "obsidian";
 
 import { FOLDERV_ID, GetFolderVHandler } from "./components/load";
 import initialize from "./initialize";
-import { BreadMeta, updateBreadMeta } from "./modules/bread-meta";
 import { AddOptionsForFolder, AddOptionsForNote } from "./modules/commands";
 import FEHandler from "./modules/fe-handler";
 import NoteFinder from "./modules/find";
+import RelationCache from "./modules/relation-cache";
 import VaultHandler from "./modules/vault-handler";
 import {
   ALxFolderNoteSettings,
@@ -20,19 +20,10 @@ export default class ALxFolderNote extends Plugin {
   vaultHandler = new VaultHandler(this);
   finder = new NoteFinder(this);
   initialize = initialize.bind(this);
-
-  breadMeta: BreadMeta = { parents: new Map(), children: new Map() };
-  updateBreadMeta = updateBreadMeta.bind(this);
+  relationCache = new RelationCache(this);
 
   async onload() {
     console.log("loading alx-folder-note");
-
-    this.app.metadataCache.on("finished", () => {
-      this.updateBreadMeta();
-    });
-    this.app.metadataCache.on("changed", (file) => {
-      if (file.extension === "md") this.updateBreadMeta(file);
-    });
 
     await this.loadSettings();
 

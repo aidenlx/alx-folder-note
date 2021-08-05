@@ -1,6 +1,5 @@
 import "obsidian";
 
-import { BreadMeta } from "../modules/bread-meta";
 declare module "obsidian" {
   class FileExplorer extends View {
     fileItems: { [key: string]: AFItem };
@@ -37,15 +36,6 @@ declare module "obsidian" {
   interface MetadataCache {
     on(name: "initialized", callback: () => any, ctx?: any): EventRef;
     on(name: "finished", callback: () => any, ctx?: any): EventRef;
-    on(
-      name: "bread-meta-changed",
-      callback: (filePath: string, breadMeta: BreadMeta) => any,
-      ctx?: any,
-    ): EventRef;
-    on(
-      name: "bread-meta-resolved",
-      callback: (breadMeta: BreadMeta) => any,
-      ctx?: any,
-    ): EventRef;
+    initialized: boolean;
   }
 }
