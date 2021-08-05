@@ -1,5 +1,7 @@
 import "obsidian";
 
+import RelationCache from "../modules/relation-cache";
+
 declare module "obsidian" {
   class FileExplorer extends View {
     fileItems: { [key: string]: AFItem };
@@ -33,9 +35,23 @@ declare module "obsidian" {
     pusherEl: HTMLDivElement;
   }
 
+  interface Vault {
+    exists(normalizedPath: string, sensitive?: boolean): Promise<boolean>;
+  }
+
   interface MetadataCache {
     on(name: "initialized", callback: () => any, ctx?: any): EventRef;
     on(name: "finished", callback: () => any, ctx?: any): EventRef;
+    on(
+      name: "relation-changed",
+      callback: (file: TFile, cache: RelationCache) => any,
+      ctx?: any,
+    ): EventRef;
+    on(
+      name: "relation-resolved",
+      callback: (cache: RelationCache) => any,
+      ctx?: any,
+    ): EventRef;
     initialized: boolean;
   }
 }

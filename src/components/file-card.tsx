@@ -1,17 +1,11 @@
 import { Card, Empty, Image, Skeleton, Space, Tag, Tooltip } from "antd";
 import Paragraph from "antd/lib/typography/Paragraph";
 import assertNever from "assert-never";
-import { App, SectionCache, TAbstractFile, TFile } from "obsidian";
+import { App, SectionCache, TAbstractFile, TFile, TFolder } from "obsidian";
 import { dirname } from "path";
-import React, {
-  ReactNode,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import React, { ReactNode, useEffect, useMemo, useState } from "react";
 
-import { Context } from "./load";
+import ALxFolderNote from "../fn-main";
 import {
   FileInfo,
   FileType,
@@ -23,7 +17,8 @@ import {
 } from "./tools";
 
 interface FileCardProps {
-  src: TFile;
+  plugin: ALxFolderNote;
+  src: string;
   linkType: LinkType;
   cover?: ReactNode;
 }
@@ -39,30 +34,34 @@ interface ImgBrief {
 
 type BriefInfo = MdBrief | ImgBrief;
 
-export const FileCard = ({ src, cover, linkType }: FileCardProps) => {
-  const { plugin, settings } = useContext(Context);
-  if (!plugin) throw new Error("No plugin available in context");
+export const FileCard = ({ plugin, src, cover, linkType }: FileCardProps) => {
   const { vault, metadataCache, workspace } = plugin.app;
+  const { folderOverview: settings } = plugin.settings;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const file = useMemo(() => vault.getAbstractFileByPath(src), [src]);
+
+  if (!file) throw new Error("Unable to find file/folder at path: " + src);
+  else if (!(file instanceof TFile)) throw new Error("Folder not supported");
 
   const [title, setTitle] = useState(
-    getTitle(src, settings.h1AsTitleSource, plugin.app),
+    getTitle(file, settings.h1AsTitleSource, plugin.app),
   );
 
-  const [stat, setStat] = useState(src.stat);
+  const [stat, setStat] = useState(file.stat);
   const [brief, setBrief] = useState<BriefInfo | null>(null);
-  const [tags, setTags] = useState<Set<string>>(getTags(src, plugin.app));
+  const [tags, setTags] = useState<Set<string>>(getTags(file, plugin.app));
 
   const fileIcon = useMemo(
-    () => getIcon(getFileType(src.extension)),
-    [src.extension],
+    () => getIcon(getFileType(file.extension)),
+    [file.extension],
   );
 
   useEffect(() => {
-    getBriefInfo(src, plugin.app).then((info) => setBrief(info));
+    getBriefInfo(file, plugin.app).then((info) => setBrief(info));
     const handleFileChange = async (af: TAbstractFile, oldPath?: string) => {
       const titleSetup = () =>
-        setTitle(getTitle(src, settings.h1AsTitleSource, plugin.app));
-      if (af.path !== src.path) return;
+        setTitle(getTitle(file, settings.h1AsTitleSource, plugin.app));
+      if (af.path !== file.path) return;
       // handle vault.on(rename)
       if (oldPath) {
         if (dirname(oldPath) === dirname(af.path)) titleSetup();
@@ -70,10 +69,10 @@ export const FileCard = ({ src, cover, linkType }: FileCardProps) => {
         else return;
       } else {
         titleSetup();
-        setBrief(await getBriefInfo(src, plugin.app));
-        setTags(getTags(src, plugin.app));
+        setBrief(await getBriefInfo(file, plugin.app));
+        setTags(getTags(file, plugin.app));
       }
-      setStat(src.stat);
+      setStat(file.stat);
     };
 
     plugin.registerEvent(metadataCache.on("changed", handleFileChange));
@@ -83,17 +82,17 @@ export const FileCard = ({ src, cover, linkType }: FileCardProps) => {
       vault.off("rename", handleFileChange);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [src]);
+  }, [file]);
 
   const handleClick = (e: React.MouseEvent) => {
     if (e.target instanceof Element && e.target.matches("a.tag, span.ant-tag"))
       return;
     else if ([0, 1].includes(e.button))
-      workspace.openLinkText(src.path, "", false);
+      workspace.openLinkText(file.path, "", false);
   };
   return (
     <Card
-      title={<ObInternalLink linktext={src.path}>{title}</ObInternalLink>}
+      title={<ObInternalLink linktext={file.path}>{title}</ObInternalLink>}
       cover={cover}
       extra={
         <Tooltip title={<FileInfo stat={stat} type={linkType} />}>

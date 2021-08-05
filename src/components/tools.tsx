@@ -1,5 +1,4 @@
 import Icon from "@ant-design/icons";
-import { Result } from "antd";
 import assertNever from "assert-never";
 import { FileStats, moment } from "obsidian";
 import bytes from "pretty-bytes";
@@ -117,20 +116,4 @@ export const getIcon = (type: FileType) => {
       assertNever(type);
   }
   return <Icon component={(prop) => icon} style={{ fontSize: "1.5em" }} />;
-};
-
-export const NoContextError = ({ target }: { target: string }) => (
-  <Result status="error" title="Missing Context" extra={"Target: " + target} />
-);
-
-export const nameSort = (a: string, b: string) => {
-  a = a.toUpperCase(); // ignore upper and lowercase
-  b = b.toUpperCase(); // ignore upper and lowercase
-  if (a < b) {
-    return -1;
-  }
-  if (a > b) {
-    return 1;
-  }
-  return 0;
 };

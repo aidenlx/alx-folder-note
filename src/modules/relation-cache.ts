@@ -7,25 +7,26 @@ import ALxFolderNote from "../fn-main";
 
 export type RelationInField = "parents" | "children";
 
-interface ParentProps {
+interface RLProps {
   path: string;
   type: SoftLink;
 }
-type Parent = RecordOf<ParentProps>;
-const Parent = Record<ParentProps>({ path: "", type: LinkType.softIn });
+type RelationLink = RecordOf<RLProps>;
+const RelationLink = Record<RLProps>({ path: "", type: LinkType.softIn });
 
 // parentsCache: {
 //   // File_Parents
-//   file1: {
-//     // File_LinkType
-//     parent1: [softout, softIn],
-//     parent2: [softout],
-//   },
+//   file1: [
+//     // RelationLink
+//     [path: parent1, type: softout],
+//     [path: parent1, type: softIn],
+//     [path: parent2, type: softout],
+//   ],
 //   file2: {
-//     parent1: [softIn],
+//     [path: parent1, type: softIn],
 //   }
 // }
-type File_Parents = Map<string /*filePath*/, Set<Parent>>;
+type File_Parents = Map<string /*filePath*/, Set<RelationLink>>;
 
 export default class RelationCache extends Events {
   plugin: ALxFolderNote;
@@ -40,13 +41,37 @@ export default class RelationCache extends Events {
   // @ts-ignore
   fmCache: Map<string, Map<RelationInField, Set<string> | null>> = Map();
 
-  private getChildrenOf(filePath: string): File_Parents {
-    return this.parentsCache.filter((parents) =>
-      parents.some((rec) => rec.path === filePath),
-    );
-    // .map((parents) =>
-    //   parents.filter((rec) => rec.path === filePath).map((rec) => rec.type),
-    // );
+  getParentsOf(filePath: string): Set<RelationLink> | null {
+    return this.parentsCache.get(filePath, null);
+  }
+  getChildrenOf(filePath: string): Set<RelationLink> | null {
+    const set = this.parentsCache.reduce((newSet, parents, key) => {
+      let result;
+      if ((result = parents.filter((rec) => rec.path === filePath)).isEmpty()) {
+        return newSet; // filter not children
+      } else {
+        const revertType = (rec: RelationLink) =>
+          rec.type === LinkType.softIn ? LinkType.softOut : LinkType.softIn;
+        const converted = result.map((rec) =>
+          rec.set("path", key).set("type", revertType(rec)),
+        );
+        return newSet.union(converted);
+      }
+    }, Set<RelationLink>());
+    return set.isEmpty() ? null : set;
+  }
+  getSiblingsOf(filePath: string): Set<string> | null {
+    const set = this.getParentsOf(filePath);
+    if (!set) return null;
+
+    const result = set
+      .reduce((newSet, parent) => {
+        let children = this.getChildrenOf(parent.path)?.map((rec) => rec.path);
+        if (children) return newSet.union(children);
+        else return newSet;
+      }, Set<string>())
+      .delete(filePath);
+    return result.isEmpty() ? null : result;
   }
 
   constructor(plugin: ALxFolderNote) {
@@ -96,10 +121,9 @@ export default class RelationCache extends Events {
       ? Array.isArray(files)
         ? files
         : [files]
-      : this.app.vault.getFiles();
+      : this.app.vault.getMarkdownFiles();
     if (updateAll) this.parentsCache = this.parentsCache.clear();
-    const mdList = files.filter((v) => v.extension === "md");
-    for (const file of mdList) {
+    for (const file of files) {
       this.setCacheFromFile(file, !updateAll);
     }
     if (updateAll) this.trigger("relation-resolved", this);
@@ -158,6 +182,7 @@ export default class RelationCache extends Events {
       }
     };
 
+    // list of keys (file path) that should be checked empty (no parent specified, type)
     let shrinked: string[] = [];
     /** update parent-out */
     const updateFromParentsField = (): File_Parents => {
@@ -177,7 +202,7 @@ export default class RelationCache extends Events {
         }
       } else {
         const parentsList = valsInField.map((path) =>
-          Parent({
+          RelationLink({
             path,
             type: LinkType.softOut,
           }),
@@ -201,7 +226,7 @@ export default class RelationCache extends Events {
       // fm unchanged, do nothing
       if (valsInField === false) return this.parentsCache;
 
-      const target = Parent({ path: targetPath, type: LinkType.softIn });
+      const target = RelationLink({ path: targetPath, type: LinkType.softIn });
       return this.parentsCache.map((fileParents, path) => {
         if (valsInField?.has(path)) return fileParents.add(target);
         else if (fileParents.has(target)) {

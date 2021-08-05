@@ -1,25 +1,68 @@
 import "antd/dist/antd.css";
 
 import { Col, Result, Row } from "antd";
+import { OrderedMap, Set } from "immutable";
 import { TFile, TFolder } from "obsidian";
-import React, { useContext, useEffect } from "react";
+import { basename } from "path";
+import React, { useEffect, useState } from "react";
 
+import ALxFolderNote from "../fn-main";
 import { FileCard } from "./file-card";
-import { Context } from "./load";
-import { LinkType, nameSort, NoContextError } from "./tools";
+import { LinkType } from "./tools";
 
+export enum SortBy {
+  name,
+  nameR,
+  mtime,
+  mtimeR,
+  ctime,
+  ctimR,
+}
 export interface FolderOverviewProps {
+  plugin: ALxFolderNote;
+  /** should be path, not linktext */
   target: string;
-  filter?: string[];
-  style?: "grid" | "list";
+  filter: string[];
+  style: "grid" | "list";
+  sort: SortBy;
 }
 
-export const FolderOverview = ({ target }: FolderOverviewProps) => {
-  const { plugin } = useContext(Context);
+type Path_Types = OrderedMap<string, Set<LinkType>>;
+const getChildren = (
+  folder: string,
+  plugin: ALxFolderNote,
+): Path_Types | null => {
+  const af = plugin.app.vault.getAbstractFileByPath(folder);
+  if (af instanceof TFolder) {
+    let children: Path_Types = OrderedMap(
+      af.children
+        .filter((af): af is TFile => af instanceof TFile)
+        .map((f) => [f.path, Set<LinkType>([LinkType.hard])]),
+    );
+
+    let folderNote = plugin.finder.getFolderNote(af);
+    if (folderNote) {
+      const softChildren = plugin.relationCache.getChildrenOf(folderNote.path);
+      if (softChildren)
+        children = softChildren.reduce((prev, val) => {
+          return prev.update(
+            val.path,
+            (src) => src?.add(val.type) ?? Set([val.type]),
+          );
+        }, children);
+    }
+
+    return children;
+  } else return null;
+};
+
+export const FolderOverview = ({ target, plugin }: FolderOverviewProps) => {
+  const [children, setChildren] = useState<Path_Types | null>(
+    getChildren(target, plugin)?.sortBy<string>((_v, path) => basename(path)) ??
+      null,
+  );
 
   useEffect(() => {
-    if (!plugin) return;
-
     const { vault } = plugin.app,
       handleChildrenChange = () => {};
 
@@ -33,40 +76,28 @@ export const FolderOverview = ({ target }: FolderOverviewProps) => {
       vault.off("rename", handleChildrenChange);
     };
   });
-
-  if (!plugin) return <NoContextError target={target} />;
-
-  const folder = plugin.app.vault.getAbstractFileByPath(target);
-  if (folder && folder instanceof TFolder) {
-    const fileList: [file: TFile, type: LinkType][] = folder.children
-      .filter((af) => af instanceof TFile)
-      .map((file) => [file as TFile, LinkType.hard]);
-    // let folderNote;
-    // if ((folderNote = plugin.finder.getFolderNote(folder))) {
-    //   for (const file of plugin.relationCache.getChildren) {
-    //     if (fileList.every((f) => f[0].path !== file.path))
-    //       fileList.push([file, LinkType.soft]);
-    //   }
-    // }
-    fileList.sort((a, b) => nameSort(a[0].name, b[0].name));
-
+  if (children) {
     return (
       <Row wrap gutter={[16, 16]}>
-        {fileList.map((val) => (
-          <Col
-            key={val[0].path}
-            flex="12em 1 0"
-            style={{ maxHeight: "15em", maxWidth: "20em" }}
-          >
-            <FileCard linkType={val[1]} src={val[0]} />
-          </Col>
-        ))}
+        {children
+          .entrySeq()
+          .map(([path, types]) => (
+            <Col
+              key={path}
+              flex="12em 1 0"
+              style={{ maxHeight: "15em", maxWidth: "20em" }}
+            >
+              <FileCard linkType={types.first()} src={path} plugin={plugin} />
+            </Col>
+          ))
+          .toArray()}
       </Row>
     );
   } else {
     let reason: string | null = null;
-    if (!folder) reason = "No folder in path: " + target;
-    else if (folder instanceof TFile) reason = "Target not folder: " + target;
+    const af = plugin.app.vault.getAbstractFileByPath(target);
+    if (!af) reason = "No folder/file in path: " + target;
+    else if (af instanceof TFile) reason = "Target not folder: " + target;
     return (
       <Result status="error" title="Invaild target folder" extra={reason} />
     );
