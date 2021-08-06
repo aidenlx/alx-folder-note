@@ -78,7 +78,7 @@ export default class RelationCache extends Events {
     super();
     this.plugin = plugin;
     plugin.registerEvent(
-      this.app.metadataCache.on("finished", () => {
+      this.app.metadataCache.on("initialized", () => {
         this.updateCache();
       }),
     );
