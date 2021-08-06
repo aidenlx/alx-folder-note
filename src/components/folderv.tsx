@@ -42,14 +42,10 @@ const getChildren = (
 
     let folderNote = plugin.finder.getFolderNote(af);
     if (folderNote) {
-      const softChildren = plugin.relationCache.getChildrenOf(folderNote.path);
-      if (softChildren)
-        children = softChildren.reduce((prev, val) => {
-          return prev.update(
-            val.path,
-            (src) => src?.add(val.type) ?? Set([val.type]),
-          );
-        }, children);
+      const softChildren = plugin.relationCache.getChildrenWithTypes(
+        folderNote.path,
+      );
+      if (softChildren) children = children.concat(softChildren);
     }
 
     return children;

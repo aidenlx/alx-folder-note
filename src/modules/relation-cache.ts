@@ -1,5 +1,5 @@
 import flat from "array.prototype.flat";
-import { is, Map, Record, RecordOf, Set } from "immutable";
+import { is, Map, Record, RecordOf, Seq, Set } from "immutable";
 import { EventRef, Events, TFile } from "obsidian";
 
 import { LinkType, SoftLink } from "../components/tools";
@@ -7,26 +7,19 @@ import ALxFolderNote from "../fn-main";
 
 export type RelationInField = "parents" | "children";
 
-interface RLProps {
-  path: string;
-  type: SoftLink;
-}
-type RelationLink = RecordOf<RLProps>;
-const RelationLink = Record<RLProps>({ path: "", type: LinkType.softIn });
-
 // parentsCache: {
 //   // File_Parents
-//   file1: [
-//     // RelationLink
-//     [path: parent1, type: softout],
-//     [path: parent1, type: softIn],
-//     [path: parent2, type: softout],
-//   ],
+//   file1: {
+//     // File_Types
+//     parent1: [softout, softIn],
+//     parent2: [softout],
+//   },
 //   file2: {
-//     [path: parent1, type: softIn],
+//     parent1: [softIn],
 //   }
 // }
-type File_Parents = Map<string /*filePath*/, Set<RelationLink>>;
+type File_Parents = Map<string /*filePath*/, File_Types>;
+type File_Types = Map<string /* parentPath */, Set<SoftLink>>;
 
 export default class RelationCache extends Events {
   plugin: ALxFolderNote;
@@ -39,34 +32,38 @@ export default class RelationCache extends Events {
   // @ts-ignore
   parentsCache: File_Parents = Map();
   // @ts-ignore
-  fmCache: Map<string, Map<RelationInField, Set<string> | null>> = Map();
+  private fmCache: Map<string, Map<RelationInField, Set<string> | null>> =
+    Map();
 
-  getParentsOf(filePath: string): Set<RelationLink> | null {
+  getParentsOf(filePath: string): Set<string> | null {
+    return this.parentsCache.get(filePath)?.keySeq().toSet() ?? null;
+  }
+  getParentsWithTypes(filePath: string): File_Types | null {
     return this.parentsCache.get(filePath, null);
   }
-  getChildrenOf(filePath: string): Set<RelationLink> | null {
-    const set = this.parentsCache.reduce((newSet, parents, key) => {
-      let result;
-      if ((result = parents.filter((rec) => rec.path === filePath)).isEmpty()) {
-        return newSet; // filter not children
-      } else {
-        const revertType = (rec: RelationLink) =>
-          rec.type === LinkType.softIn ? LinkType.softOut : LinkType.softIn;
-        const converted = result.map((rec) =>
-          rec.set("path", key).set("type", revertType(rec)),
-        );
-        return newSet.union(converted);
-      }
-    }, Set<RelationLink>());
-    return set.isEmpty() ? null : set;
+  getChildrenOf(filePath: string): Set<string> | null {
+    const result = this.parentsCache
+      .toSeq()
+      .filter((ft) => ft.has(filePath))
+      .keySeq();
+    return result.isEmpty() ? null : result.toSet();
+  }
+  getChildrenWithTypes(filePath: string): File_Types | null {
+    const revert = (type: SoftLink) =>
+      type === LinkType.softIn ? LinkType.softOut : LinkType.softIn;
+    const result = this.parentsCache
+      .toSeq()
+      .filter((ft) => ft.has(filePath))
+      .map((ft) => (ft.get(filePath) as Set<SoftLink>).map((t) => revert(t)));
+    return result.isEmpty() ? null : result.toMap();
   }
   getSiblingsOf(filePath: string): Set<string> | null {
     const set = this.getParentsOf(filePath);
     if (!set) return null;
 
     const result = set
-      .reduce((newSet, parent) => {
-        let children = this.getChildrenOf(parent.path)?.map((rec) => rec.path);
+      .reduce((newSet, path) => {
+        let children = this.getChildrenOf(path);
         if (children) return newSet.union(children);
         else return newSet;
       }, Set<string>())
@@ -132,7 +129,6 @@ export default class RelationCache extends Events {
   /** read soft links defined in given file and update relationCache */
   private setCacheFromFile(file: TFile, triggerEvt = true) {
     const { metadataCache } = this.app;
-    const previousCache = this.parentsCache;
     const targetPath = file.path,
       fm = metadataCache.getFileCache(file)?.frontmatter;
 
@@ -182,69 +178,84 @@ export default class RelationCache extends Events {
       }
     };
 
-    // list of keys (file path) that should be checked empty (no parent specified, type)
-    let shrinked: string[] = [];
-    /** update parent-out */
-    const updateFromParentsField = (): File_Parents => {
-      const valsInField = getVaildPathsFromField("parents");
-      // fm unchanged, do nothing
-      if (valsInField === false) return this.parentsCache;
-
-      if (valsInField === null) {
-        let parents;
-        if ((parents = this.parentsCache.get(targetPath))) {
-          shrinked.push(targetPath);
-          // clear all parent-out
-          return this.parentsCache.set(
-            targetPath,
-            parents.filterNot((v) => v.type === LinkType.softOut),
-          );
-        }
+    /** @param op T:add; F:remove */
+    function getToggle(op: boolean, type: LinkType.softOut): Set<SoftLink>;
+    function getToggle(
+      op: boolean,
+      type: LinkType.softIn,
+    ): Map<string, Set<SoftLink>>;
+    // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
+    function getToggle(
+      op: boolean,
+      type: SoftLink,
+    ): Set<SoftLink> | Map<string, Set<SoftLink>> {
+      if (type === LinkType.softIn) {
+        return op
+          ? //@ts-ignore
+            Map<string, Set<SoftLink>>({ [targetPath]: Set([LinkType.softIn]) })
+          : Map<string, Set<SoftLink>>({ [targetPath]: Set<SoftLink>() });
       } else {
-        const parentsList = valsInField.map((path) =>
-          RelationLink({
-            path,
-            type: LinkType.softOut,
-          }),
-        );
-        return this.parentsCache.update(targetPath, (parents) => {
-          // if not created
-          if (parents === undefined) return parentsList;
-          else {
-            shrinked.push(targetPath);
-            return parents
-              .filterNot((v) => v.type === LinkType.softOut)
-              .union(parentsList);
-          }
-        });
+        return op ? Set([LinkType.softOut]) : Set();
       }
-      return this.parentsCache;
-    };
-    /** update parent-in */
-    const updateFromChildrenField = (): File_Parents => {
-      const valsInField = getVaildPathsFromField("children");
-      // fm unchanged, do nothing
-      if (valsInField === false) return this.parentsCache;
-
-      const target = RelationLink({ path: targetPath, type: LinkType.softIn });
-      return this.parentsCache.map((fileParents, path) => {
-        if (valsInField?.has(path)) return fileParents.add(target);
-        else if (fileParents.has(target)) {
-          shrinked.push(path);
-          return fileParents.delete(target);
-        }
-        return fileParents;
-      });
-    };
-
-    this.parentsCache = updateFromParentsField();
-    this.parentsCache = updateFromChildrenField();
-
-    for (const key of shrinked) {
-      if (this.parentsCache.get(key)?.isEmpty())
-        this.parentsCache = this.parentsCache.delete(targetPath);
     }
-    if (triggerEvt && previousCache !== this.parentsCache)
-      this.trigger("relation-changed", file, this);
+
+    // get from parent field
+    const fmParents = getVaildPathsFromField("parents");
+    if (fmParents !== false) {
+      const type = LinkType.softOut,
+        srcParents = this.parentsCache.get(targetPath);
+      let newTree: Seq.Keyed<string, Set<SoftLink>>;
+      if (srcParents) {
+        const fillWith = getToggle(false, type);
+        newTree = srcParents
+          .toSeq()
+          .filter((types) => types.has(type))
+          .map(() => fillWith);
+      } else {
+        newTree = Seq.Keyed();
+      }
+
+      if (fmParents !== null) {
+        const fillWith = getToggle(true, type);
+        newTree = newTree.concat(fmParents.toMap().map(() => fillWith));
+      }
+
+      // do merge here
+      if (!newTree.isEmpty()) {
+        const merge = (oldVal: Set<SoftLink>, newVal: Set<SoftLink>) =>
+          newVal.isEmpty() ? oldVal.delete(type) : oldVal.add(type);
+        const setTo: File_Types = srcParents
+          ? srcParents.mergeWith(merge, newTree)
+          : newTree.toMap();
+        this.parentsCache = this.parentsCache.set(targetPath, setTo);
+      }
+    }
+
+    // get from children field
+    const fmChildren = getVaildPathsFromField("children");
+    if (fmChildren !== false) {
+      const type = LinkType.softIn;
+      let types,
+        fillWith = getToggle(false, type);
+      let newTree = this.parentsCache
+        .toSeq()
+        .filter(
+          (parents) => !!(types = parents.get(targetPath)) && types.has(type),
+        )
+        .map(() => fillWith);
+
+      if (fmChildren !== null) {
+        fillWith = getToggle(true, type);
+        newTree = newTree.concat(fmChildren.toMap().map(() => fillWith));
+      }
+
+      // do merge here
+      if (!newTree.isEmpty()) {
+        const merge = (oldVal: Set<SoftLink>, newVal: Set<SoftLink>) =>
+          newVal.isEmpty() ? oldVal.delete(type) : oldVal.add(type);
+        // @ts-ignore
+        this.parentsCache = this.parentsCache.mergeDeepWith(merge, newTree);
+      }
+    }
   }
 }
