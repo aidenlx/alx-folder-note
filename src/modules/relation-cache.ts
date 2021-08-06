@@ -1,5 +1,5 @@
 import flat from "array.prototype.flat";
-import { is, isSet, Map, Record, RecordOf, Seq, Set } from "immutable";
+import { is, isSet, Map, Seq, Set } from "immutable";
 import { EventRef, Events, TFile } from "obsidian";
 
 import { LinkType, SoftLink } from "../components/tools";
@@ -87,10 +87,24 @@ export default class RelationCache extends Events {
       }),
     );
   }
-
   on(
-    name: "relation-changed",
-    callback: (file: TFile, cache: RelationCache) => any,
+    name: "children-removed",
+    callback: (affected: Set<string>, cache: RelationCache) => any,
+    ctx?: any,
+  ): EventRef;
+  on(
+    name: "children-added",
+    callback: (affected: Set<string>, cache: RelationCache) => any,
+    ctx?: any,
+  ): EventRef;
+  on(
+    name: "parent-removed",
+    callback: (affected: Set<string>, cache: RelationCache) => any,
+    ctx?: any,
+  ): EventRef;
+  on(
+    name: "parent-added",
+    callback: (affected: Set<string>, cache: RelationCache) => any,
     ctx?: any,
   ): EventRef;
   on(
@@ -102,7 +116,26 @@ export default class RelationCache extends Events {
     return super.on(name, callback, ctx);
   }
 
-  trigger(name: "relation-changed", file: TFile, cache: RelationCache): void;
+  trigger(
+    name: "children-removed",
+    affected: Set<string>,
+    cache: RelationCache,
+  ): void;
+  trigger(
+    name: "children-added",
+    affected: Set<string>,
+    cache: RelationCache,
+  ): void;
+  trigger(
+    name: "parent-removed",
+    affected: Set<string>,
+    cache: RelationCache,
+  ): void;
+  trigger(
+    name: "parent-added",
+    affected: Set<string>,
+    cache: RelationCache,
+  ): void;
   trigger(name: "relation-resolved", cache: RelationCache): void;
   trigger(name: string, ...data: any[]): void {
     super.trigger(name, ...data);
@@ -198,22 +231,30 @@ export default class RelationCache extends Events {
       }
     }
 
+    let addedFromP: Set<string> | null = null,
+      removedFromP: Set<string> | null = null;
     // get from parent field
     const fmParents = getVaildPathsFromField("parents");
     if (fmParents !== false) {
       const type = LinkType.softOut,
         srcParents = this.parentsCache.get(targetPath);
       const fillWith = getToggle(false, type);
-      let newTree: Seq.Keyed<string, Set<SoftLink>> = srcParents
-        ?.toSeq()
-        .filter((types) => types.has(type))
-        .map(() => fillWith) ?? Seq.Keyed();
+      let newTree =
+        srcParents?.filter((types) => types.has(type)).map(() => fillWith) ??
+        Map<string, Set<SoftLink>>();
 
       if (fmParents !== null) {
+        addedFromP = fmParents.subtract(newTree.keySeq());
         const fillWith = getToggle(true, type);
         newTree = newTree.concat(fmParents.toMap().map(() => fillWith));
-      }
+      } else addedFromP = Set();
 
+      removedFromP = newTree
+        .filter((v) => v.isEmpty())
+        .keySeq()
+        .toSet();
+
+      // do merge here
       if (!newTree.isEmpty()) {
         const merge = (oldVal: Set<SoftLink>, newVal: Set<SoftLink>) =>
           newVal.isEmpty() ? oldVal.delete(type) : oldVal.add(type);
@@ -224,6 +265,8 @@ export default class RelationCache extends Events {
       }
     }
 
+    let addedFromC: Set<string> | null = null,
+      removedFromC: Set<string> | null = null;
     // get from children field
     const fmChildren = getVaildPathsFromField("children");
     if (fmChildren !== false) {
@@ -231,16 +274,20 @@ export default class RelationCache extends Events {
       let types;
       const fillWith = getToggle(false, type);
       let newTree = this.parentsCache
-        .toSeq()
         .filter(
           (parents) => !!(types = parents.get(targetPath)) && types.has(type),
         )
         .map(() => fillWith);
 
       if (fmChildren !== null) {
+        addedFromC = fmChildren.subtract(newTree.keySeq());
         const fillWith = getToggle(true, type);
         newTree = newTree.concat(fmChildren.toMap().map(() => fillWith));
-      }
+      } else addedFromC = Set();
+      removedFromC = newTree
+        .filter((v) => v.get(targetPath) === null)
+        .keySeq()
+        .toSet();
 
       if (!newTree.isEmpty()) {
         const merge = (oldVal: unknown, newVal: unknown, key: unknown) => {
@@ -258,6 +305,53 @@ export default class RelationCache extends Events {
         };
         // @ts-ignore
         this.parentsCache = this.parentsCache.mergeDeepWith(merge, newTree);
+      }
+    }
+
+    // console.log(
+    //   `parents of ${targetPath} added: %o, parents of ${targetPath} removed: %o`,
+    //   added.toJS(),
+    //   removed.toJS(),
+    // );
+    // console.log(
+    //   `added parent ${targetPath} to %o, removed parent ${targetPath} from %o`,
+    //   added2.toJS(),
+    //   removed2.toJS(),
+    // );
+    if (triggerEvt) {
+      if (
+        (addedFromC && !addedFromC.isEmpty()) ||
+        (addedFromP && !addedFromP.isEmpty())
+      ) {
+        const parentAddedTo = Set<string>().withMutations((m) => {
+          if (addedFromP && !addedFromP.isEmpty()) m.add(targetPath);
+          if (addedFromC) m.merge(addedFromC);
+        });
+        const childrenAddedTo = Set<string>().withMutations((m) => {
+          if (addedFromC && !addedFromC.isEmpty()) m.add(targetPath);
+          if (addedFromP) m.merge(addedFromP);
+        });
+        if (!parentAddedTo.isEmpty())
+          this.trigger("parent-added", parentAddedTo, this);
+        if (!childrenAddedTo.isEmpty())
+          this.trigger("children-added", childrenAddedTo, this);
+      }
+      if (
+        (removedFromC && !removedFromC.isEmpty()) ||
+        (removedFromP && !removedFromP.isEmpty())
+      ) {
+        const parentAddedTo = Set<string>().withMutations((m) => {
+          if (removedFromP && !removedFromP.isEmpty()) m.add(targetPath);
+          if (removedFromC) m.merge(removedFromC);
+        });
+        const childrenAddedTo = Set<string>().withMutations((m) => {
+          if (removedFromC && !removedFromC.isEmpty()) m.add(targetPath);
+          if (removedFromP) m.merge(removedFromP);
+        });
+        if (!parentAddedTo.isEmpty())
+          this.trigger("parent-removed", parentAddedTo, this);
+        if (!childrenAddedTo.isEmpty())
+          this.trigger("children-removed", childrenAddedTo, this);
       }
     }
   }
