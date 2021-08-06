@@ -1,5 +1,5 @@
 import flat from "array.prototype.flat";
-import { is, Map, Record, RecordOf, Seq, Set } from "immutable";
+import { is, isSet, Map, Record, RecordOf, Seq, Set } from "immutable";
 import { EventRef, Events, TFile } from "obsidian";
 
 import { LinkType, SoftLink } from "../components/tools";
@@ -183,17 +183,16 @@ export default class RelationCache extends Events {
     function getToggle(
       op: boolean,
       type: LinkType.softIn,
-    ): Map<string, Set<SoftLink>>;
+    ): Map<string, Set<SoftLink> | null>;
     // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
     function getToggle(
       op: boolean,
       type: SoftLink,
-    ): Set<SoftLink> | Map<string, Set<SoftLink>> {
+    ): Set<SoftLink> | Map<string, Set<SoftLink> | null> {
       if (type === LinkType.softIn) {
         return op
-          ? //@ts-ignore
-            Map<string, Set<SoftLink>>({ [targetPath]: Set([LinkType.softIn]) })
-          : Map<string, Set<SoftLink>>({ [targetPath]: Set<SoftLink>() });
+          ? Map({ [targetPath]: Set<SoftLink>([LinkType.softIn]) })
+          : Map<string, Set<SoftLink> | null>({ [targetPath]: null });
       } else {
         return op ? Set([LinkType.softOut]) : Set();
       }
@@ -204,23 +203,17 @@ export default class RelationCache extends Events {
     if (fmParents !== false) {
       const type = LinkType.softOut,
         srcParents = this.parentsCache.get(targetPath);
-      let newTree: Seq.Keyed<string, Set<SoftLink>>;
-      if (srcParents) {
-        const fillWith = getToggle(false, type);
-        newTree = srcParents
-          .toSeq()
-          .filter((types) => types.has(type))
-          .map(() => fillWith);
-      } else {
-        newTree = Seq.Keyed();
-      }
+      const fillWith = getToggle(false, type);
+      let newTree: Seq.Keyed<string, Set<SoftLink>> = srcParents
+        ?.toSeq()
+        .filter((types) => types.has(type))
+        .map(() => fillWith) ?? Seq.Keyed();
 
       if (fmParents !== null) {
         const fillWith = getToggle(true, type);
         newTree = newTree.concat(fmParents.toMap().map(() => fillWith));
       }
 
-      // do merge here
       if (!newTree.isEmpty()) {
         const merge = (oldVal: Set<SoftLink>, newVal: Set<SoftLink>) =>
           newVal.isEmpty() ? oldVal.delete(type) : oldVal.add(type);
@@ -235,8 +228,8 @@ export default class RelationCache extends Events {
     const fmChildren = getVaildPathsFromField("children");
     if (fmChildren !== false) {
       const type = LinkType.softIn;
-      let types,
-        fillWith = getToggle(false, type);
+      let types;
+      const fillWith = getToggle(false, type);
       let newTree = this.parentsCache
         .toSeq()
         .filter(
@@ -245,14 +238,24 @@ export default class RelationCache extends Events {
         .map(() => fillWith);
 
       if (fmChildren !== null) {
-        fillWith = getToggle(true, type);
+        const fillWith = getToggle(true, type);
         newTree = newTree.concat(fmChildren.toMap().map(() => fillWith));
       }
 
-      // do merge here
       if (!newTree.isEmpty()) {
-        const merge = (oldVal: Set<SoftLink>, newVal: Set<SoftLink>) =>
-          newVal.isEmpty() ? oldVal.delete(type) : oldVal.add(type);
+        const merge = (oldVal: unknown, newVal: unknown, key: unknown) => {
+          if (key === targetPath && newVal === null && isSet(oldVal))
+            return oldVal.clear();
+          else {
+            console.warn(
+              "unexpected merge in key %s, %o -> %o",
+              key,
+              oldVal,
+              newVal,
+            );
+            return newVal;
+          }
+        };
         // @ts-ignore
         this.parentsCache = this.parentsCache.mergeDeepWith(merge, newTree);
       }
