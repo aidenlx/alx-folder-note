@@ -89,22 +89,11 @@ export default class RelationCache extends Events {
     );
   }
   on(
-    name: "children-removed",
-    callback: (affected: Set<string>, cache: RelationCache) => any,
-    ctx?: any,
-  ): EventRef;
-  on(
-    name: "children-added",
-    callback: (affected: Set<string>, cache: RelationCache) => any,
-    ctx?: any,
-  ): EventRef;
-  on(
-    name: "parent-removed",
-    callback: (affected: Set<string>, cache: RelationCache) => any,
-    ctx?: any,
-  ): EventRef;
-  on(
-    name: "parent-added",
+    name:
+      | "parent-added"
+      | "children-removed"
+      | "children-added"
+      | "parent-removed",
     callback: (affected: Set<string>, cache: RelationCache) => any,
     ctx?: any,
   ): EventRef;
@@ -118,22 +107,11 @@ export default class RelationCache extends Events {
   }
 
   trigger(
-    name: "children-removed",
-    affected: Set<string>,
-    cache: RelationCache,
-  ): void;
-  trigger(
-    name: "children-added",
-    affected: Set<string>,
-    cache: RelationCache,
-  ): void;
-  trigger(
-    name: "parent-removed",
-    affected: Set<string>,
-    cache: RelationCache,
-  ): void;
-  trigger(
-    name: "parent-added",
+    name:
+      | "parent-added"
+      | "children-removed"
+      | "children-added"
+      | "parent-removed",
     affected: Set<string>,
     cache: RelationCache,
   ): void;
@@ -344,8 +322,46 @@ export default class RelationCache extends Events {
   private setCacheFromFile(file: TFile, triggerEvt = true) {
     const [addedFromP, removedFromP] = this.updateFromFmField("parents", file);
     const [addedFromC, removedFromC] = this.updateFromFmField("children", file);
-    const targetPath = file.path;
-
+    if (triggerEvt) {
+      const trigger = (
+        op: Operation,
+        fromC: Set<string> | null,
+        fromP: Set<string> | null,
+      ) => {
+        const notEmpty = (set: typeof fromC): set is Set<string> =>
+          !!set && !set.isEmpty();
+        if (notEmpty(fromC) || notEmpty(fromP)) {
+          const parentAffected = Set<string>().withMutations((m) => {
+            if (fromP && !fromP.isEmpty()) m.add(file.path);
+            if (fromC) m.merge(fromC);
+          });
+          const childrenAddedTo = Set<string>().withMutations((m) => {
+            if (fromC && !fromC.isEmpty()) m.add(file.path);
+            if (fromP) m.merge(fromP);
+          });
+          if (notEmpty(parentAffected)) {
+            const evt =
+              op === "add"
+                ? "parent-added"
+                : op === "remove"
+                ? "parent-removed"
+                : assertNever(op);
+            this.trigger(evt, parentAffected, this);
+          }
+          if (notEmpty(childrenAddedTo)) {
+            const evt =
+              op === "add"
+                ? "children-added"
+                : op === "remove"
+                ? "children-removed"
+                : assertNever(op);
+            this.trigger(evt, childrenAddedTo, this);
+          }
+        }
+      };
+      trigger("add", addedFromC, addedFromP);
+      trigger("remove", removedFromC, removedFromP);
+    }
     // console.log(
     //   `parents of ${targetPath} added: %o, parents of ${targetPath} removed: %o`,
     //   addedFromC?.toJS(),
@@ -356,42 +372,6 @@ export default class RelationCache extends Events {
     //   addedFromP?.toJS(),
     //   removedFromP?.toJS(),
     // );
-    if (triggerEvt) {
-      if (
-        (addedFromC && !addedFromC.isEmpty()) ||
-        (addedFromP && !addedFromP.isEmpty())
-      ) {
-        const parentAddedTo = Set<string>().withMutations((m) => {
-          if (addedFromP && !addedFromP.isEmpty()) m.add(targetPath);
-          if (addedFromC) m.merge(addedFromC);
-        });
-        const childrenAddedTo = Set<string>().withMutations((m) => {
-          if (addedFromC && !addedFromC.isEmpty()) m.add(targetPath);
-          if (addedFromP) m.merge(addedFromP);
-        });
-        if (!parentAddedTo.isEmpty())
-          this.trigger("parent-added", parentAddedTo, this);
-        if (!childrenAddedTo.isEmpty())
-          this.trigger("children-added", childrenAddedTo, this);
-      }
-      if (
-        (removedFromC && !removedFromC.isEmpty()) ||
-        (removedFromP && !removedFromP.isEmpty())
-      ) {
-        const parentAddedTo = Set<string>().withMutations((m) => {
-          if (removedFromP && !removedFromP.isEmpty()) m.add(targetPath);
-          if (removedFromC) m.merge(removedFromC);
-        });
-        const childrenAddedTo = Set<string>().withMutations((m) => {
-          if (removedFromC && !removedFromC.isEmpty()) m.add(targetPath);
-          if (removedFromP) m.merge(removedFromP);
-        });
-        if (!parentAddedTo.isEmpty())
-          this.trigger("parent-removed", parentAddedTo, this);
-        if (!childrenAddedTo.isEmpty())
-          this.trigger("children-removed", childrenAddedTo, this);
-      }
-    }
   }
 }
 
