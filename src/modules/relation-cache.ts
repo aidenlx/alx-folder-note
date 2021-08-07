@@ -1,7 +1,7 @@
 import flat from "array.prototype.flat";
 import assertNever from "assert-never";
 import { is, isRecord, isSet, Map, Record, RecordOf, Set } from "immutable";
-import { EventRef, Events, TFile } from "obsidian";
+import { debounce, EventRef, Events, TFile } from "obsidian";
 
 import { LinkType, SoftLink } from "../components/tools";
 import ALxFolderNote from "../fn-main";
@@ -71,6 +71,16 @@ export default class RelationCache extends Events {
     return result.isEmpty() ? null : result;
   }
 
+  filesToUpdate: TFile[] = [];
+  update = debounce(
+    (file: TFile) => {
+      this.updateCache(this.filesToUpdate);
+      this.filesToUpdate.length = 0;
+    },
+    5e3,
+    true,
+  );
+
   constructor(plugin: ALxFolderNote) {
     super();
     this.plugin = plugin;
@@ -83,7 +93,11 @@ export default class RelationCache extends Events {
 
     plugin.registerEvent(
       this.app.metadataCache.on("changed", (file) => {
-        if (file.extension === "md") this.updateCache(file);
+        if (file.extension === "md") {
+          if (this.filesToUpdate.every((f) => f.path !== file.path))
+            this.filesToUpdate.push(file);
+          this.update(file);
+        }
       }),
     );
   }
