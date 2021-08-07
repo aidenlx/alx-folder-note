@@ -24,17 +24,16 @@ type File_Types = Map<string /* parentPath */, Set<SoftLink>>;
 
 export default class RelationCache extends Events {
   plugin: ALxFolderNote;
-  private get app() {
+  get app() {
     return this.plugin.app;
   }
-  private get settings() {
+  get settings() {
     return this.plugin.settings.relation;
   }
   // @ts-ignore
   parentsCache: File_Parents = Map();
   // @ts-ignore
-  private fmCache: Map<string, Map<RelationInField, Set<string> | null>> =
-    Map();
+  fmCache: Map<string, Map<RelationInField, Set<string> | null>> = Map();
 
   getParentsOf(filePath: string): Set<string> | null {
     return this.parentsCache.get(filePath)?.keySeq().toSet() ?? null;
@@ -138,68 +137,22 @@ export default class RelationCache extends Events {
     if (updateAll) this.trigger("relation-resolved", this);
   }
 
-  private getValFromFmField(
-    key: "parents" | "children",
-    file: TFile,
-  ): Set<string> | null {
-    const fm = this.app.metadataCache.getFileCache(file)?.frontmatter;
-    if (fm) {
-      const val = fm[this.settings.fieldNames[key]];
-      if (typeof val === "string") return Set([val]);
-      if (Array.isArray(val)) return Set(flat(val, Infinity));
-    }
-    return null;
-  }
-
   /**
-   * @returns return false if no changes in frontmatter
+   * Update parent/children from file with given function to get raw fields
+   * @param file file to get fields
+   * @param getValFunc function to get vaild filepaths from file
+   * @returns affected files
    */
-  private getVaildPathsFromFmField(
+  private updateParent(
     key: "parents" | "children",
     file: TFile,
-  ): Set<string> | null | false {
-    const val = this.getValFromFmField(key, file),
-      targetPath = file.path;
-
-    let cachedFm = this.fmCache.getIn([targetPath, key]) as
-      | Set<string>
-      | null
-      | undefined;
-    if (cachedFm !== undefined && is(val, cachedFm)) {
-      return false;
-    } else {
-      this.fmCache = this.fmCache.setIn([targetPath, key], val);
-    }
-
-    if (!val) return null;
-    else {
-      const toVaildPath = (val: string) => {
-        if (!val) return null;
-        const vaildPath = this.app.metadataCache.getFirstLinkpathDest(
-          val,
-          targetPath,
-        );
-        if (!vaildPath)
-          console.warn(
-            `Fail to get file from linktext ${val}, skipping... location: file ${targetPath} field ${this.settings.fieldNames[key]}`,
-          );
-        return vaildPath?.path ?? null;
-      };
-      return val
-        .map(toVaildPath)
-        .filter<string>((v): v is string => v !== null);
-    }
-  }
-
-  private updateFromFmField(
-    key: "parents" | "children",
-    file: TFile,
+    getValFunc: getPathsFromField,
   ): [added: Set<string> | null, removed: Set<string> | null] {
     const targetPath = file.path;
 
     let added: Set<string> | null, removed: Set<string> | null;
     // get from children field
-    const fmPaths = this.getVaildPathsFromFmField(key, file);
+    const fmPaths = getValFunc.call(this, key, file);
     if (fmPaths !== false) {
       type mergeMap = Map<string, Map<string, AlterOp>>;
       /** get all cached relation for given file and marked them remove */
@@ -225,7 +178,7 @@ export default class RelationCache extends Events {
         } else assertNever(key);
       };
       /** fetch relation from file's fm and mark them add */
-      const fetchFromFm = (
+      const fetchFromFile = (
         tree: mergeMap,
       ): [fetched: mergeMap, added: Set<string>] => {
         if (fmPaths !== null) {
@@ -251,7 +204,7 @@ export default class RelationCache extends Events {
           return [tree.merge(addFromPaths), added];
         } else return [tree, Set()];
       };
-      const [newTree, a] = fetchFromFm(fetchFromCache());
+      const [newTree, a] = fetchFromFile(fetchFromCache());
 
       added = a;
       // get removed
@@ -318,10 +271,18 @@ export default class RelationCache extends Events {
     return [added, removed];
   }
 
-  /** read soft links defined in given file and update relationCache */
+  /** Read relation defined in given file and update relationCache */
   private setCacheFromFile(file: TFile, triggerEvt = true) {
-    const [addedFromP, removedFromP] = this.updateFromFmField("parents", file);
-    const [addedFromC, removedFromC] = this.updateFromFmField("children", file);
+    const [addedP, removedP] = this.updateParent(
+      "parents",
+      file,
+      getPathsFromFm,
+    );
+    const [addedC, removedC] = this.updateParent(
+      "children",
+      file,
+      getPathsFromFm,
+    );
     if (triggerEvt) {
       const trigger = (
         op: Operation,
@@ -359,18 +320,18 @@ export default class RelationCache extends Events {
           }
         }
       };
-      trigger("add", addedFromC, addedFromP);
-      trigger("remove", removedFromC, removedFromP);
+      trigger("add", addedC, addedP);
+      trigger("remove", removedC, removedP);
     }
     // console.log(
     //   `parents of ${targetPath} added: %o, parents of ${targetPath} removed: %o`,
-    //   addedFromC?.toJS(),
-    //   removedFromC?.toJS(),
+    //   addedC?.toJS(),
+    //   removedC?.toJS(),
     // );
     // console.log(
     //   `added parent ${targetPath} to %o, removed parent ${targetPath} from %o`,
-    //   addedFromP?.toJS(),
-    //   removedFromP?.toJS(),
+    //   addedP?.toJS(),
+    //   removedP?.toJS(),
     // );
   }
 }
@@ -402,4 +363,59 @@ function getToggle(
   } else if (type === LinkType.softOut) {
     return types;
   } else assertNever(type);
+}
+
+type getPathsFromField = (
+  this: RelationCache,
+  key: "parents" | "children",
+  file: TFile,
+) => Set<string> | null | false;
+
+/**
+ * Get vaild paths from given key of file's frontmatter
+ * @returns false if no changes in frontmatter; null if given key not exists
+ */
+function getPathsFromFm(
+  this: RelationCache,
+  key: "parents" | "children",
+  file: TFile,
+): Set<string> | null | false {
+  const getLinktext = (): Set<string> | null => {
+      const fm = this.app.metadataCache.getFileCache(file)?.frontmatter;
+      if (fm) {
+        const val = fm[this.settings.fieldNames[key]];
+        if (typeof val === "string") return Set([val]);
+        if (Array.isArray(val)) return Set(flat(val, Infinity));
+      }
+      return null;
+    },
+    val = getLinktext(),
+    targetPath = file.path;
+
+  let cachedFm = this.fmCache.getIn([targetPath, key]) as
+    | Set<string>
+    | null
+    | undefined;
+  if (cachedFm !== undefined && is(val, cachedFm)) {
+    return false;
+  } else {
+    this.fmCache = this.fmCache.setIn([targetPath, key], val);
+  }
+
+  if (!val) return null;
+  else {
+    const toVaildPath = (val: string) => {
+      if (!val) return null;
+      const vaildPath = this.app.metadataCache.getFirstLinkpathDest(
+        val,
+        targetPath,
+      );
+      if (!vaildPath)
+        console.warn(
+          `Fail to get file from linktext ${val}, skipping... location: file ${targetPath} field ${this.settings.fieldNames[key]}`,
+        );
+      return vaildPath?.path ?? null;
+    };
+    return val.map(toVaildPath).filter<string>((v): v is string => v !== null);
+  }
 }
