@@ -6,7 +6,7 @@ Add description, summary and more info to folders with folder notes.
 
 ![demo](https://user-images.githubusercontent.com/31102694/128635308-0a58279e-8bf0-4608-9330-fe11180953dd.png)
 
-- [create folder note easily](https://github.com/aidenlx/alx-folder-note/wiki/create-folder-note), with [mulitple preferences](https://github.com/aidenlx/alx-folder-note/wiki/folder-note-pref)
+- [create folder note easily](https://github.com/aidenlx/alx-folder-note/wiki/create-folder-note), with [mulitple preferences](https://github.com/aidenlx/alx-folder-note/wiki/folder-note-pref) and [template](https://github.com/aidenlx/alx-folder-note/wiki/core-settings#template)
 - [make folder acting as a note](https://github.com/aidenlx/alx-folder-note/wiki/folder-as-note)
   - click on folder in file explorer to open folder note
   - [folder and linked note synced as one](https://github.com/aidenlx/alx-folder-note/wiki/core-settings#auto-rename): change folder name from folder note; folder note moves with your folder
