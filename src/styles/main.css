@@ -16,3 +16,7 @@ body:not(.alx-no-hide-note) .nav-file.alx-folder-note > .nav-file-title {
   text-decoration-thickness: 2px;
   text-underline-offset: 1px;
 }
+
+input.incorrect {
+  color: #eb3223;
+}

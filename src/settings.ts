@@ -58,6 +58,7 @@ export class ALxFolderNoteSettingTab extends PluginSettingTab {
     let { containerEl } = this;
     containerEl.empty();
 
+    containerEl.createEl("h2", { text: "Core" });
     this.setNoteLoc();
     if (this.plugin.settings.folderNotePref === NoteLoc.Index)
       this.setIndexName();
@@ -68,6 +69,9 @@ export class ALxFolderNoteSettingTab extends PluginSettingTab {
     this.setHide();
     if (this.plugin.settings.folderNotePref !== NoteLoc.Index)
       this.setAutoRename();
+    containerEl.createEl("h2", { text: "Folder Overview" });
+    this.setH1AsTitle();
+    this.setBriefMax();
   }
 
   setDeleteWithFolder() {
@@ -83,7 +87,6 @@ export class ALxFolderNoteSettingTab extends PluginSettingTab {
           }),
       );
   }
-
   setNoteLoc() {
     new Setting(this.containerEl)
       .setName("Preference for Note File Location")
@@ -201,5 +204,48 @@ export class ALxFolderNoteSettingTab extends PluginSettingTab {
           await this.plugin.saveSettings();
         });
       });
+  }
+
+  setBriefMax() {
+    const isPositiveInteger = (number: string) =>
+      Number.isInteger(+number) && +number > 0;
+    const { settings } = this.plugin;
+    new Setting(this.containerEl)
+      .setName("Maximum Brief Length")
+      .setDesc(
+        "Maximum length of brief generated from 1st paragraph of notes when not description field is set in frontmatter",
+      )
+      .addText((text) => {
+        const save = debounce(
+          async (value: string) => {
+            settings.folderOverview.briefMax = +value;
+            await this.plugin.saveSettings();
+          },
+          500,
+          true,
+        );
+        text
+          .setValue(settings.folderOverview.briefMax.toString())
+          .onChange(async (value: string) => {
+            text.inputEl.toggleClass("incorrect", !isPositiveInteger(value));
+            if (isPositiveInteger(value)) save(value);
+          });
+      });
+  }
+  setH1AsTitle() {
+    const { settings } = this.plugin;
+    new Setting(this.containerEl)
+      .setName("Use First Heading 1 as File Title")
+      .setDesc(
+        "Applied when title field is not set in the frontmatter, fallback to filename when no Heading 1 found",
+      )
+      .addToggle((toggle) =>
+        toggle
+          .setValue(settings.folderOverview.h1AsTitleSource)
+          .onChange(async (value) => {
+            settings.folderOverview.h1AsTitleSource = value;
+            await this.plugin.saveSettings();
+          }),
+      );
   }
 }
