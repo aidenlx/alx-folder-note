@@ -12,7 +12,7 @@ export const GetFolderVHandler: (
   plugin: ALxFolderNote,
 ) => Parameters<ALxFolderNote["registerMarkdownCodeBlockProcessor"]>[1] =
   (plugin) => (source, el, ctx) => {
-    let { target, sort } = parseYaml(source);
+    let { target, sort } = parseYaml(source) ?? {};
     target =
       typeof target === "string"
         ? target
