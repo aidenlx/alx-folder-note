@@ -17,8 +17,7 @@ export const GetFolderVHandler: (
       typeof target === "string"
         ? target
         : plugin.finder.getFolderPath(ctx.sourcePath);
-    // @ts-ignore
-    sort = (SortBy[sort] as SortBy | undefined) ?? SortBy.name;
+    sort = Object.values(SortBy).includes(sort) ? sort : SortBy.name;
     ctx.addChild(
       new FolderVRenderChild(el, {
         plugin,

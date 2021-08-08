@@ -255,8 +255,8 @@ const FileInfo = ({
   type: LinkType;
 }) => (
   <div>
-    <div>Last Modified: {moment(ctime).format("YYYY-MM-DD HH:mm")}</div>
-    <div>Created: {moment(mtime).format("YYYY-MM-DD HH:mm")}</div>
+    <div>Last Modified: {moment(mtime).format("YYYY-MM-DD HH:mm")}</div>
+    <div>Created: {moment(ctime).format("YYYY-MM-DD HH:mm")}</div>
     <div>
       {type === LinkType.hard ? "Hard" : "Soft"} Link; Size: {bytes(size)}
     </div>
