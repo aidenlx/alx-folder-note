@@ -1,3 +1,19 @@
+# [0.7.0](https://github.com/alx-plugins/alx-folder-note/compare/0.6.0...0.7.0) (2021-08-08)
+
+### Bug Fixes
+
+* **fe-handler.ts:** slience the error of no afitem found for path in waitingList ([1146529](https://github.com/alx-plugins/alx-folder-note/commit/11465298acc3ea39dfeceb8c1a816e8eb41a0bfd))
+* remove monkey-around when unload ([9df247f](https://github.com/alx-plugins/alx-folder-note/commit/9df247f0448aab4394d94f6e834a65f259f8fd83))
+* **vault-handler.ts:** fix folder note not update internal links when auto rename ([90922bf](https://github.com/alx-plugins/alx-folder-note/commit/90922bf115ddd89850f4d8de2df8bb060a726eb6))
+
+### Features
+
+* folder overview support ([44303ee](https://github.com/alx-plugins/alx-folder-note/commit/44303eeade5209649144019ced2ed51cb6fd90ac), [7da2a69](https://github.com/alx-plugins/alx-folder-note/commit/7da2a69a6c47deb09b830844cbad5ebd4e920499), [a4a128e](https://github.com/alx-plugins/alx-folder-note/commit/a4a128e78a824c03717e74ea5dc81ef7d37133f0), [9ddd1e1](https://github.com/alx-plugins/alx-folder-note/commit/9ddd1e1bd1daec0ee91c0b4b574a250e630c33d8), [d00bb3e](https://github.com/alx-plugins/alx-folder-note/commit/d00bb3e2f32f3b5346ea554ed38bed4bc2c52e1c)), closes [#6](https://github.com/alx-plugins/alx-folder-note/issues/6)
+
+### Performance Improvements
+
+* move debounce from vaultHandler to feHandler ([c83e125](https://github.com/alx-plugins/alx-folder-note/commit/c83e125fea78aea31c64b59c92d2a237b7bc82dd))
+
 # [0.6.0](https://github.com/alx-plugins/alx-folder-note/compare/0.5.0...0.6.0) (2021-06-11)
 
 
