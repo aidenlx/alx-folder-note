@@ -2,8 +2,8 @@ import "antd/dist/antd.css";
 
 import { Col, Result, Row } from "antd";
 import { OrderedMap, Set } from "immutable";
-import { TFile, TFolder } from "obsidian";
-import { basename } from "path";
+import { TAbstractFile, TFile, TFolder } from "obsidian";
+import { basename, dirname } from "path";
 import React, { useEffect, useState } from "react";
 
 import ALxFolderNote from "../fn-main";
@@ -57,19 +57,52 @@ export const FolderOverview = ({ target, plugin }: FolderOverviewProps) => {
   );
 
   useEffect(() => {
-    const { vault } = plugin.app,
-      handleChildrenChange = () => {};
+    const { vault } = plugin.app;
 
-    plugin.registerEvent(vault.on("create", handleChildrenChange));
-    plugin.registerEvent(vault.on("delete", handleChildrenChange));
-    // only handle move
-    plugin.registerEvent(vault.on("rename", handleChildrenChange));
-    return () => {
-      vault.off("create", handleChildrenChange);
-      vault.off("delete", handleChildrenChange);
-      vault.off("rename", handleChildrenChange);
+    const moveIn = (af: TAbstractFile, type: LinkType) =>
+      af instanceof TFile &&
+      setChildren(
+        (prev) =>
+          prev?.update(af.path, (types) =>
+            types ? types.add(type) : Set([type]),
+          ) ?? prev,
+      );
+    const moveOut = (path: string) =>
+      setChildren((prev) => prev?.delete(path) ?? null);
+
+    const handleVaultChange = (af: TAbstractFile, oldPath?: string) => {
+      if (oldPath) {
+        // rename
+        const parentBefore = dirname(oldPath),
+          parentAfter = dirname(af.path);
+        if (parentAfter === parentBefore) return;
+        // when moved, not rename
+        if (parentAfter === target) moveIn(af, LinkType.hard);
+        else if (parentBefore === target) moveOut(oldPath);
+      } else {
+        const parentPath = dirname(af.path);
+        if (parentPath !== target) return;
+        // create
+        if (af.parent) moveIn(af, LinkType.hard);
+        // delete
+        else moveOut(af.path);
+      }
     };
-  });
+
+    plugin.registerEvent(vault.on("create", handleVaultChange));
+    plugin.registerEvent(vault.on("delete", handleVaultChange));
+    // only handle move
+    plugin.registerEvent(vault.on("rename", handleVaultChange));
+    // plugin.registerEvent(
+    //   metadataCache.on("rr:changed", handleMetaChange),
+    // );
+    return () => {
+      vault.off("create", handleVaultChange);
+      vault.off("delete", handleVaultChange);
+      vault.off("rename", handleVaultChange);
+      // metadataCache.off("rr:changed", handleMetaChange);
+    };
+  }, [plugin, target]);
   if (children) {
     return (
       <Row wrap gutter={[16, 16]}>

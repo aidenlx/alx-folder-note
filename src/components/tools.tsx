@@ -42,6 +42,8 @@ export enum LinkType {
 }
 /** Defined in front-matter/ Dataview inline fields*/
 export type SoftLink = LinkType.softIn | LinkType.softOut;
+export const isSoftLink = (type: LinkType): type is SoftLink =>
+  type !== LinkType.hard;
 
 export const ObInternalLink = ({
   linktext,
