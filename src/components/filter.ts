@@ -1,36 +1,36 @@
-import { Set } from "immutable";
+// import { Set } from "immutable";
 import minimatch from "minimatch";
+import RegexParser from "regex-parser";
 
 export type Filter = ((name: string) => boolean) | null;
 
-const RegExpPattern = /^\/(.+)\/([gimsuy]*)$/;
-const getRegex = (str: string): RegExp | null => {
-  if (RegExpPattern.test(str)) {
-    const [, pattern, flags] = str.match(RegExpPattern) as RegExpMatchArray;
-    return new RegExp(pattern, flags ?? undefined);
-  } else return null;
+const getRegex = (input: string): RegExp | null => {
+  // https://github.com/IonicaBizau/regex-parser.js
+  // Parse input
+  let m = input.match(/(\/?)(.+)\1([a-z]*)/i);
+  if (
+    !m || //Invalid flags
+    (m[3] && !/^(?!.*?(.).*?\1)[gmixXsuUAJ]+$/.test(m[3]))
+  )
+    return null;
+  // Create the regular expression
+  return new RegExp(m[2], m[3]);
 };
-const filterToRegex = (fields: unknown): Set<RegExp | string> | null => {
-  if (!fields) return null;
-  let patterns: Set<string>;
-  if (typeof fields === "string") patterns = Set([fields]);
-  else if (Array.isArray(fields))
-    patterns = Set(fields.filter((v) => typeof v === "string"));
-  else return null;
-
-  const returns = patterns.map((raw) => getRegex(raw) ?? raw);
-  return returns.isEmpty() ? null : returns;
+const filterToRegex = (field: unknown): RegExp | string | null => {
+  if (!field || typeof field !== "string") return null;
+  return getRegex(field) ?? field;
 };
 
 export const getFilter = (fields: unknown): Filter => {
-  const patterns = filterToRegex(fields);
-  if (patterns) {
+  const pattern = filterToRegex(fields);
+  if (pattern) {
     return (name) => {
-      for (const p of patterns) {
-        if (typeof p === "string" ? minimatch(name, p) : p.test(name))
-          return true;
+      if (typeof pattern === "string") return minimatch(name, pattern);
+      else {
+        const result = pattern.test(name);
+        pattern.lastIndex = 0;
+        return result;
       }
-      return false;
     };
   } else return null;
 };
