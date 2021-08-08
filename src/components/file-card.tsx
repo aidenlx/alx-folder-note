@@ -64,7 +64,7 @@ export const FileCard = ({ plugin, src, cover, linkType }: FileCardProps) => {
   );
 
   useEffect(() => {
-    getBriefInfo(file, plugin.app).then((info) => setBrief(info));
+    getBriefInfo(file, plugin).then((info) => setBrief(info));
     const handleFileChange = async (af: TAbstractFile, oldPath?: string) => {
       const titleSetup = () =>
         setTitle(getTitle(file, settings.h1AsTitleSource, plugin.app));
@@ -76,7 +76,7 @@ export const FileCard = ({ plugin, src, cover, linkType }: FileCardProps) => {
         else return;
       } else {
         titleSetup();
-        setBrief(await getBriefInfo(file, plugin.app));
+        setBrief(await getBriefInfo(file, plugin));
         setTags(getTags(file, plugin.app));
       }
       setStat(file.stat);
@@ -144,15 +144,19 @@ const getTitle = (file: TFile, h1AsTitleSource: boolean, app: App) => {
   return file.basename;
 };
 
-const getDocBrief = async (file: TFile, app: App): Promise<string | null> => {
-  const { metadataCache, vault } = app;
+const getDocBrief = async (
+  file: TFile,
+  plugin: ALxFolderNote,
+): Promise<string | null> => {
+  const { metadataCache, vault } = plugin.app;
+  const { briefMax } = plugin.settings.folderOverview;
   const get1stParagraph = async (sections: SectionCache[] | undefined) => {
     if (!sections) return null;
     const result = sections.find((sec) => sec.type === "paragraph");
     if (!result) return null;
     const { start, end } = result.position;
     let doc = await vault.cachedRead(file);
-    return doc.substring(start.offset, end.offset);
+    return doc.substring(start.offset, end.offset).substring(0, briefMax);
   };
 
   const cache = metadataCache.getFileCache(file);
@@ -219,16 +223,16 @@ const Tags = ({ tags }: { tags: Set<string> }) =>
 
 const getBriefInfo = async (
   file: TFile,
-  app: App,
+  plugin: ALxFolderNote,
 ): Promise<BriefInfo | null> => {
   const type = getFileType(file.extension);
   switch (type) {
     case FileType.md: {
-      const content = await getDocBrief(file, app);
+      const content = await getDocBrief(file, plugin);
       return { type, content };
     }
     case FileType.img:
-      return { type, src: app.vault.getResourcePath(file) };
+      return { type, src: plugin.app.vault.getResourcePath(file) };
     case FileType.pdf:
     case FileType.video:
     case FileType.audio:
