@@ -26,7 +26,10 @@ const getClickHandler = (plugin: ALxFolderNote) => (evt: MouseEvent) => {
         return false;
       }
       const folder = plugin.feHandler.files.get(navFolder) as TFolder;
-      const createNew = isModifier(evt, plugin.settings.modifierForNewNote);
+      const createNew =
+        (evt.type === "click" &&
+          isModifier(evt, plugin.settings.modifierForNewNote)) ||
+        (evt.type === "auxclick" && evt.button === 1);
 
       // check if folder note exists
       const { info, path } = getFolderNotePath(folder);
@@ -45,9 +48,7 @@ const getClickHandler = (plugin: ALxFolderNote) => (evt: MouseEvent) => {
         folderNote.path,
         "",
         createNew || evt.type === "auxclick",
-        {
-          active: true,
-        },
+        { active: true },
       );
       return true;
     } catch (error) {
