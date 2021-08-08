@@ -39,15 +39,13 @@ const getChildren = (
         .filter((af): af is TFile => af instanceof TFile)
         .map((f) => [f.path, Set<LinkType>([LinkType.hard])]),
     );
-
-    let folderNote = plugin.finder.getFolderNote(af);
-    if (folderNote) {
-      const softChildren = plugin.relationCache.getChildrenWithTypes(
-        folderNote.path,
-      );
-      if (softChildren) children = children.concat(softChildren);
-    }
-
+    // let folderNote = plugin.finder.getFolderNote(af);
+    // if (folderNote) {
+    //   const softChildren = plugin.relationCache.getChildrenWithTypes(
+    //     folderNote.path,
+    //   );
+    //   if (softChildren) children = children.concat(softChildren);
+    // }
     return children;
   } else return null;
 };

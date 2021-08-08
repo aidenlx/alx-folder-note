@@ -1,4 +1,4 @@
-import { App, MarkdownRenderChild, parseYaml, Plugin_2 } from "obsidian";
+import { MarkdownRenderChild, parseYaml } from "obsidian";
 import React from "react";
 import ReactDOM from "react-dom";
 
@@ -9,7 +9,7 @@ export const FOLDERV_ID = "folderv";
 
 export const GetFolderVHandler: (
   plugin: ALxFolderNote,
-) => Parameters<Plugin_2["registerMarkdownCodeBlockProcessor"]>[1] =
+) => Parameters<ALxFolderNote["registerMarkdownCodeBlockProcessor"]>[1] =
   (plugin) => (source, el, ctx) => {
     let { target } = parseYaml(source);
     target =

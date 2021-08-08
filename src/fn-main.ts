@@ -7,7 +7,6 @@ import initialize from "./initialize";
 import { AddOptionsForFolder, AddOptionsForNote } from "./modules/commands";
 import FEHandler from "./modules/fe-handler";
 import NoteFinder from "./modules/find";
-import RelationCache from "./modules/relation-cache";
 import VaultHandler from "./modules/vault-handler";
 import {
   ALxFolderNoteSettings,
@@ -20,7 +19,6 @@ export default class ALxFolderNote extends Plugin {
   vaultHandler = new VaultHandler(this);
   finder = new NoteFinder(this);
   initialize = initialize.bind(this);
-  relationCache = new RelationCache(this);
 
   async onload() {
     console.log("loading alx-folder-note");

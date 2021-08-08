@@ -3,7 +3,6 @@ import { App, debounce, Modifier, PluginSettingTab, Setting } from "obsidian";
 import ALxFolderNote from "./fn-main";
 import { isMac, NoteLoc } from "./misc";
 import FEHandler from "./modules/fe-handler";
-import { RelationInField } from "./modules/relation-cache";
 
 export const noHideMark = "alx-no-hide-note";
 
@@ -19,9 +18,6 @@ export interface ALxFolderNoteSettings {
     h1AsTitleSource: boolean;
     briefMax: number;
   };
-  relation: {
-    fieldNames: Record<RelationInField, string>;
-  };
 }
 
 export const DEFAULT_SETTINGS: ALxFolderNoteSettings = {
@@ -35,12 +31,6 @@ export const DEFAULT_SETTINGS: ALxFolderNoteSettings = {
   folderOverview: {
     h1AsTitleSource: true,
     briefMax: 64,
-  },
-  relation: {
-    fieldNames: {
-      parents: "parent",
-      children: "children",
-    },
   },
 };
 
