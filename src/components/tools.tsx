@@ -1,7 +1,7 @@
 import Icon from "@ant-design/icons";
 import assertNever from "assert-never";
-import { FileStats, moment } from "obsidian";
-import bytes from "pretty-bytes";
+import { List, OrderedMap, Set } from "immutable";
+import { TFile } from "obsidian";
 import React, { PropsWithChildren } from "react";
 import { FaMarkdown } from "react-icons/fa";
 import {
@@ -11,6 +11,8 @@ import {
   FcImageFile,
   FcVideoFile,
 } from "react-icons/fc";
+
+import { IRecord, IRecordOf, required } from "../improved-record";
 
 export const getFileType = (ext: string): FileType => {
   const img = ["bmp", "png", "jpg", "jpeg", "gif", "svg"],
@@ -77,22 +79,6 @@ export const ObTag = ({ tag }: { tag: string }) => (
   </a>
 );
 
-export const FileInfo = ({
-  stat: { ctime, mtime, size },
-  type,
-}: {
-  stat: FileStats;
-  type: LinkType;
-}) => (
-  <div>
-    <div>Last Modified: {moment(ctime).format("YYYY-MM-DD HH:mm")}</div>
-    <div>Created: {moment(mtime).format("YYYY-MM-DD HH:mm")}</div>
-    <div>
-      {type === LinkType.hard ? "Hard" : "Soft"} Link; Size: {bytes(size)}
-    </div>
-  </div>
-);
-
 export const getIcon = (type: FileType) => {
   let icon: JSX.Element;
   switch (type) {
@@ -119,3 +105,14 @@ export const getIcon = (type: FileType) => {
   }
   return <Icon component={(prop) => icon} style={{ fontSize: "1.5em" }} />;
 };
+
+interface FileInfoProps {
+  file: TFile;
+  types?: Set<LinkType>;
+}
+export type FileInfo = IRecordOf<FileInfoProps>;
+export const FileInfo = IRecord<FileInfoProps>({
+  file: required,
+  types: Set([LinkType.hard]),
+});
+export type Path_Types = OrderedMap<string, FileInfo>;

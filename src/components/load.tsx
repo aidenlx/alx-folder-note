@@ -3,7 +3,8 @@ import React from "react";
 import ReactDOM from "react-dom";
 
 import ALxFolderNote from "../fn-main";
-import { FolderOverview, FolderOverviewProps, SortBy } from "./folderv";
+import { FolderOverview, FolderOverviewProps } from "./folderv";
+import { SortBy } from "./sort";
 
 export const FOLDERV_ID = "folderv";
 
@@ -11,18 +12,20 @@ export const GetFolderVHandler: (
   plugin: ALxFolderNote,
 ) => Parameters<ALxFolderNote["registerMarkdownCodeBlockProcessor"]>[1] =
   (plugin) => (source, el, ctx) => {
-    let { target } = parseYaml(source);
+    let { target, sort } = parseYaml(source);
     target =
       typeof target === "string"
         ? target
         : plugin.finder.getFolderPath(ctx.sourcePath);
+    // @ts-ignore
+    sort = (SortBy[sort] as SortBy | undefined) ?? SortBy.name;
     ctx.addChild(
       new FolderVRenderChild(el, {
         plugin,
         target,
         style: "grid",
         filter: [],
-        sort: SortBy.name,
+        sort,
       }),
     );
   };

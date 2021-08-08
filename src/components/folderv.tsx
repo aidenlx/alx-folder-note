@@ -1,23 +1,15 @@
 import "antd/dist/antd.css";
 
 import { Col, Result, Row } from "antd";
-import { OrderedMap, Set } from "immutable";
+import { List, OrderedMap, Set } from "immutable";
 import { TAbstractFile, TFile, TFolder } from "obsidian";
-import { basename, dirname } from "path";
+import { dirname } from "path";
 import React, { useEffect, useState } from "react";
 
 import ALxFolderNote from "../fn-main";
 import { FileCard } from "./file-card";
-import { LinkType } from "./tools";
-
-export enum SortBy {
-  name,
-  nameR,
-  mtime,
-  mtimeR,
-  ctime,
-  ctimR,
-}
+import { getSorted, SortBy } from "./sort";
+import { FileInfo, LinkType, Path_Types } from "./tools";
 export interface FolderOverviewProps {
   plugin: ALxFolderNote;
   /** should be path, not linktext */
@@ -27,17 +19,17 @@ export interface FolderOverviewProps {
   sort: SortBy;
 }
 
-type Path_Types = OrderedMap<string, Set<LinkType>>;
 const getChildren = (
   folder: string,
   plugin: ALxFolderNote,
 ): Path_Types | null => {
   const af = plugin.app.vault.getAbstractFileByPath(folder);
   if (af instanceof TFolder) {
-    let children: Path_Types = OrderedMap(
-      af.children
-        .filter((af): af is TFile => af instanceof TFile)
-        .map((f) => [f.path, Set<LinkType>([LinkType.hard])]),
+    let children: Path_Types = OrderedMap<string, FileInfo>().withMutations(
+      (map) =>
+        af.children
+          .filter((af): af is TFile => af instanceof TFile)
+          .forEach((file) => map.set(file.path, FileInfo({ file }))),
     );
     // let folderNote = plugin.finder.getFolderNote(af);
     // if (folderNote) {
@@ -50,10 +42,13 @@ const getChildren = (
   } else return null;
 };
 
-export const FolderOverview = ({ target, plugin }: FolderOverviewProps) => {
+export const FolderOverview = ({
+  target,
+  plugin,
+  sort,
+}: FolderOverviewProps) => {
   const [children, setChildren] = useState<Path_Types | null>(
-    getChildren(target, plugin)?.sortBy<string>((_v, path) => basename(path)) ??
-      null,
+    getSorted(getChildren(target, plugin), sort),
   );
 
   useEffect(() => {
@@ -61,14 +56,24 @@ export const FolderOverview = ({ target, plugin }: FolderOverviewProps) => {
 
     const moveIn = (af: TAbstractFile, type: LinkType) =>
       af instanceof TFile &&
-      setChildren(
-        (prev) =>
-          prev?.update(af.path, (types) =>
-            types ? types.add(type) : Set([type]),
-          ) ?? prev,
-      );
-    const moveOut = (path: string) =>
-      setChildren((prev) => prev?.delete(path) ?? null);
+      setChildren((prev) => {
+        if (!prev) return prev;
+        // @ts-ignore
+        return prev.update(af.path, (info) => {
+          if (info) return info.update("types", (types) => types.add(type));
+          else return FileInfo({ file: af, types: Set([type]) });
+        });
+      });
+    const moveOut = (path: string, type: LinkType) =>
+      // @ts-ignore
+      setChildren((prev) => {
+        if (!prev) return prev;
+        const info = prev.get(path);
+        if (info && info.types.has(type)) {
+          if (info.types.size <= 1) return prev.delete(path);
+          else return info.update("types", (types) => types.delete(type));
+        }
+      });
 
     const handleVaultChange = (af: TAbstractFile, oldPath?: string) => {
       if (oldPath) {
@@ -78,14 +83,14 @@ export const FolderOverview = ({ target, plugin }: FolderOverviewProps) => {
         if (parentAfter === parentBefore) return;
         // when moved, not rename
         if (parentAfter === target) moveIn(af, LinkType.hard);
-        else if (parentBefore === target) moveOut(oldPath);
+        else if (parentBefore === target) moveOut(oldPath, LinkType.hard);
       } else {
         const parentPath = dirname(af.path);
         if (parentPath !== target) return;
         // create
         if (af.parent) moveIn(af, LinkType.hard);
         // delete
-        else moveOut(af.path);
+        else moveOut(af.path, LinkType.hard);
       }
     };
 
@@ -108,7 +113,7 @@ export const FolderOverview = ({ target, plugin }: FolderOverviewProps) => {
       <Row wrap gutter={[16, 16]}>
         {children
           .entrySeq()
-          .map(([path, types]) => (
+          .map(([path, { types }]) => (
             <Col
               key={path}
               flex="12em 1 0"

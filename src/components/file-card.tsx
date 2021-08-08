@@ -1,13 +1,20 @@
 import { Card, Empty, Image, Skeleton, Space, Tag, Tooltip } from "antd";
 import Paragraph from "antd/lib/typography/Paragraph";
 import assertNever from "assert-never";
-import { App, SectionCache, TAbstractFile, TFile, TFolder } from "obsidian";
+import {
+  App,
+  FileStats,
+  moment,
+  SectionCache,
+  TAbstractFile,
+  TFile,
+} from "obsidian";
 import { dirname } from "path";
+import bytes from "pretty-bytes";
 import React, { ReactNode, useEffect, useMemo, useState } from "react";
 
 import ALxFolderNote from "../fn-main";
 import {
-  FileInfo,
   FileType,
   getFileType,
   getIcon,
@@ -239,3 +246,19 @@ const getTags = (file: TFile, app: App): Set<string> => {
     return new Set();
   } else return new Set(cache.tags?.map((v) => v.tag));
 };
+
+const FileInfo = ({
+  stat: { ctime, mtime, size },
+  type,
+}: {
+  stat: FileStats;
+  type: LinkType;
+}) => (
+  <div>
+    <div>Last Modified: {moment(ctime).format("YYYY-MM-DD HH:mm")}</div>
+    <div>Created: {moment(mtime).format("YYYY-MM-DD HH:mm")}</div>
+    <div>
+      {type === LinkType.hard ? "Hard" : "Soft"} Link; Size: {bytes(size)}
+    </div>
+  </div>
+);
