@@ -17,6 +17,8 @@ export interface ALxFolderNoteSettings {
   folderOverview: {
     h1AsTitleSource: boolean;
     briefMax: number;
+    titleField: string;
+    descField: string;
   };
 }
 
@@ -27,10 +29,12 @@ export const DEFAULT_SETTINGS: ALxFolderNoteSettings = {
   modifierForNewNote: "Meta",
   hideNoteInExplorer: true,
   autoRename: true,
-  folderNoteTemplate: "# {{FOLDER_NAME}}",
+  folderNoteTemplate: "# {{FOLDER_NAME}}\n\n```folderv\n```",
   folderOverview: {
     h1AsTitleSource: true,
-    briefMax: 64,
+    briefMax: 128,
+    titleField: "title",
+    descField: "description",
   },
 };
 
@@ -72,6 +76,7 @@ export class ALxFolderNoteSettingTab extends PluginSettingTab {
     containerEl.createEl("h2", { text: "Folder Overview" });
     this.setH1AsTitle();
     this.setBriefMax();
+    this.setTitleDescField();
   }
 
   setDeleteWithFolder() {
@@ -247,5 +252,40 @@ export class ALxFolderNoteSettingTab extends PluginSettingTab {
             await this.plugin.saveSettings();
           }),
       );
+  }
+  setTitleDescField() {
+    const { settings } = this.plugin;
+    new Setting(this.containerEl)
+      .setName("Title Field Name")
+      .setDesc("Used to find title set in note's frontmatter")
+      .addText((text) => {
+        const save = debounce(
+          async (value: string) => {
+            settings.folderOverview.titleField = value;
+            await this.plugin.saveSettings();
+          },
+          500,
+          true,
+        );
+        text
+          .setValue(settings.folderOverview.titleField)
+          .onChange(async (value: string) => save(value));
+      });
+    new Setting(this.containerEl)
+      .setName("Description Field Name")
+      .setDesc("Used to find description set in note's frontmatter")
+      .addText((text) => {
+        const save = debounce(
+          async (value: string) => {
+            settings.folderOverview.descField = value;
+            await this.plugin.saveSettings();
+          },
+          500,
+          true,
+        );
+        text
+          .setValue(settings.folderOverview.descField)
+          .onChange(async (value: string) => save(value));
+      });
   }
 }

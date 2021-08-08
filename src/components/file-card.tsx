@@ -50,9 +50,7 @@ export const FileCard = ({ plugin, src, cover, linkType }: FileCardProps) => {
   if (!file) throw new Error("Unable to find file/folder at path: " + src);
   else if (!(file instanceof TFile)) throw new Error("Folder not supported");
 
-  const [title, setTitle] = useState(
-    getTitle(file, settings.h1AsTitleSource, plugin.app),
-  );
+  const [title, setTitle] = useState(getTitle(file, plugin));
 
   const [stat, setStat] = useState(file.stat);
   const [brief, setBrief] = useState<BriefInfo | null>(null);
@@ -66,8 +64,7 @@ export const FileCard = ({ plugin, src, cover, linkType }: FileCardProps) => {
   useEffect(() => {
     getBriefInfo(file, plugin).then((info) => setBrief(info));
     const handleFileChange = async (af: TAbstractFile, oldPath?: string) => {
-      const titleSetup = () =>
-        setTitle(getTitle(file, settings.h1AsTitleSource, plugin.app));
+      const titleSetup = () => setTitle(getTitle(file, plugin));
       if (af.path !== file.path) return;
       // handle vault.on(rename)
       if (oldPath) {
@@ -127,18 +124,17 @@ export const FileCard = ({ plugin, src, cover, linkType }: FileCardProps) => {
 };
 
 /** Get title from file content */
-const getTitle = (file: TFile, h1AsTitleSource: boolean, app: App) => {
-  const cache = app.metadataCache.getFileCache(file);
+const getTitle = (file: TFile, plugin: ALxFolderNote) => {
+  const { metadataCache } = plugin.app;
+  const { titleField, h1AsTitleSource: useH1 } = plugin.settings.folderOverview;
+  const cache = metadataCache.getFileCache(file);
   if (!cache) console.log("no meta for file %o, fallback to filename", file);
   else {
-    if (typeof cache.frontmatter?.title === "string")
-      return cache.frontmatter.title;
+    const { frontmatter, headings } = cache;
+    if (frontmatter && typeof frontmatter[titleField] === "string")
+      return frontmatter[titleField];
     let h1;
-    if (
-      h1AsTitleSource &&
-      cache.headings &&
-      (h1 = cache.headings.find((h) => h.level === 1))
-    )
+    if (useH1 && headings && (h1 = headings.find((h) => h.level === 1)))
       return h1.heading;
   }
   return file.basename;
@@ -149,8 +145,10 @@ const getDocBrief = async (
   plugin: ALxFolderNote,
 ): Promise<string | null> => {
   const { metadataCache, vault } = plugin.app;
-  const { briefMax } = plugin.settings.folderOverview;
-  const get1stParagraph = async (sections: SectionCache[] | undefined) => {
+  const { briefMax, descField } = plugin.settings.folderOverview;
+  const get1stParagraph = async (
+    sections: SectionCache[] | undefined,
+  ): Promise<string | null> => {
     if (!sections) return null;
     const result = sections.find((sec) => sec.type === "paragraph");
     if (!result) return null;
@@ -163,8 +161,9 @@ const getDocBrief = async (
   if (!cache) console.log("no meta for file %o, fallback to null", file);
   else {
     const { frontmatter, sections } = cache;
-    if (frontmatter?.description) return frontmatter.description;
-    return await get1stParagraph(sections);
+    if (frontmatter && typeof frontmatter[descField] === "string")
+      return frontmatter[descField];
+    else return await get1stParagraph(sections);
   }
   return null;
 };
