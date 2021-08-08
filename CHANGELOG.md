@@ -1,3 +1,16 @@
+# [0.8.0](https://github.com/aidenlx/alx-folder-note/compare/0.7.0...0.8.0) (2021-08-08)
+
+
+### Bug Fixes
+
+* **sort:** fix regex  not parsed correctly; fix test when regex flag set to g ([d0bdf4a](https://github.com/aidenlx/alx-folder-note/commit/d0bdf4a4d61e22383277178aa9c96b95ae1c8d1c))
+
+
+### Features
+
+* add custom title and description field name; update default settting ([33ad9f8](https://github.com/aidenlx/alx-folder-note/commit/33ad9f880d47d0cca8c52f87e0c9d9b805c4d687))
+* add mid-click on folder to create new folder note ([ebefb6a](https://github.com/aidenlx/alx-folder-note/commit/ebefb6a7572ffd16afd5fe63ddbece22e4b9b3a8))
+
 # [0.7.0](https://github.com/alx-plugins/alx-folder-note/compare/0.6.0...0.7.0) (2021-08-08)
 
 ### Bug Fixes
