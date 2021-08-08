@@ -1,23 +1,13 @@
 # AidenLx's Folder Note
 
-An complete rewrite of [xpgo/obsidian-folder-note-plugin](https://github.com/xpgo/obsidian-folder-note-plugin)
+Add description, summary and more info to folders with folder notes. 
 
-- Using Obsidian API in favor of pure dom parse
-- Support hiding folder note in file explorer automatically
-- Support open folder note by click on folder similar to open a file:
-  - click on folder with notes will open folder note without triggering folder collapse (collapse-indicator is still available)
-  - mid-click on folder open note in a new window
-- Two way sync between folder and its note
-  - folder notes moves with folder, even if it's outside of folder
-  - move in new file that matches folder note will hide note automatically
-  - move out folder not will show note again
-- Live updates when changing settings
-
-Note: without xpgo's permission, the [ccard feature](https://github.com/xpgo/obsidian-folder-note-plugin#overview-of-folder) won't be able to be ported directly, so it will take a while for this feature to get fully rewritten. But anyway, it's on the roadmap. :)
+(Special thanks to [xpgo](https://github.com/xpgo) for the [obsidian-folder-note-plugin](https://github.com/xpgo/obsidian-folder-note-plugin))
 
 ## How to use
 
-Please visit: <https://github.com/xpgo/obsidian-folder-note-plugin#readme>
+TODO
+
 ## Compatibility
 
 The required API feature is only available for Obsidian v0.12.5+.
@@ -44,4 +34,4 @@ enable the plugin from there.
 3. Click `Browse community plugins`
 4. Search for this plugin
 5. Click `Install`
-6. Once installed, close the community plugins window and the patch is ready to use.
+6. Once installed, close the community plugins window and the plugin is ready to use.

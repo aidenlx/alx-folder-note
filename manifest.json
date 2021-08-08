@@ -3,7 +3,7 @@
   "name": "AidenLx's Folder Note",
   "version": "0.7.0",
   "minAppVersion": "0.12.5",
-  "description": "An completely rewrite of xpgo/obsidian-folder-note-plugin",
+  "description": "Add description, summary and more info to folders with folder notes.",
   "author": "",
   "authorUrl": "",
   "isDesktopOnly": true
