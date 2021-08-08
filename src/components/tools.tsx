@@ -1,6 +1,6 @@
 import Icon from "@ant-design/icons";
 import assertNever from "assert-never";
-import { List, OrderedMap, Set } from "immutable";
+import { OrderedMap, Set } from "immutable";
 import { TFile } from "obsidian";
 import React, { PropsWithChildren } from "react";
 import { FaMarkdown } from "react-icons/fa";

@@ -3,6 +3,7 @@ import React from "react";
 import ReactDOM from "react-dom";
 
 import ALxFolderNote from "../fn-main";
+import { getFilter } from "./filter";
 import { FolderOverview, FolderOverviewProps } from "./folderv";
 import { SortBy } from "./sort";
 
@@ -12,7 +13,7 @@ export const GetFolderVHandler: (
   plugin: ALxFolderNote,
 ) => Parameters<ALxFolderNote["registerMarkdownCodeBlockProcessor"]>[1] =
   (plugin) => (source, el, ctx) => {
-    let { target, sort } = parseYaml(source) ?? {};
+    let { target, sort, filter } = parseYaml(source) ?? {};
     target =
       typeof target === "string"
         ? target
@@ -23,7 +24,7 @@ export const GetFolderVHandler: (
         plugin,
         target,
         style: "grid",
-        filter: [],
+        filter: getFilter(filter),
         sort,
       }),
     );

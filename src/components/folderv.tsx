@@ -8,28 +8,33 @@ import React, { useEffect, useState } from "react";
 
 import ALxFolderNote from "../fn-main";
 import { FileCard } from "./file-card";
+import { Filter } from "./filter";
 import { getSorted, SortBy } from "./sort";
 import { FileInfo, LinkType, Path_Types } from "./tools";
 export interface FolderOverviewProps {
   plugin: ALxFolderNote;
   /** should be path, not linktext */
   target: string;
-  filter: string[];
+  filter?: Filter;
   style: "grid" | "list";
   sort: SortBy;
 }
 
 const getChildren = (
-  folder: string,
+  folderPath: string,
   plugin: ALxFolderNote,
+  filter?: Filter,
 ): Path_Types | null => {
-  const af = plugin.app.vault.getAbstractFileByPath(folder);
-  if (af instanceof TFolder) {
-    let children: Path_Types = OrderedMap<string, FileInfo>().withMutations(
-      (map) =>
-        af.children
-          .filter((af): af is TFile => af instanceof TFile)
-          .forEach((file) => map.set(file.path, FileInfo({ file }))),
+  const folder = plugin.app.vault.getAbstractFileByPath(folderPath);
+  const internalFilter = filter
+    ? (af: TAbstractFile): af is TFile => af instanceof TFile && filter(af.name)
+    : (af: TAbstractFile): af is TFile => af instanceof TFile;
+  if (folder instanceof TFolder) {
+    return OrderedMap<string, FileInfo>().withMutations((map) =>
+      folder.children.forEach(
+        (file) =>
+          internalFilter(file) && map.set(file.path, FileInfo({ file })),
+      ),
     );
     // let folderNote = plugin.finder.getFolderNote(af);
     // if (folderNote) {
@@ -38,7 +43,6 @@ const getChildren = (
     //   );
     //   if (softChildren) children = children.concat(softChildren);
     // }
-    return children;
   } else return null;
 };
 
@@ -46,9 +50,10 @@ export const FolderOverview = ({
   target,
   plugin,
   sort,
+  filter,
 }: FolderOverviewProps) => {
   const [children, setChildren] = useState<Path_Types | null>(
-    getSorted(getChildren(target, plugin), sort),
+    getSorted(getChildren(target, plugin, filter), sort),
   );
 
   useEffect(() => {
