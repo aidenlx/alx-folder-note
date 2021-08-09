@@ -1,3 +1,15 @@
+# [0.9.0](https://github.com/aidenlx/alx-folder-note/compare/0.8.0...0.9.0) (2021-08-09)
+
+
+### Bug Fixes
+
+* fix css global pollution ([220f069](https://github.com/aidenlx/alx-folder-note/commit/220f06955d4053c3e1b34a0f7f87e815e5ee890d)), closes [#14](https://github.com/aidenlx/alx-folder-note/issues/14)
+
+
+### Features
+
+* add support for dark mode ([e590015](https://github.com/aidenlx/alx-folder-note/commit/e5900159f1deff7ce41c49bedfc971266db5d8e3)), closes [#15](https://github.com/aidenlx/alx-folder-note/issues/15)
+
 # [0.8.0](https://github.com/aidenlx/alx-folder-note/compare/0.7.0...0.8.0) (2021-08-08)
 
 
