@@ -1,3 +1,10 @@
+## [0.9.1](https://github.com/aidenlx/alx-folder-note/compare/0.9.0...0.9.1) (2021-08-09)
+
+
+### Bug Fixes
+
+* **folderv:** fix tooltip ([adc983b](https://github.com/aidenlx/alx-folder-note/commit/adc983b7bc59ea6a2ca4289504164cb58029dd2e))
+
 # [0.9.0](https://github.com/aidenlx/alx-folder-note/compare/0.8.0...0.9.0) (2021-08-09)
 
 
