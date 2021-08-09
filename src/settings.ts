@@ -95,7 +95,21 @@ export class ALxFolderNoteSettingTab extends PluginSettingTab {
   setNoteLoc() {
     new Setting(this.containerEl)
       .setName("Preference for Note File Location")
-      .setDesc("Select how you would like the folder note to be placed")
+      .setDesc(
+        createFragment((el) => {
+          el.appendText(
+            "Select how you would like the folder note to be placed",
+          );
+          el.createEl("br");
+          el.createEl("a", {
+            href: "https://github.com/aidenlx/alx-folder-note/wiki/folder-note-pref",
+            text: "Check here",
+          });
+          el.appendText(
+            " for more detail for pros and cons for different strategies",
+          );
+        }),
+      )
       .addDropdown((dropDown) => {
         const options: Record<NoteLoc, string> = {
           [NoteLoc.Index]: "Inside Folder, Index File",
@@ -150,7 +164,7 @@ export class ALxFolderNoteSettingTab extends PluginSettingTab {
           .setValue(this.plugin.settings.folderNoteTemplate)
           .onChange(debounce(onChange, 500, true));
         text.inputEl.rows = 8;
-        text.inputEl.cols = 50;
+        text.inputEl.cols = 30;
       });
   }
   setModifier() {
