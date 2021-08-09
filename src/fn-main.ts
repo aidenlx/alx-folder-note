@@ -1,6 +1,6 @@
 import "./styles/main.css";
 
-import { Plugin, TFolder } from "obsidian";
+import { debounce, Debouncer, Notice, Plugin, TFolder } from "obsidian";
 
 import { FOLDERV_ID, GetFolderVHandler } from "./components/load";
 import initialize from "./initialize";
@@ -19,6 +19,35 @@ export default class ALxFolderNote extends Plugin {
   vaultHandler = new VaultHandler(this);
   finder = new NoteFinder(this);
   initialize = initialize.bind(this);
+
+  private _notify = (
+    id: string,
+    message: string | null,
+    timeout?: number | undefined,
+  ): void => {
+    if (message) new Notice(message, timeout);
+    this._noticeSender.delete(id);
+  };
+  private _noticeSender = new Map<
+    string,
+    Debouncer<Parameters<ALxFolderNote["notify"]>>
+  >();
+  /**
+   * @param message set to null to cancel message
+   */
+  notify = (
+    id: string,
+    message: string | null,
+    timeout?: number | undefined,
+  ) => {
+    let sender = this._noticeSender.get(id);
+    if (sender) sender(id, message, timeout);
+    else if (message) {
+      const debouncer = debounce(this._notify, 1e3, true);
+      this._noticeSender.set(id, debouncer);
+      debouncer(id, message, timeout);
+    }
+  };
 
   async onload() {
     console.log("loading alx-folder-note");

@@ -3,8 +3,8 @@ import assertNever from "assert-never";
 import { Path_Types } from "./tools";
 
 export enum SortBy {
-  name = "name",
-  nameR = "nameR",
+  name = "name-az",
+  nameR = "name-za",
   mtimeN = "modify-new",
   mtimeO = "modify-old",
   ctimeN = "create-new",

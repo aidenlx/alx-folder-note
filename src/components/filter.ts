@@ -7,14 +7,14 @@ export type Filter = ((name: string) => boolean) | null;
 const getRegex = (input: string): RegExp | null => {
   // https://github.com/IonicaBizau/regex-parser.js
   // Parse input
-  let m = input.match(/(\/?)(.+)\1([a-z]*)/i);
+  let m = input.match(/^\/(.+)\/([a-z]*)/i);
   if (
     !m || //Invalid flags
-    (m[3] && !/^(?!.*?(.).*?\1)[gmixXsuUAJ]+$/.test(m[3]))
+    (m[2] && !/^(?!.*?(.).*?\1)[gmixXsuUAJ]+$/.test(m[2]))
   )
     return null;
   // Create the regular expression
-  return new RegExp(m[2], m[3]);
+  return new RegExp(m[1], m[2]);
 };
 const filterToRegex = (field: unknown): RegExp | string | null => {
   if (!field || typeof field !== "string") return null;

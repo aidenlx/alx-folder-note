@@ -21,13 +21,37 @@ export const GetFolderVHandler: (
       typeof target === "string"
         ? target
         : plugin.finder.getFolderPath(ctx.sourcePath);
-    sort = Object.values(SortBy).includes(sort) ? sort : SortBy.name;
+    // Sort Option
+    if (!sort) {
+      plugin.notify("sort", null);
+      sort = SortBy.name;
+    } else if (!Object.values(SortBy).includes(sort)) {
+      plugin.notify(
+        "sort",
+        `invaild sort option: ${JSON.stringify(
+          sort,
+        )}\nfallback to A-Z name sort`,
+      );
+      sort = SortBy.name;
+    } else plugin.notify("sort", null);
+    // Filter Option
+    try {
+      filter = getFilter(filter);
+    } catch (e) {
+      plugin.notify(
+        "filter",
+        `invaild filter option: ${JSON.stringify(filter)}\n` + e.toString(),
+      );
+      filter = null;
+    } finally {
+      plugin.notify("filter", null);
+    }
     ctx.addChild(
       new FolderVRenderChild(el, {
         plugin,
         target,
         style: "card",
-        filter: getFilter(filter),
+        filter,
         sort,
       }),
     );
