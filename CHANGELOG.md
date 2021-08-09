@@ -1,3 +1,11 @@
+## [0.9.2](https://github.com/aidenlx/alx-folder-note/compare/0.9.1...0.9.2) (2021-08-09)
+
+
+### Bug Fixes
+
+* **command:** add missing command for link-to-parent-folder; fix commands not available in preview mode ([4acd8d7](https://github.com/aidenlx/alx-folder-note/commit/4acd8d734a32ad6f17a85dd69f3fdfa6b41b502a))
+* fix glob filter matched as regex; add notice for invaild options; rename sort field ([6747616](https://github.com/aidenlx/alx-folder-note/commit/67476164ec46c73c2fedd3720e9977620a72d6e9))
+
 ## [0.9.1](https://github.com/aidenlx/alx-folder-note/compare/0.9.0...0.9.1) (2021-08-09)
 
 
