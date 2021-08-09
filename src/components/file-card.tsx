@@ -1,4 +1,8 @@
-import { Card, Empty, Image, Skeleton, Space, Tag, Tooltip } from "antd";
+import "tippy.js/dist/tippy.css";
+import "./tippy.css";
+
+import Tippy from "@tippyjs/react";
+import { Card, Empty, Image, Skeleton, Space, Tag } from "antd";
 import Paragraph from "antd/lib/typography/Paragraph";
 import assertNever from "assert-never";
 import {
@@ -99,9 +103,12 @@ export const FileCard = ({ plugin, src, cover, linkType }: FileCardProps) => {
       title={<ObInternalLink linktext={file.path}>{title}</ObInternalLink>}
       cover={cover}
       extra={
-        <Tooltip title={<FileInfo stat={stat} type={linkType} />}>
+        <Tippy
+          theme="obsidian"
+          content={<FileInfo stat={stat} type={linkType} />}
+        >
           {fileIcon}
-        </Tooltip>
+        </Tippy>
       }
       size="small"
       style={{
