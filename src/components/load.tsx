@@ -1,4 +1,5 @@
-import "./antd.less";
+import "./antd-light.less";
+import "./antd-dark.less";
 
 import { MarkdownRenderChild, parseYaml } from "obsidian";
 import React from "react";
