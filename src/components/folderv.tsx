@@ -1,7 +1,5 @@
-import "antd/dist/antd.css";
-
 import { Col, Result, Row } from "antd";
-import { List, OrderedMap, Set } from "immutable";
+import { OrderedMap, Set } from "immutable";
 import { TAbstractFile, TFile, TFolder } from "obsidian";
 import { dirname } from "path";
 import React, { useEffect, useState } from "react";
@@ -16,7 +14,7 @@ export interface FolderOverviewProps {
   /** should be path, not linktext */
   target: string;
   filter?: Filter;
-  style: "grid" | "list";
+  style: "card" | "list";
   sort: SortBy;
 }
 

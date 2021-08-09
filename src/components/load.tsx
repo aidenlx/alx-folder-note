@@ -1,3 +1,5 @@
+import "./antd.less";
+
 import { MarkdownRenderChild, parseYaml } from "obsidian";
 import React from "react";
 import ReactDOM from "react-dom";
@@ -23,7 +25,7 @@ export const GetFolderVHandler: (
       new FolderVRenderChild(el, {
         plugin,
         target,
-        style: "grid",
+        style: "card",
         filter: getFilter(filter),
         sort,
       }),
@@ -33,6 +35,7 @@ export const GetFolderVHandler: (
 class FolderVRenderChild extends MarkdownRenderChild {
   constructor(containerEl: HTMLElement, props: FolderOverviewProps) {
     super(containerEl);
+    containerEl.addClass("alx-folderv");
     ReactDOM.render(<FolderOverview {...props} />, this.containerEl);
   }
 
