@@ -1,5 +1,7 @@
 import "obsidian";
 
+import { ChangeInfo, RelationResolverAPI } from "@aidenlx/relation-resolver";
+
 declare module "obsidian" {
   class FileExplorer extends View {
     fileItems: { [key: string]: AFItem };
@@ -37,5 +39,37 @@ declare module "obsidian" {
     exists(normalizedPath: string, sensitive?: boolean): Promise<boolean>;
   }
 
-  interface MetadataCache {}
+  interface App {
+    plugins: {
+      plugins: {
+        [id: string]: any;
+        ["relation-resolver"]?: {
+          api: RelationResolverAPI;
+        };
+      };
+    };
+    internalPlugins: {
+      plugins: {
+        [id: string]: any;
+        ["file-explorer"]?: {
+          instance: {
+            revealInFolder(this: any, ...args: any[]): any;
+          };
+        };
+      };
+    };
+  }
+
+  interface MetadataCache {
+    on(
+      name: "relation:changed",
+      callback: (info: ChangeInfo, ref: RelationResolverAPI) => any,
+      ctx?: any,
+    ): EventRef;
+    on(
+      name: "relation:resolved",
+      callback: (ref: RelationResolverAPI) => any,
+      ctx?: any,
+    ): EventRef;
+  }
 }

@@ -1,6 +1,7 @@
+import { RelationType } from "@aidenlx/relation-resolver";
 import Icon from "@ant-design/icons";
 import assertNever from "assert-never";
-import { OrderedMap, Set } from "immutable";
+import { OrderedMap, Record, RecordOf, Set } from "immutable";
 import { TFile } from "obsidian";
 import React, { PropsWithChildren } from "react";
 import { FaMarkdown } from "react-icons/fa";
@@ -11,8 +12,6 @@ import {
   FcImageFile,
   FcVideoFile,
 } from "react-icons/fc";
-
-import { IRecord, IRecordOf, required } from "../improved-record";
 
 export const getFileType = (ext: string): FileType => {
   const img = ["bmp", "png", "jpg", "jpeg", "gif", "svg"],
@@ -108,11 +107,22 @@ export const getIcon = (type: FileType) => {
 
 interface FileInfoProps {
   file: TFile;
-  types?: Set<LinkType>;
+  types: Set<LinkType>;
 }
-export type FileInfo = IRecordOf<FileInfoProps>;
-export const FileInfo = IRecord<FileInfoProps>({
-  file: required,
+export type FileInfo = RecordOf<FileInfoProps>;
+export const FileInfo = Record<FileInfoProps>({
+  // @ts-ignore
+  file: {},
   types: Set([LinkType.hard]),
-});
+}) as unknown as (values: { file: TFile; types?: Set<LinkType> }) => FileInfo;
+
 export type Path_Types = OrderedMap<string, FileInfo>;
+
+export const mapTypes = (set: Set<RelationType>): Set<LinkType> =>
+  set.map((t) =>
+    t === "in"
+      ? LinkType.softIn
+      : t === "out"
+      ? LinkType.softOut
+      : assertNever(t),
+  );

@@ -1,3 +1,4 @@
+import { File_Types } from "@aidenlx/relation-resolver";
 import { Col, Result, Row } from "antd";
 import { OrderedMap, Set } from "immutable";
 import { TAbstractFile, TFile, TFolder } from "obsidian";
@@ -8,7 +9,7 @@ import ALxFolderNote from "../fn-main";
 import { FileCard } from "./file-card";
 import { Filter } from "./filter";
 import { getSorted, SortBy } from "./sort";
-import { FileInfo, LinkType, Path_Types } from "./tools";
+import { FileInfo, LinkType, mapTypes, Path_Types } from "./tools";
 export interface FolderOverviewProps {
   plugin: ALxFolderNote;
   /** should be path, not linktext */
@@ -23,24 +24,43 @@ const getChildren = (
   plugin: ALxFolderNote,
   filter?: Filter,
 ): Path_Types | null => {
-  const folder = plugin.app.vault.getAbstractFileByPath(folderPath);
-  const internalFilter = filter
-    ? (af: TAbstractFile): af is TFile => af instanceof TFile && filter(af.name)
-    : (af: TAbstractFile): af is TFile => af instanceof TFile;
+  const { vault } = plugin.app,
+    folder = vault.getAbstractFileByPath(folderPath),
+    internalFilter = filter
+      ? (af: TAbstractFile): af is TFile =>
+          af instanceof TFile && filter(af.name)
+      : (af: TAbstractFile): af is TFile => af instanceof TFile;
   if (folder instanceof TFolder) {
-    return OrderedMap<string, FileInfo>().withMutations((map) =>
+    let children = OrderedMap<string, FileInfo>().withMutations((map) =>
       folder.children.forEach(
         (file) =>
           internalFilter(file) && map.set(file.path, FileInfo({ file })),
       ),
     );
-    // let folderNote = plugin.finder.getFolderNote(af);
-    // if (folderNote) {
-    //   const softChildren = plugin.relationCache.getChildrenWithTypes(
-    //     folderNote.path,
-    //   );
-    //   if (softChildren) children = children.concat(softChildren);
-    // }
+    let folderNote: TFile | null,
+      sc: File_Types | null,
+      api = plugin.app.plugins.plugins["relation-resolver"]?.api;
+    if (
+      (folderNote = plugin.finder.getFolderNote(folder)) &&
+      api &&
+      (sc = api.getChildrenWithTypes(folderNote.path))
+    ) {
+      const softChildren = sc;
+      children = children.withMutations((map) => {
+        for (const [filePath, relTypes] of softChildren) {
+          const file = vault.getAbstractFileByPath(filePath),
+            types = mapTypes(relTypes);
+          if (file && file instanceof TFile) {
+            const info = map.get(filePath),
+              setTo = info
+                ? info.update("types", (tList) => tList.union(types))
+                : FileInfo({ file, types });
+            map.set(filePath, setTo);
+          }
+        }
+      });
+    }
+    return children;
   } else return null;
 };
 
@@ -61,21 +81,23 @@ export const FolderOverview = ({
       af instanceof TFile &&
       setChildren((prev) => {
         if (!prev) return prev;
-        // @ts-ignore
         return prev.update(af.path, (info) => {
           if (info) return info.update("types", (types) => types.add(type));
           else return FileInfo({ file: af, types: Set([type]) });
         });
       });
     const moveOut = (path: string, type: LinkType) =>
-      // @ts-ignore
       setChildren((prev) => {
         if (!prev) return prev;
         const info = prev.get(path);
         if (info && info.types.has(type)) {
           if (info.types.size <= 1) return prev.delete(path);
-          else return info.update("types", (types) => types.delete(type));
-        }
+          else
+            return prev.set(
+              path,
+              info.update("types", (types) => types.delete(type)),
+            );
+        } else return prev;
       });
 
     const handleVaultChange = (af: TAbstractFile, oldPath?: string) => {

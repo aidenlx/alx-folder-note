@@ -64,7 +64,6 @@ export default class NoteFinder {
 
   createFolderForNote = async (file: TFile) => {
     const newFolderPath = this.getFolderPath(file, true);
-    // @ts-ignore
     const folderExist: boolean = await this.vault.exists(newFolderPath);
     if (folderExist) {
       new Notice("Folder already exists");

@@ -154,7 +154,6 @@ export const PatchRevealInExplorer = (plugin: ALxFolderNote) => {
   const { getFolderFromNote } = plugin.finder;
 
   const feInstance =
-    // @ts-ignore
     plugin.app.internalPlugins.plugins["file-explorer"]?.instance;
   if (feInstance) {
     const remover = around(feInstance, {
