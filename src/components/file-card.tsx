@@ -105,6 +105,7 @@ export const FileCard = ({ plugin, src, cover, linkType }: FileCardProps) => {
       extra={
         <Tippy
           theme="obsidian"
+          appendTo="parent"
           content={<FileInfo stat={stat} type={linkType} />}
         >
           {fileIcon}
