@@ -1,6 +1,14 @@
 import "./styles/main.css";
 
-import { debounce, Debouncer, Notice, Plugin, TFolder } from "obsidian";
+import {
+  App,
+  debounce,
+  Debouncer,
+  Notice,
+  Plugin,
+  PluginManifest,
+  TFolder,
+} from "obsidian";
 
 import { FOLDERV_ID, GetFolderVHandler } from "./components/load";
 import initialize from "./initialize";
@@ -13,12 +21,28 @@ import {
   ALxFolderNoteSettingTab,
   DEFAULT_SETTINGS,
 } from "./settings";
+import API from "./typings/api";
 export default class ALxFolderNote extends Plugin {
   settings: ALxFolderNoteSettings = DEFAULT_SETTINGS;
   feHandler?: FEHandler;
   vaultHandler = new VaultHandler(this);
-  finder = new NoteFinder(this);
+  finder: NoteFinder;
+  api: API;
   initialize = initialize.bind(this);
+
+  constructor(app: App, manifest: PluginManifest) {
+    super(app, manifest);
+    let finder = new NoteFinder(this);
+    this.finder = finder;
+    this.api = {
+      get getFolderFromNote() {
+        return finder.getFolderFromNote;
+      },
+      get getFolderNote() {
+        return finder.getFolderNote;
+      },
+    };
+  }
 
   private _notify = (
     id: string,

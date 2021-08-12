@@ -4,6 +4,7 @@ import { basename, join, parse } from "path";
 
 import ALxFolderNote from "../fn-main";
 import { getParentPath, isMd, NoteLoc } from "../misc";
+import API from "../typings/api";
 
 const getFileInfo = (
   note: TFile | string,
@@ -87,7 +88,7 @@ export default class NoteFinder {
     if (newNotePath) this.vault.rename(file, newNotePath);
   };
 
-  getFolderFromNote = (note: TFile | string): TFolder | null => {
+  getFolderFromNote: API["getFolderFromNote"] = (note) => {
     if (!isMd(note)) return null;
     const { parent, base } = getFileInfo(note);
     // check if folder note name vaild
@@ -111,9 +112,9 @@ export default class NoteFinder {
 
   // Get Folder Note from Folder
 
-  getFolderNote = (
-    ...args: Parameters<NoteFinder["getFolderNotePath"]>
-  ): TFile | null => {
+  getFolderNote: API["getFolderNote"] = (
+    ...args: [path: string, folder: TFolder] | [folder: TFolder]
+  ) => {
     const result = this.getFolderNotePath(...args).info;
     return this.findFolderNote(...result);
   };
