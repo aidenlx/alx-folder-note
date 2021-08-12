@@ -1,3 +1,16 @@
+# [0.10.0](https://github.com/aidenlx/alx-folder-note/compare/0.9.2...0.10.0) (2021-08-12)
+
+
+### Bug Fixes
+
+* **folderv:** tippy now append to parent ([a4d57c1](https://github.com/aidenlx/alx-folder-note/commit/a4d57c1aae848fd84676755375d33da589d07a3d))
+
+
+### Features
+
+* add api support ([27e3489](https://github.com/aidenlx/alx-folder-note/commit/27e34894b2fa04c1ec7b7c50082f30dbbf7a0872))
+* **folderv:** add soft link support ([4c5d33d](https://github.com/aidenlx/alx-folder-note/commit/4c5d33d82756020bcccb2bf91dda7a28e4bdccda))
+
 ## [0.9.2](https://github.com/aidenlx/alx-folder-note/compare/0.9.1...0.9.2) (2021-08-09)
 
 

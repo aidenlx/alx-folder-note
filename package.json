@@ -1,6 +1,6 @@
 {
   "name": "@aidenlx/folder-note",
-  "version": "0.9.2",
+  "version": "0.10.0",
   "description": "Add description, summary and more info to folders with folder notes.",
   "main": "",
   "types": "src/typings/api.d.ts",
