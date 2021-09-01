@@ -1,6 +1,8 @@
+import { around } from "monkey-around";
 import {
   AFItem,
   debounce,
+  EventRef,
   FileExplorer,
   TAbstractFile,
   TFile,
@@ -24,6 +26,26 @@ export default class FEHandler {
     this.plugin = plugin;
     this.clickHandler = getClickHandler(plugin);
     this.fileExplorer = explorer;
+    const { vault } = plugin.app;
+    let refs = [] as EventRef[];
+    refs.push(
+      vault.on("folder-note:create", (note, folder) => {
+        this.setMark(note);
+        this.setMark(folder);
+      }),
+      vault.on("folder-note:delete", (note, folder) => {
+        this.setMark(note, true);
+        this.setMark(folder, true);
+      }),
+      vault.on("folder-note:rename", () => {
+        // fe-item in dom will be reused, do nothing for now
+      }),
+      vault.on("folder-note:cfg-changed", () => {
+        this.markAll(true);
+        window.setTimeout(this.markAll, 200);
+      }),
+    );
+    refs.forEach((ref) => this.plugin.registerEvent(ref));
   }
 
   update = debounce(
@@ -39,8 +61,8 @@ export default class FEHandler {
 
   waitingList: Map<string, boolean> = new Map();
 
-  get finder() {
-    return this.plugin.finder;
+  get api() {
+    return this.plugin.CoreApi;
   }
   get files() {
     return this.fileExplorer.files;
@@ -115,7 +137,7 @@ export default class FEHandler {
   };
 
   markFolderNote = (af: TAbstractFile): boolean => {
-    const { getFolderNote, getFolderFromNote } = this.finder;
+    const { getFolderNote, getFolderFromNote } = this.api;
 
     let found: TAbstractFile | null = null;
     if (af instanceof TFile) found = getFolderFromNote(af);
@@ -139,3 +161,24 @@ export default class FEHandler {
       }
   };
 }
+
+export const PatchRevealInExplorer = (plugin: ALxFolderNote) => {
+  const { getFolderFromNote } = plugin.CoreApi;
+
+  const feInstance =
+    plugin.app.internalPlugins.plugins["file-explorer"]?.instance;
+  if (feInstance) {
+    const remover = around(feInstance, {
+      revealInFolder: (next) => {
+        return function (this: any, ...args: any[]) {
+          if (args[0] instanceof TFile && plugin.settings.hideNoteInExplorer) {
+            const findResult = getFolderFromNote(args[0]);
+            if (findResult) args[0] = findResult;
+          }
+          return next.apply(this, args);
+        };
+      },
+    });
+    plugin.register(remover);
+  }
+};

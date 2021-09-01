@@ -7,55 +7,56 @@ import FEHandler from "./modules/fe-handler";
 export const noHideMark = "alx-no-hide-note";
 
 export interface ALxFolderNoteSettings {
-  folderNotePref: NoteLoc;
-  deleteOutsideNoteWithFolder: boolean;
-  indexName: string;
-  modifierForNewNote: Modifier;
   hideNoteInExplorer: boolean;
-  autoRename: boolean;
-  folderNoteTemplate: string;
   folderOverview: {
     h1AsTitleSource: boolean;
     briefMax: number;
     titleField: string;
     descField: string;
   };
+  folderNotePref: NoteLoc | null;
+  deleteOutsideNoteWithFolder: boolean | null;
+  indexName: string | null;
+  modifierForNewNote: Modifier | null;
+  autoRename: boolean | null;
+  folderNoteTemplate: string | null;
 }
 
 export const DEFAULT_SETTINGS: ALxFolderNoteSettings = {
-  folderNotePref: NoteLoc.Inside,
-  deleteOutsideNoteWithFolder: true,
-  indexName: "_about_",
-  modifierForNewNote: "Meta",
   hideNoteInExplorer: true,
-  autoRename: true,
-  folderNoteTemplate: "# {{FOLDER_NAME}}\n\n```folderv\n```",
   folderOverview: {
     h1AsTitleSource: true,
     briefMax: 128,
     titleField: "title",
     descField: "description",
   },
+  folderNotePref: null,
+  deleteOutsideNoteWithFolder: null,
+  indexName: null,
+  modifierForNewNote: null,
+  autoRename: null,
+  folderNoteTemplate: null,
 };
+
+const old: (keyof ALxFolderNoteSettings)[] = [
+  "folderNotePref",
+  "deleteOutsideNoteWithFolder",
+  "indexName",
+  "modifierForNewNote",
+  "autoRename",
+  "folderNoteTemplate",
+];
 
 export class ALxFolderNoteSettingTab extends PluginSettingTab {
   plugin: ALxFolderNote;
-
-  private get feHandler(): FEHandler {
-    if (this.plugin.feHandler) return this.plugin.feHandler;
-    else throw new Error("Missing feHandler");
-  }
 
   constructor(app: App, plugin: ALxFolderNote) {
     super(app, plugin);
     this.plugin = plugin;
   }
 
-  updateMark() {
-    this.feHandler.markAll(true);
-    window.setTimeout(() => {
-      this.feHandler.markAll();
-    }, 200);
+  checkMigrated(): boolean {
+    return old.every((key) => this.plugin.settings[key] === null);
   }
 
   display(): void {
@@ -63,141 +64,45 @@ export class ALxFolderNoteSettingTab extends PluginSettingTab {
     containerEl.empty();
 
     containerEl.createEl("h2", { text: "Core" });
-    this.setNoteLoc();
-    if (this.plugin.settings.folderNotePref === NoteLoc.Index)
-      this.setIndexName();
-    else if (this.plugin.settings.folderNotePref === NoteLoc.Outside)
-      this.setDeleteWithFolder();
-    this.setTemplate();
-    this.setModifier();
+    if (this.checkMigrated()) {
+      this.plugin.CoreApi.renderCoreSettings(containerEl);
+    } else this.setMigrate();
     this.setHide();
-    if (this.plugin.settings.folderNotePref !== NoteLoc.Index)
-      this.setAutoRename();
     containerEl.createEl("h2", { text: "Folder Overview" });
     this.setH1AsTitle();
     this.setBriefMax();
     this.setTitleDescField();
   }
 
-  setDeleteWithFolder() {
+  setMigrate() {
     new Setting(this.containerEl)
-      .setName("Delete Outside Note with Folder")
-      .setDesc("Delete folder note outside when folder is deleted")
-      .addToggle((toggle) =>
-        toggle
-          .setValue(this.plugin.settings.deleteOutsideNoteWithFolder)
-          .onChange(async (value) => {
-            this.plugin.settings.deleteOutsideNoteWithFolder = value;
-            await this.plugin.saveSettings();
-          }),
+      .setName("Migrate settings to Folder Note Core")
+      .setDesc(
+        "Some settings has not been migrated to Folder Note Core, " +
+          "click Migrate to migrate old config " +
+          "or Cancel to use config in Folder Note Core in favor of old config",
+      )
+      .addButton((cb) =>
+        cb.setButtonText("Migrate").onClick(async () => {
+          const toImport = old.reduce(
+            (obj, k) => ((obj[k] = this.plugin.settings[k] ?? undefined), obj),
+            {} as any,
+          );
+          this.plugin.CoreApi.importSettings(toImport);
+          old.forEach((k) => ((this.plugin.settings as any)[k] = null));
+          await this.plugin.saveSettings();
+          this.display();
+        }),
+      )
+      .addButton((cb) =>
+        cb.setButtonText("Cancel").onClick(async () => {
+          old.forEach((k) => ((this.plugin.settings as any)[k] = null));
+          await this.plugin.saveSettings();
+          this.display();
+        }),
       );
   }
-  setNoteLoc() {
-    new Setting(this.containerEl)
-      .setName("Preference for Note File Location")
-      .setDesc(
-        createFragment((el) => {
-          el.appendText(
-            "Select how you would like the folder note to be placed",
-          );
-          el.createEl("br");
-          el.createEl("a", {
-            href: "https://github.com/aidenlx/alx-folder-note/wiki/folder-note-pref",
-            text: "Check here",
-          });
-          el.appendText(
-            " for more detail for pros and cons for different strategies",
-          );
-        }),
-      )
-      .addDropdown((dropDown) => {
-        const options: Record<NoteLoc, string> = {
-          [NoteLoc.Index]: "Inside Folder, Index File",
-          [NoteLoc.Inside]: "Inside Folder, With Same Name",
-          [NoteLoc.Outside]: "Outside Folder, With Same Name",
-        };
 
-        dropDown
-          .addOptions(options)
-          .setValue(this.plugin.settings.folderNotePref.toString())
-          .onChange(async (value: string) => {
-            this.plugin.settings.folderNotePref = +value;
-            this.updateMark();
-            await this.plugin.saveSettings();
-            this.display();
-          });
-      });
-  }
-  setIndexName() {
-    new Setting(this.containerEl)
-      .setName("Name for Index File")
-      .setDesc("Set the note name to be recognized as index file for folders")
-      .addText((text) => {
-        const onChange = async (value: string) => {
-          this.plugin.settings.indexName = value;
-          this.updateMark();
-          await this.plugin.saveSettings();
-        };
-        text
-          .setValue(this.plugin.settings.indexName)
-          .onChange(debounce(onChange, 500, true));
-      });
-  }
-  setTemplate() {
-    new Setting(this.containerEl)
-      .setName("Folder Note Template")
-      .setDesc(
-        createFragment((descEl) => {
-          descEl.appendText("The template used to generate new folder note.");
-          descEl.appendChild(document.createElement("br"));
-          descEl.appendText("Supported placeholders:");
-          descEl.appendChild(document.createElement("br"));
-          descEl.appendText("{{FOLDER_NAME}} {{FOLDER_PATH}}");
-        }),
-      )
-      .addTextArea((text) => {
-        const onChange = async (value: string) => {
-          this.plugin.settings.folderNoteTemplate = value;
-          await this.plugin.saveSettings();
-        };
-        text
-          .setValue(this.plugin.settings.folderNoteTemplate)
-          .onChange(debounce(onChange, 500, true));
-        text.inputEl.rows = 8;
-        text.inputEl.cols = 30;
-      });
-  }
-  setModifier() {
-    new Setting(this.containerEl)
-      .setName("Modifier for New Note")
-      .setDesc("Choose a modifier to click folders with to create folder notes")
-      .addDropdown((dropDown) => {
-        const windowsOpts: Record<Modifier, string> = {
-          Mod: "Ctrl (Cmd in macOS)",
-          Ctrl: "Ctrl (Ctrl in macOS)",
-          Meta: "⊞ Win",
-          Shift: "Shift",
-          Alt: "Alt",
-        };
-        const macOSOpts: Record<Modifier, string> = {
-          Mod: "⌘ Cmd (Ctrl)",
-          Ctrl: "⌃ Control",
-          Meta: "⌘ Cmd (Win)",
-          Shift: "⇧ Shift",
-          Alt: "⌥ Option",
-        };
-
-        const options = isMac() ? macOSOpts : windowsOpts;
-
-        dropDown
-          .addOptions(options)
-          .setValue(this.plugin.settings.modifierForNewNote.toString())
-          .onChange(async (value: string) => {
-            this.plugin.settings.modifierForNewNote = value as Modifier;
-            await this.plugin.saveSettings();
-          });
-      });
-  }
   setHide() {
     new Setting(this.containerEl)
       .setName("Hide Folder Note")
@@ -211,18 +116,6 @@ export class ALxFolderNoteSettingTab extends PluginSettingTab {
             await this.plugin.saveSettings();
           }),
       );
-  }
-  setAutoRename() {
-    new Setting(this.containerEl)
-      .setName("Auto Sync")
-      .setDesc("Keep name and location of folder note and folder in sync")
-      .addToggle((toggle) => {
-        toggle.setValue(this.plugin.settings.autoRename);
-        toggle.onChange(async (value) => {
-          this.plugin.settings.autoRename = value;
-          await this.plugin.saveSettings();
-        });
-      });
   }
 
   setBriefMax() {

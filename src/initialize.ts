@@ -2,8 +2,7 @@ import { AFItem, FileExplorer } from "obsidian";
 
 import ALxFolderNote from "./fn-main";
 import { isFolder } from "./misc";
-import { PatchRevealInExplorer } from "./modules/commands";
-import FEHandler from "./modules/fe-handler";
+import FEHandler, { PatchRevealInExplorer } from "./modules/fe-handler";
 import { noHideMark } from "./settings";
 
 export default function initialize(this: ALxFolderNote, revert = false) {
@@ -24,7 +23,6 @@ export default function initialize(this: ALxFolderNote, revert = false) {
       });
     };
 
-    if (!revert) this.vaultHandler.registerEvent();
     setupClick(revert);
     feHandler.markAll(revert);
     document.body.toggleClass(noHideMark, !this.settings.hideNoteInExplorer);

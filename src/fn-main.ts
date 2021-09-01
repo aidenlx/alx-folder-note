@@ -1,48 +1,22 @@
 import "./styles/main.css";
 
-import {
-  App,
-  debounce,
-  Debouncer,
-  Notice,
-  Plugin,
-  PluginManifest,
-  TFolder,
-} from "obsidian";
+import FolderNoteAPI from "@aidenlx/folder-note-core";
+import { debounce, Debouncer, Notice, Plugin } from "obsidian";
 
 import { FOLDERV_ID, GetFolderVHandler } from "./components/load";
 import initialize from "./initialize";
-import { AddOptionsForFolder, AddOptionsForNote } from "./modules/commands";
 import FEHandler from "./modules/fe-handler";
-import NoteFinder from "./modules/find";
-import VaultHandler from "./modules/vault-handler";
 import {
   ALxFolderNoteSettings,
   ALxFolderNoteSettingTab,
   DEFAULT_SETTINGS,
 } from "./settings";
-import API from "./typings/api";
+
+const CORE_PLUGIN_ID = "folder-note-core";
 export default class ALxFolderNote extends Plugin {
   settings: ALxFolderNoteSettings = DEFAULT_SETTINGS;
   feHandler?: FEHandler;
-  vaultHandler = new VaultHandler(this);
-  finder: NoteFinder;
-  api: API;
   initialize = initialize.bind(this);
-
-  constructor(app: App, manifest: PluginManifest) {
-    super(app, manifest);
-    let finder = new NoteFinder(this);
-    this.finder = finder;
-    this.api = {
-      get getFolderFromNote() {
-        return finder.getFolderFromNote;
-      },
-      get getFolderNote() {
-        return finder.getFolderNote;
-      },
-    };
-  }
 
   private _notify = (
     id: string,
@@ -73,15 +47,35 @@ export default class ALxFolderNote extends Plugin {
     }
   };
 
+  get CoreApi(): FolderNoteAPI {
+    let message;
+    if (this.app.plugins.enabledPlugins.has(CORE_PLUGIN_ID)) {
+      const api = this.app.plugins.plugins[CORE_PLUGIN_ID]?.api;
+      if (!api) {
+        message = "Error: folder-note-core api not available";
+        throw new Error(message);
+      } else return api;
+    } else {
+      message =
+        "Failed to initialize alx-folder-note: folder-note-core plugin not enabled";
+      new Notice(message);
+      throw new Error(message);
+    }
+  }
+
   async onload() {
     console.log("loading alx-folder-note");
 
     await this.loadSettings();
 
-    this.addSettingTab(new ALxFolderNoteSettingTab(this.app, this));
+    let tab = new ALxFolderNoteSettingTab(this.app, this);
+    if (!tab.checkMigrated())
+      new Notice(
+        "Old config not yet migrated, \n" +
+          "Open Settings Tab of ALx Folder Note for details",
+      );
+    this.addSettingTab(tab);
 
-    AddOptionsForNote(this);
-    AddOptionsForFolder(this);
     this.app.workspace.onLayoutReady(this.initialize);
 
     this.registerMarkdownCodeBlockProcessor(
@@ -102,9 +96,4 @@ export default class ALxFolderNote extends Plugin {
   async saveSettings() {
     await this.saveData(this.settings);
   }
-
-  getNewFolderNote = (folder: TFolder): string =>
-    this.settings.folderNoteTemplate
-      .replace(/{{FOLDER_NAME}}/g, folder.name)
-      .replace(/{{FOLDER_PATH}}/g, folder.path);
 }

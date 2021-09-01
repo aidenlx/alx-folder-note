@@ -1,5 +1,6 @@
 import "obsidian";
 
+import FolderNoteAPI from "@aidenlx/folder-note-core";
 import { ChangeInfo, RelationResolverAPI } from "@aidenlx/relation-resolver";
 
 declare module "obsidian" {
@@ -37,14 +38,34 @@ declare module "obsidian" {
 
   interface Vault {
     exists(normalizedPath: string, sensitive?: boolean): Promise<boolean>;
+    on(
+      name: "folder-note:create",
+      callback: (note: TFile, folder: TFolder) => any,
+    ): EventRef;
+    on(
+      name: "folder-note:rename",
+      callback: (
+        note: [file: TFile, oldPath: string],
+        folder: [folder: TFolder, oldPath: string],
+      ) => any,
+    ): EventRef;
+    on(
+      name: "folder-note:delete",
+      callback: (note: TFile, folder: TFolder) => any,
+    ): EventRef;
+    on(name: "folder-note:cfg-changed", callback: () => any): EventRef;
   }
 
   interface App {
     plugins: {
+      enabledPlugins: Set<string>;
       plugins: {
         [id: string]: any;
         ["relation-resolver"]?: {
           api: RelationResolverAPI;
+        };
+        ["folder-note-core"]?: {
+          api: FolderNoteAPI;
         };
       };
     };

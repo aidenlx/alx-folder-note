@@ -3,10 +3,6 @@
   "version": "0.10.0",
   "description": "Add description, summary and more info to folders with folder notes.",
   "main": "",
-  "types": "src/typings/api.d.ts",
-  "files": [
-    "src/typings/api.d.ts"
-  ],
   "scripts": {
     "dev": "cross-env BUILD=dev node esbuild.js",
     "build": "cross-env BUILD=production node esbuild.js",
@@ -18,6 +14,7 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
+    "@aidenlx/folder-note-core": "^0.2.0",
     "@aidenlx/relation-resolver": "^0.1.0",
     "@release-it/bumper": "^3.0.1",
     "@release-it/conventional-changelog": "^3.0.1",
@@ -68,9 +65,6 @@
   "browser": {
     "path": "path-browserify"
   },
-  "publishConfig": {
-    "access": "public"
-  },
   "release-it": {
     "hooks": {
       "before:init": [
@@ -86,6 +80,9 @@
       ],
       "after:git:release": "echo After git push, before github release",
       "after:release": "echo Successfully released ${name} v${version} to ${repo.repository}."
+    },
+    "npm": {
+      "publish": false
     },
     "git": {
       "commitMessage": "chore: release v${version}",
