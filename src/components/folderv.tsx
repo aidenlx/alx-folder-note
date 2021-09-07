@@ -13,7 +13,7 @@ import { FileInfo, LinkType, mapTypes, Path_Types } from "./tools";
 export interface FolderOverviewProps {
   plugin: ALxFolderNote;
   /** should be path, not linktext */
-  target: string;
+  target: string | null;
   filter?: Filter;
   style: "card" | "list";
   sort: SortBy;
@@ -41,7 +41,7 @@ const getChildren = (
       sc: File_Types | null,
       api = plugin.app.plugins.plugins["relation-resolver"]?.api;
     if (
-      (folderNote = plugin.finder.getFolderNote(folder)) &&
+      (folderNote = plugin.CoreApi.getFolderNote(folder)) &&
       api &&
       (sc = api.getChildrenWithTypes(folderNote.path))
     ) {
@@ -71,7 +71,7 @@ export const FolderOverview = ({
   filter,
 }: FolderOverviewProps) => {
   const [children, setChildren] = useState<Path_Types | null>(
-    getSorted(getChildren(target, plugin, filter), sort),
+    target ? getSorted(getChildren(target, plugin, filter), sort) : null,
   );
 
   useEffect(() => {
@@ -152,8 +152,9 @@ export const FolderOverview = ({
     );
   } else {
     let reason: string | null = null;
-    const af = plugin.app.vault.getAbstractFileByPath(target);
-    if (!af) reason = "No folder/file in path: " + target;
+    let af;
+    if (!target || !(af = plugin.app.vault.getAbstractFileByPath(target)))
+      reason = "No folder/file in path: " + target;
     else if (af instanceof TFile) reason = "Target not folder: " + target;
     return (
       <Result status="error" title="Invaild target folder" extra={reason} />

@@ -1,6 +1,10 @@
 import "./styles/main.css";
 
-import FolderNoteAPI from "@aidenlx/folder-note-core";
+import {
+  FolderNoteAPI,
+  getApi,
+  isPluginEnabled,
+} from "@aidenlx/folder-note-core";
 import { debounce, Debouncer, Notice, Plugin } from "obsidian";
 
 import { FOLDERV_ID, GetFolderVHandler } from "./components/load";
@@ -12,7 +16,6 @@ import {
   DEFAULT_SETTINGS,
 } from "./settings";
 
-const CORE_PLUGIN_ID = "folder-note-core";
 export default class ALxFolderNote extends Plugin {
   settings: ALxFolderNoteSettings = DEFAULT_SETTINGS;
   feHandler?: FEHandler;
@@ -49,8 +52,8 @@ export default class ALxFolderNote extends Plugin {
 
   get CoreApi(): FolderNoteAPI {
     let message;
-    if (this.app.plugins.enabledPlugins.has(CORE_PLUGIN_ID)) {
-      const api = this.app.plugins.plugins[CORE_PLUGIN_ID]?.api;
+    if (isPluginEnabled(this)) {
+      const api = getApi(this);
       if (!api) {
         message = "Error: folder-note-core api not available";
         throw new Error(message);

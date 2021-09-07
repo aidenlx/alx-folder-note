@@ -20,7 +20,7 @@ export const GetFolderVHandler: (
     target =
       typeof target === "string"
         ? target
-        : plugin.finder.getFolderPath(ctx.sourcePath);
+        : plugin.CoreApi.getFolderPath(ctx.sourcePath, false);
     // Sort Option
     if (!sort) {
       plugin.notify("sort", null);
@@ -40,7 +40,8 @@ export const GetFolderVHandler: (
     } catch (e) {
       plugin.notify(
         "filter",
-        `invaild filter option: ${JSON.stringify(filter)}\n` + e.toString(),
+        `invaild filter option: ${JSON.stringify(filter)}\n` +
+          (e as any)?.toString(),
       );
       filter = null;
     } finally {

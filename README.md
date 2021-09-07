@@ -30,26 +30,6 @@ More to come:
 
 Check [wiki](https://github.com/aidenlx/alx-folder-note/wiki) for more details
 
-### API
-
-run `npm i -D @aidenlx/folder-note` and add `type.d.ts` with following content to the src folder of your plugin:
-
-```ts
-import FolderNoteAPI from "@aidenlx/folder-note";
-declare module "obsidian" {
-  interface App {
-    plugins: {
-      plugins: {
-        [id: string]: any;
-        ["alx-folder-note"]?: {
-          api: FolderNoteAPI;
-        };
-      };
-    };
-  }
-}
-```
-
 ## Compatibility
 
 The required API feature is only available for Obsidian v0.12.5+.

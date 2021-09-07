@@ -29,11 +29,11 @@ export default class FEHandler {
     const { vault } = plugin.app;
     let refs = [] as EventRef[];
     refs.push(
-      vault.on("folder-note:create", (note, folder) => {
+      vault.on("folder-note:create", (note: TFile, folder: TFolder) => {
         this.setMark(note);
         this.setMark(folder);
       }),
-      vault.on("folder-note:delete", (note, folder) => {
+      vault.on("folder-note:delete", (note: TFile, folder: TFolder) => {
         this.setMark(note, true);
         this.setMark(folder, true);
       }),
@@ -137,6 +137,7 @@ export default class FEHandler {
   };
 
   markFolderNote = (af: TAbstractFile): boolean => {
+    if (af instanceof TFolder && af.isRoot()) return false;
     const { getFolderNote, getFolderFromNote } = this.api;
 
     let found: TAbstractFile | null = null;

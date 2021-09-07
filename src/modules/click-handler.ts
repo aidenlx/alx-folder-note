@@ -7,7 +7,7 @@ const getClickHandler = (plugin: ALxFolderNote) => (evt: MouseEvent) => {
   const titleInnerEl = evt.target as HTMLDivElement;
   const titleEl = titleInnerEl.parentElement as HTMLDivElement;
   const navFolder = titleEl?.parentElement as HTMLDivElement;
-  const { findFolderNote, getFolderNotePath } = plugin.finder;
+  const { getFolderNote, getFolderNotePath, getNewFolderNote } = plugin.CoreApi;
 
   const tryOpen = async (): Promise<boolean> => {
     try {
@@ -32,12 +32,12 @@ const getClickHandler = (plugin: ALxFolderNote) => (evt: MouseEvent) => {
         (evt.type === "auxclick" && evt.button === 1);
 
       // check if folder note exists
-      const { info, path } = getFolderNotePath(folder);
-      let folderNote = findFolderNote(...info);
-      if (createNew && !folderNote) {
+      let folderNote = getFolderNote(folder),
+        fnPath;
+      if (createNew && !folderNote && (fnPath = getFolderNotePath(folder))) {
         folderNote = await plugin.app.vault.create(
-          path,
-          plugin.getNewFolderNote(folder),
+          fnPath.path,
+          getNewFolderNote(folder),
         );
       }
 
@@ -52,6 +52,7 @@ const getClickHandler = (plugin: ALxFolderNote) => (evt: MouseEvent) => {
       );
       return true;
     } catch (error) {
+      console.error(error);
       return false;
     }
   };

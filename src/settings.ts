@@ -7,6 +7,7 @@ import FEHandler from "./modules/fe-handler";
 export const noHideMark = "alx-no-hide-note";
 
 export interface ALxFolderNoteSettings {
+  modifierForNewNote: Modifier;
   hideNoteInExplorer: boolean;
   folderOverview: {
     h1AsTitleSource: boolean;
@@ -17,12 +18,12 @@ export interface ALxFolderNoteSettings {
   folderNotePref: NoteLoc | null;
   deleteOutsideNoteWithFolder: boolean | null;
   indexName: string | null;
-  modifierForNewNote: Modifier | null;
   autoRename: boolean | null;
   folderNoteTemplate: string | null;
 }
 
 export const DEFAULT_SETTINGS: ALxFolderNoteSettings = {
+  modifierForNewNote: "Mod",
   hideNoteInExplorer: true,
   folderOverview: {
     h1AsTitleSource: true,
@@ -33,19 +34,17 @@ export const DEFAULT_SETTINGS: ALxFolderNoteSettings = {
   folderNotePref: null,
   deleteOutsideNoteWithFolder: null,
   indexName: null,
-  modifierForNewNote: null,
   autoRename: null,
   folderNoteTemplate: null,
 };
 
-const old: (keyof ALxFolderNoteSettings)[] = [
+const old = [
   "folderNotePref",
   "deleteOutsideNoteWithFolder",
   "indexName",
-  "modifierForNewNote",
   "autoRename",
   "folderNoteTemplate",
-];
+] as const;
 
 export class ALxFolderNoteSettingTab extends PluginSettingTab {
   plugin: ALxFolderNote;
@@ -67,6 +66,7 @@ export class ALxFolderNoteSettingTab extends PluginSettingTab {
     if (this.checkMigrated()) {
       this.plugin.CoreApi.renderCoreSettings(containerEl);
     } else this.setMigrate();
+    this.setModifier();
     this.setHide();
     containerEl.createEl("h2", { text: "Folder Overview" });
     this.setH1AsTitle();
@@ -102,6 +102,38 @@ export class ALxFolderNoteSettingTab extends PluginSettingTab {
         }),
       );
   }
+
+  setModifier = () => {
+    new Setting(this.containerEl)
+      .setName("Modifier for New Note")
+      .setDesc("Choose a modifier to click folders with to create folder notes")
+      .addDropdown((dropDown) => {
+        const windowsOpts: Record<Modifier, string> = {
+          Mod: "Ctrl (Cmd in macOS)",
+          Ctrl: "Ctrl (Ctrl in macOS)",
+          Meta: "⊞ Win",
+          Shift: "Shift",
+          Alt: "Alt",
+        };
+        const macOSOpts: Record<Modifier, string> = {
+          Mod: "⌘ Cmd (Ctrl)",
+          Ctrl: "⌃ Control",
+          Meta: "⌘ Cmd (Win)",
+          Shift: "⇧ Shift",
+          Alt: "⌥ Option",
+        };
+
+        const options = isMac() ? macOSOpts : windowsOpts;
+
+        dropDown
+          .addOptions(options)
+          .setValue(this.plugin.settings.modifierForNewNote.toString())
+          .onChange(async (value: string) => {
+            this.plugin.settings.modifierForNewNote = value as Modifier;
+            await this.plugin.saveSettings();
+          });
+      });
+  };
 
   setHide() {
     new Setting(this.containerEl)
