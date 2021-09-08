@@ -6,6 +6,10 @@ Add description, summary and more info to folders with folder notes.
 
 ![demo](https://user-images.githubusercontent.com/31102694/128635308-0a58279e-8bf0-4608-9330-fe11180953dd.png)
 
+Note: Starting from v0.11.0, this plugin require [folder-note-core](https://github.com/aidenlx/folder-note-core) to work properly. For old user, check [here](https://github.com/aidenlx/alx-folder-note/wiki/migrate-from-v0.10.0-and-lower) for migration guide.
+
+## Intro
+
 - [create folder note](https://github.com/aidenlx/alx-folder-note/wiki/create-folder-note) easily, with [mulitple preferences](https://github.com/aidenlx/alx-folder-note/wiki/folder-note-pref) and [template support](https://github.com/aidenlx/alx-folder-note/wiki/core-settings#template)
 - folder and folder note working as one
   - [click on folder in file explorer to open folder note](https://github.com/aidenlx/alx-folder-note/wiki/open-folder-note-from-folder)
@@ -35,6 +39,8 @@ Check [wiki](https://github.com/aidenlx/alx-folder-note/wiki) for more details
 The required API feature is only available for Obsidian v0.12.5+.
 
 ## Installation
+
+Note: Starting from v0.11.0, this plugin require [folder-note-core](https://github.com/aidenlx/folder-note-core) to work properly, which is also available on community plugins list. 
 
 ### From Obsidian
 
