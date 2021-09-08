@@ -29,6 +29,7 @@ export default class FEHandler {
     const { vault } = plugin.app;
     let refs = [] as EventRef[];
     refs.push(
+      vault.on("create", (af) => af instanceof TFolder && this.setClick(af)),
       vault.on("folder-note:create", (note: TFile, folder: TFolder) => {
         this.setMark(note);
         this.setMark(folder);
