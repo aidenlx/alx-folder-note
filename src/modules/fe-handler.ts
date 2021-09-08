@@ -32,6 +32,7 @@ export default class FEHandler {
       vault.on("folder-note:create", (note: TFile, folder: TFolder) => {
         this.setMark(note);
         this.setMark(folder);
+        this.setClick(folder);
       }),
       vault.on("folder-note:delete", (note: TFile, folder: TFolder) => {
         this.setMark(note, true);
@@ -48,18 +49,33 @@ export default class FEHandler {
     refs.forEach((ref) => this.plugin.registerEvent(ref));
   }
 
-  update = debounce(
+  setMarkQueue: Map<string, boolean> = new Map();
+  updateMark = debounce(
     () => {
-      for (const [path, revert] of this.waitingList) {
-        this._setMark(path, revert);
+      if (this.setMarkQueue.size > 0) {
+        this.setMarkQueue.forEach((revert, path) =>
+          this._setMark(path, revert),
+        );
+        this.setMarkQueue.clear();
       }
-      this.waitingList.clear();
     },
     200,
     true,
   );
 
-  waitingList: Map<string, boolean> = new Map();
+  setClickQueue: Map<string, [folder: AFItem | TFolder, revert: boolean]> =
+    new Map();
+
+  updateClick = debounce(
+    () => {
+      if (this.setClickQueue.size > 0) {
+        this.setClickQueue.forEach((param) => this._setClick(...param));
+        this.setClickQueue.clear();
+      }
+    },
+    200,
+    true,
+  );
 
   get api() {
     return this.plugin.CoreApi;
@@ -86,26 +102,33 @@ export default class FEHandler {
   setMark = (target: AFItem | TAbstractFile, revert = false) => {
     if (!target) return;
     if (target instanceof TAbstractFile) {
-      this.waitingList.set(target.path, revert);
+      this.setMarkQueue.set(target.path, revert);
     } else {
-      this.waitingList.set(target.file.path, revert);
+      this.setMarkQueue.set(target.file.path, revert);
     }
-    this.update();
+    this.updateMark();
   };
 
   getAfItem = (path: string): afItemMark | null =>
     this.fileExplorer.fileItems[path] ?? null;
 
+  setClick = (target: AFItem | TFolder, revert = false) => {
+    if (!target) return;
+    if (target instanceof TFolder) {
+      this.setClickQueue.set(target.path, [target, revert]);
+    } else {
+      this.setClickQueue.set(target.file.path, [target, revert]);
+    }
+    this.updateClick();
+  };
   /**
    * @param revert when revert is true, set item.evtDone to undefined
    */
-  setClick = (itemOrFolder: AFItem | TFolder, revert = false) => {
+  _setClick = (target: AFItem | TFolder, revert = false) => {
     const item: afItemMark | null =
-      itemOrFolder instanceof TFolder
-        ? this.getAfItem(itemOrFolder.path)
-        : itemOrFolder;
+      target instanceof TFolder ? this.getAfItem(target.path) : target;
     if (!item) {
-      console.error("item not found with path %s", itemOrFolder);
+      console.error("item not found with path %s", target);
       return;
     }
     if (isFolder(item)) {
