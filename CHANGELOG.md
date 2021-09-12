@@ -1,3 +1,10 @@
+## [0.11.1](https://github.com/aidenlx/alx-folder-note/compare/0.11.0...0.11.1) (2021-09-12)
+
+
+### Features
+
+* **settings:** expose log level settings of folder-note-core ([b7aecbf](https://github.com/aidenlx/alx-folder-note/commit/b7aecbfc9013f679dae9b9e17a25086bd83c68f0))
+
 # [0.11.0](https://github.com/aidenlx/alx-folder-note/compare/0.10.0...0.11.0) (2021-09-12)
 
 
