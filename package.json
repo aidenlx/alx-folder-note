@@ -15,7 +15,7 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
-    "@aidenlx/folder-note-core": "^1.2.0",
+    "@aidenlx/folder-note-core": "^1.2.2",
     "@aidenlx/relation-resolver": "^0.1.0",
     "@release-it/bumper": "^3.0.1",
     "@release-it/conventional-changelog": "^3.0.1",

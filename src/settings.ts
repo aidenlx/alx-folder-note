@@ -72,6 +72,8 @@ export class ALxFolderNoteSettingTab extends PluginSettingTab {
     this.setH1AsTitle();
     this.setBriefMax();
     this.setTitleDescField();
+    containerEl.createEl("h2", { text: "Debug" });
+    this.plugin.CoreApi.renderLogLevel(containerEl);
   }
 
   setMigrate() {
