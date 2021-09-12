@@ -1,3 +1,17 @@
+# [0.11.0](https://github.com/aidenlx/alx-folder-note/compare/0.10.0...0.11.0) (2021-09-12)
+
+
+### Bug Fixes
+
+* **fe-handler:** fix click not set on newly created folder items ([38ea6cf](https://github.com/aidenlx/alx-folder-note/commit/38ea6cfb8dd291713f5e65e68e963aec3a47012d))
+* **fe-handler:** fix click not set on newly created folder items (again) ([b50b6a6](https://github.com/aidenlx/alx-folder-note/commit/b50b6a61e9b7673731950f1c291aa425566a045d))
+* fix compatibility with folder-note-core v1.0.0 ([96c3105](https://github.com/aidenlx/alx-folder-note/commit/96c31053b72b45b839dcb02118dc07e22379127d))
+
+
+### Features
+
+* migrate code to folder-note-core ([29c20eb](https://github.com/aidenlx/alx-folder-note/commit/29c20ebbbfff55315c0a2fc2b551394b7a623ba5))
+
 # [0.10.0](https://github.com/aidenlx/alx-folder-note/compare/0.9.2...0.10.0) (2021-08-12)
 
 
