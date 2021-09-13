@@ -3,6 +3,7 @@ import {
   AFItem,
   FolderItem,
   Modifier,
+  Platform,
   TAbstractFile,
   TFile,
   TFolder,
@@ -21,8 +22,6 @@ export const isFolder = (item: AFItem): item is FolderItem =>
 export const isMd = (file: TFile | string) =>
   typeof file === "string" ? extname(file) === ".md" : file.extension === "md";
 
-export const isMac = () => navigator.userAgent.includes("Macintosh");
-
 export enum NoteLoc {
   Index,
   Inside,
@@ -33,7 +32,7 @@ export const isModifier = (evt: MouseEvent, pref: Modifier): boolean => {
   const { altKey, metaKey, ctrlKey, shiftKey } = evt;
   switch (pref) {
     case "Mod":
-      return isMac() ? metaKey : ctrlKey;
+      return Platform.isMacOS ? metaKey : ctrlKey;
     case "Ctrl":
       return ctrlKey;
     case "Meta":

@@ -1,8 +1,14 @@
-import { App, debounce, Modifier, PluginSettingTab, Setting } from "obsidian";
+import {
+  App,
+  debounce,
+  Modifier,
+  Platform,
+  PluginSettingTab,
+  Setting,
+} from "obsidian";
 
 import ALxFolderNote from "./fn-main";
-import { isMac, NoteLoc } from "./misc";
-import FEHandler from "./modules/fe-handler";
+import { NoteLoc } from "./misc";
 
 export const noHideMark = "alx-no-hide-note";
 
@@ -125,7 +131,7 @@ export class ALxFolderNoteSettingTab extends PluginSettingTab {
           Alt: "⌥ Option",
         };
 
-        const options = isMac() ? macOSOpts : windowsOpts;
+        const options = Platform.isMacOS ? macOSOpts : windowsOpts;
 
         dropDown
           .addOptions(options)
