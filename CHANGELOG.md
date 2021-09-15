@@ -1,3 +1,12 @@
+## [0.11.2](https://github.com/aidenlx/alx-folder-note/compare/0.11.1...0.11.2) (2021-09-15)
+
+
+### Bug Fixes
+
+* **file-card:** fix mid-click and mod-click on file card ([fe89454](https://github.com/aidenlx/alx-folder-note/commit/fe8945443ad172b7d3562a27e09ca9c2543d3e8b)), closes [#20](https://github.com/aidenlx/alx-folder-note/issues/20)
+* **folderv:** folder notes are no longer included in folderv ([4b9fdf3](https://github.com/aidenlx/alx-folder-note/commit/4b9fdf368b2e6f61d72719283de124cac302bf3b))
+* **initialize:** add more retrys to get FileExplorer view ([38625dc](https://github.com/aidenlx/alx-folder-note/commit/38625dc26859253996e4b190567660c85c40f721)), closes [#21](https://github.com/aidenlx/alx-folder-note/issues/21) [#12](https://github.com/aidenlx/alx-folder-note/issues/12)
+
 ## [0.11.1](https://github.com/aidenlx/alx-folder-note/compare/0.11.0...0.11.1) (2021-09-12)
 
 
