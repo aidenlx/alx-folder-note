@@ -9,6 +9,7 @@ import {
   App,
   FileStats,
   moment,
+  Platform,
   SectionCache,
   TAbstractFile,
   TFile,
@@ -93,10 +94,19 @@ export const FileCard = ({ plugin, src, cover, linkType }: FileCardProps) => {
   }, [file]);
 
   const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
     if (e.target instanceof Element && e.target.matches("a.tag, span.ant-tag"))
       return;
-    else if ([0, 1].includes(e.button))
-      workspace.openLinkText(file.path, "", false);
+    else if (e.button === 0) {
+      workspace.openLinkText(
+        file.path,
+        "",
+        (Platform.isMacOS && e.metaKey) || e.ctrlKey,
+      );
+    } else if (e.button === 1) {
+      workspace.openLinkText(file.path, "", true);
+    }
   };
   return (
     <Card

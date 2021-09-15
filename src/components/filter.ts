@@ -1,6 +1,5 @@
 // import { Set } from "immutable";
 import minimatch from "minimatch";
-import RegexParser from "regex-parser";
 
 export type Filter = ((name: string) => boolean) | null;
 
