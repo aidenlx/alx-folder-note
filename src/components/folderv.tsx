@@ -26,10 +26,10 @@ const getChildren = (
 ): Path_Types | null => {
   const { vault } = plugin.app,
     folder = vault.getAbstractFileByPath(folderPath),
-    internalFilter = filter
-      ? (af: TAbstractFile): af is TFile =>
-          af instanceof TFile && filter(af.name)
-      : (af: TAbstractFile): af is TFile => af instanceof TFile;
+    internalFilter = (af: TAbstractFile): af is TFile =>
+      af instanceof TFile &&
+      plugin.CoreApi.getFolderFromNote(af) === null &&
+      (!filter || filter(af.name));
   if (folder instanceof TFolder) {
     let children = OrderedMap<string, FileInfo>().withMutations((map) =>
       folder.children.forEach(
@@ -41,8 +41,8 @@ const getChildren = (
       sc: File_Types | null,
       api = plugin.app.plugins.plugins["relation-resolver"]?.api;
     if (
-      (folderNote = plugin.CoreApi.getFolderNote(folder)) &&
       api &&
+      (folderNote = plugin.CoreApi.getFolderNote(folder)) &&
       (sc = api.getChildrenWithTypes(folderNote.path))
     ) {
       const softChildren = sc;
