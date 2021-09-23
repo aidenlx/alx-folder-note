@@ -2,7 +2,7 @@
 
 Add description, summary and more info to folders with folder notes.
 
-(Special thanks to [xpgo](https://github.com/xpgo) for the [obsidian-folder-note-plugin](https://github.com/xpgo/obsidian-folder-note-plugin))
+alx-folder-note is a maintained, completely rewritten, and improved folder note plugin that covers all core features of the original [folder note plugin](https://github.com/xpgo/obsidian-folder-note-plugin) (Special thanks to [xpgo](https://github.com/xpgo)) (except folder overview), with enhanced file explorer patches and lots of QoL improvements, aiming to make the folder with note work as seamless as native files.)
 
 ![demo](https://user-images.githubusercontent.com/31102694/128635308-0a58279e-8bf0-4608-9330-fe11180953dd.png)
 
