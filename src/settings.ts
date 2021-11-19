@@ -12,6 +12,7 @@ import ALxFolderNote from "./fn-main";
 import { NoteLoc } from "./misc";
 
 export const noHideMark = "alx-no-hide-note";
+export const folderIconMark = "alx-folder-icons";
 
 export interface ALxFolderNoteSettings {
   modifierForNewNote: Modifier;
@@ -190,6 +191,7 @@ export class ALxFolderNoteSettingTab extends PluginSettingTab {
           .setValue(this.plugin.settings.folderIcon)
           .onChange(async (value) => {
             this.plugin.settings.folderIcon = value;
+            document.body.toggleClass(folderIconMark, value);
             await this.plugin.saveSettings();
           }),
       );

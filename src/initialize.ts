@@ -4,7 +4,7 @@ import { AFItem, FileExplorer } from "obsidian";
 import ALxFolderNote from "./fn-main";
 import { isFolder } from "./misc";
 import FEHandler, { PatchRevealInExplorer } from "./modules/fe-handler";
-import { noHideMark } from "./settings";
+import { folderIconMark, noHideMark } from "./settings";
 
 export default function initialize(this: ALxFolderNote, revert = false) {
   if (!revert) {
@@ -52,6 +52,10 @@ export default function initialize(this: ALxFolderNote, revert = false) {
     document.body.toggleClass(
       noHideMark,
       revert ? false : !this.settings.hideNoteInExplorer,
+    );
+    document.body.toggleClass(
+      folderIconMark,
+      revert ? false : this.settings.folderIcon,
     );
 
     if (!revert) {
