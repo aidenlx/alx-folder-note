@@ -1,4 +1,5 @@
-import { AFItem, App, FileExplorer } from "obsidian";
+import { around } from "monkey-around";
+import { AFItem, FileExplorer } from "obsidian";
 
 import ALxFolderNote from "./fn-main";
 import { isFolder } from "./misc";
@@ -6,7 +7,9 @@ import FEHandler, { PatchRevealInExplorer } from "./modules/fe-handler";
 import { noHideMark } from "./settings";
 
 export default function initialize(this: ALxFolderNote, revert = false) {
-  PatchRevealInExplorer(this);
+  if (!revert) {
+    PatchRevealInExplorer(this);
+  }
 
   const doWithFileExplorer = (callback: (view: FileExplorer) => void) => {
     let leaves,
@@ -26,21 +29,45 @@ export default function initialize(this: ALxFolderNote, revert = false) {
     };
     tryGetView();
   };
-
-  doWithFileExplorer((view) => {
-    const feHandler = new FEHandler(this, view);
-    this.feHandler = feHandler;
-    /** get all AbstractFile (file+folder) and attach event */
-    const setupClick = (re: boolean) => {
-      feHandler.iterateItems((item: AFItem) => {
-        if (isFolder(item)) {
-          feHandler.setClick(item, re);
-        }
-      });
-    };
-
-    setupClick(revert);
+  /** get all AbstractFile (file+folder) and attach event */
+  const setupClick = (feHandler: FEHandler, re: boolean) => {
+    feHandler.iterateItems((item: AFItem) => {
+      if (isFolder(item)) {
+        feHandler.setClick(item, re);
+      }
+    });
+  };
+  const getViewHandler = (revert: boolean) => (view: FileExplorer) => {
+    let feHandler: FEHandler;
+    if (!this.feHandler) {
+      const newHandler = new FEHandler(this, view);
+      this.feHandler = newHandler;
+      feHandler = newHandler;
+    } else {
+      this.feHandler.fileExplorer = view;
+      feHandler = this.feHandler;
+    }
+    setupClick(feHandler, revert);
     feHandler.markAll(revert);
-    document.body.toggleClass(noHideMark, !this.settings.hideNoteInExplorer);
-  });
+    document.body.toggleClass(
+      noHideMark,
+      revert ? false : !this.settings.hideNoteInExplorer,
+    );
+
+    if (!revert) {
+      // when file explorer is closed (workspace changed)
+      // try to update fehanlder with new file explorer instance
+      this.register(
+        around(view, {
+          onClose: (next) =>
+            function (this: FileExplorer) {
+              setTimeout(() => doWithFileExplorer(getViewHandler(false)), 1e3);
+              return next.apply(this);
+            },
+        }),
+      );
+    }
+  };
+
+  doWithFileExplorer(getViewHandler(revert));
 }
