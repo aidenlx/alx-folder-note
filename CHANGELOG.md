@@ -1,3 +1,8 @@
+* refactor: add body.alx-folder-icons when option is enabled (ff1fa46)
+* fix(initialize): fix feHanlder failed to update when workspace changes (9fe694a)
+* feat(fe-handler): set folder icon in folder note (7ba11ad)
+* docs(readme): update introduction (517c55e)
+
 ## [0.11.2](https://github.com/aidenlx/alx-folder-note/compare/0.11.1...0.11.2) (2021-09-15)
 
 
