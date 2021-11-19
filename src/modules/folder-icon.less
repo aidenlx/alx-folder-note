@@ -1,0 +1,30 @@
+.nav-folder.alx-folder-with-note[data-icon]
+  > .nav-folder-title
+  > .nav-folder-title-content {
+
+  &::before {
+    content: var(--alx-folder-icon-txt);
+    background-image: var(--alx-folder-icon-url);
+  }
+
+  body:not(.cc-folder-icons) & {
+    &::before {
+      width: 14px;
+      height: 14px;
+      flex-shrink: 0;
+      flex-grow: 0;
+      margin-right: 5px;
+      position: relative;
+      display: inline-block;
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center center;
+    }
+    display: flex;
+    align-items: center;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    flex-grow: 1;
+    padding-left: 4px;
+  }
+}

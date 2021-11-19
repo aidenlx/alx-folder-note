@@ -1,3 +1,4 @@
+import { isPluginEnabled } from "@aidenlx/obsidian-icon-shortcodes";
 import {
   App,
   debounce,
@@ -21,6 +22,7 @@ export interface ALxFolderNoteSettings {
     titleField: string;
     descField: string;
   };
+  folderIcon: boolean;
   folderNotePref: NoteLoc | null;
   deleteOutsideNoteWithFolder: boolean | null;
   indexName: string | null;
@@ -37,6 +39,7 @@ export const DEFAULT_SETTINGS: ALxFolderNoteSettings = {
     titleField: "title",
     descField: "description",
   },
+  folderIcon: true,
   folderNotePref: null,
   deleteOutsideNoteWithFolder: null,
   indexName: null,
@@ -68,17 +71,20 @@ export class ALxFolderNoteSettingTab extends PluginSettingTab {
     let { containerEl } = this;
     containerEl.empty();
 
-    containerEl.createEl("h2", { text: "Core" });
+    new Setting(containerEl).setHeading().setName("Core");
     if (this.checkMigrated()) {
       this.plugin.CoreApi.renderCoreSettings(containerEl);
     } else this.setMigrate();
+    this.setFolderIcon();
     this.setModifier();
     this.setHide();
-    containerEl.createEl("h2", { text: "Folder Overview" });
+
+    new Setting(containerEl).setHeading().setName("Folder Overview");
     this.setH1AsTitle();
     this.setBriefMax();
     this.setTitleDescField();
-    containerEl.createEl("h2", { text: "Debug" });
+
+    new Setting(containerEl).setHeading().setName("Debug");
     this.plugin.CoreApi.renderLogLevel(containerEl);
   }
 
@@ -153,6 +159,37 @@ export class ALxFolderNoteSettingTab extends PluginSettingTab {
           .onChange(async (value) => {
             this.plugin.settings.hideNoteInExplorer = value;
             document.body.toggleClass(noHideMark, !value);
+            await this.plugin.saveSettings();
+          }),
+      );
+  }
+  setFolderIcon() {
+    new Setting(this.containerEl)
+      .setName("Set Folder Icon in Folder Notes")
+      .setDesc(
+        createFragment((el) => {
+          el.appendText(
+            "Set `icon` field with icon shortcode in frontmatter of foler note to specify linked folder's icon",
+          );
+          el.createEl("br");
+
+          el.createEl("a", {
+            href: "https://github.com/aidenlx/obsidian-icon-shortcodes",
+            text: "Icon Shortcodes v0.5.1+",
+          });
+          el.appendText(" Required. ");
+          if (!isPluginEnabled(this.plugin))
+            el.appendText("(Currently not enabled)");
+          el.createEl("br");
+
+          el.appendText("Restart obsidian to take effects");
+        }),
+      )
+      .addToggle((toggle) =>
+        toggle
+          .setValue(this.plugin.settings.folderIcon)
+          .onChange(async (value) => {
+            this.plugin.settings.folderIcon = value;
             await this.plugin.saveSettings();
           }),
       );

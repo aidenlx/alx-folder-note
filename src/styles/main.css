@@ -9,12 +9,10 @@ body:not(.alx-no-hide-note) .nav-file.alx-folder-note > .nav-file-title {
 
 .nav-folder.alx-folder-with-note
   > .nav-folder-title
-  > .nav-folder-title-content {
-  /* color: var(--text-accent); */
-  text-decoration-line: underline;
-  text-decoration-color: var(--text-faint);
-  text-decoration-thickness: 2px;
-  text-underline-offset: 1px;
+  > .nav-folder-title-content::after {
+  content: ">";
+  color: var(--text-accent);
+  margin-left: 5px;
 }
 
 input.incorrect {
