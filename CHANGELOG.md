@@ -1,3 +1,10 @@
+## [0.12.1](https://github.com/aidenlx/alx-folder-note/compare/0.12.0...0.12.1) (2021-11-27)
+
+
+### Features
+
+* **fe-handler:** add option to hide collapse indicator when folder contains only folder note ([7fa8ee8](https://github.com/aidenlx/alx-folder-note/commit/7fa8ee833acf898f781dc37aa1d7857e576897d5)), closes [#40](https://github.com/aidenlx/alx-folder-note/issues/40)
+
 * refactor: add body.alx-folder-icons when option is enabled (ff1fa46)
 * fix(initialize): fix feHanlder failed to update when workspace changes (9fe694a)
 * feat(fe-handler): set folder icon in folder note (7ba11ad)
