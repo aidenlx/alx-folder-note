@@ -35,7 +35,7 @@ export interface ALxFolderNoteSettings {
 export const DEFAULT_SETTINGS: ALxFolderNoteSettings = {
   modifierForNewNote: "Mod",
   hideNoteInExplorer: true,
-  hideCollapseIndicator: true,
+  hideCollapseIndicator: false,
   folderOverview: {
     h1AsTitleSource: true,
     briefMax: 128,
