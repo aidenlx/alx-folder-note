@@ -15,6 +15,12 @@ body:not(.alx-no-hide-note) .nav-file.alx-folder-note > .nav-file-title {
   margin-left: 5px;
 }
 
+.nav-folder.alx-empty-folder
+  > .nav-folder-title
+  > .nav-folder-collapse-indicator {
+  visibility: hidden;
+}
+
 input.incorrect {
   color: #eb3223;
 }

@@ -11,12 +11,13 @@ import {
 import ALxFolderNote from "./fn-main";
 import { NoteLoc } from "./misc";
 
-export const noHideMark = "alx-no-hide-note";
+export const noHideNoteMark = "alx-no-hide-note";
 export const folderIconMark = "alx-folder-icons";
 
 export interface ALxFolderNoteSettings {
   modifierForNewNote: Modifier;
   hideNoteInExplorer: boolean;
+  hideCollapseIndicator: boolean;
   folderOverview: {
     h1AsTitleSource: boolean;
     briefMax: number;
@@ -34,6 +35,7 @@ export interface ALxFolderNoteSettings {
 export const DEFAULT_SETTINGS: ALxFolderNoteSettings = {
   modifierForNewNote: "Mod",
   hideNoteInExplorer: true,
+  hideCollapseIndicator: true,
   folderOverview: {
     h1AsTitleSource: true,
     briefMax: 128,
@@ -159,7 +161,20 @@ export class ALxFolderNoteSettingTab extends PluginSettingTab {
           .setValue(this.plugin.settings.hideNoteInExplorer)
           .onChange(async (value) => {
             this.plugin.settings.hideNoteInExplorer = value;
-            document.body.toggleClass(noHideMark, !value);
+            document.body.toggleClass(noHideNoteMark, !value);
+            await this.plugin.saveSettings();
+          }),
+      );
+    new Setting(this.containerEl)
+      .setName("Hide Collapse Indicator")
+      .setDesc(
+        "Hide collapse indicator when folder contains only folder note, reload obsidian to take effects",
+      )
+      .addToggle((toggle) =>
+        toggle
+          .setValue(this.plugin.settings.hideCollapseIndicator)
+          .onChange(async (value) => {
+            this.plugin.settings.hideCollapseIndicator = value;
             await this.plugin.saveSettings();
           }),
       );

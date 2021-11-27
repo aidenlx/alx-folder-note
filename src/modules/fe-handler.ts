@@ -8,10 +8,12 @@ import {
   debounce,
   EventRef,
   FileExplorer,
+  FolderItem,
   TAbstractFile,
   TFile,
   TFolder,
 } from "obsidian";
+import { dirname } from "path";
 
 import ALxFolderNote from "../fn-main";
 import { afItemMark, isFolder } from "../misc";
@@ -19,6 +21,7 @@ import getClickHandler from "./click-handler";
 
 const folderNoteClass = "alx-folder-note";
 const folderClass = "alx-folder-with-note";
+const emptyFolderClass = "alx-empty-folder";
 
 /** File Explorer Handler */
 export default class FEHandler {
@@ -30,6 +33,13 @@ export default class FEHandler {
 
   private get shouldSetIcon(): boolean {
     return this.plugin.settings.folderIcon && !!getApi(this.plugin);
+  }
+
+  get fncApi() {
+    return this.plugin.CoreApi;
+  }
+  get files() {
+    return this.fileExplorer.files;
   }
 
   constructor(plugin: ALxFolderNote, explorer: FileExplorer) {
@@ -70,11 +80,26 @@ export default class FEHandler {
       vault.on("iconsc:initialized", updateIcon),
       vault.on("iconsc:changed", updateIcon),
     );
+    if (this.plugin.settings.hideCollapseIndicator) {
+      refs.push(
+        // empty folder detection
+        vault.on("create", (file) => this.setChangedFolder(file.parent.path)),
+        vault.on("delete", (file) => {
+          let parent = dirname(file.path);
+          this.setChangedFolder(parent === "." ? "/" : parent);
+        }),
+        vault.on("rename", (file, oldPath) => {
+          this.setChangedFolder(file.parent.path);
+          let parent = dirname(oldPath);
+          this.setChangedFolder(parent === "." ? "/" : parent);
+        }),
+      );
+    }
     refs.forEach((ref) => this.plugin.registerEvent(ref));
   }
 
-  setMarkQueue: Map<string, boolean> = new Map();
-  updateMark = debounce(
+  private setMarkQueue: Map<string, boolean> = new Map();
+  private updateMark = debounce(
     () => {
       if (this.setMarkQueue.size > 0) {
         this.setMarkQueue.forEach((revert, path) =>
@@ -86,28 +111,6 @@ export default class FEHandler {
     200,
     true,
   );
-
-  setClickQueue: Map<string, [folder: AFItem | TFolder, revert: boolean]> =
-    new Map();
-
-  updateClick = debounce(
-    () => {
-      if (this.setClickQueue.size > 0) {
-        this.setClickQueue.forEach((param) => this._setClick(...param));
-        this.setClickQueue.clear();
-      }
-    },
-    200,
-    true,
-  );
-
-  get fncApi() {
-    return this.plugin.CoreApi;
-  }
-  get files() {
-    return this.fileExplorer.files;
-  }
-
   private _setMark = (path: string, revert: boolean) => {
     const item = this.getAfItem(path);
     if (!item) {
@@ -118,12 +121,105 @@ export default class FEHandler {
       if (revert === !!item.isFolderWithNote) {
         item.el.toggleClass(folderClass, !revert);
         item.isFolderWithNote = revert ? undefined : true;
+        if (this.plugin.settings.hideCollapseIndicator)
+          item.el.toggleClass(
+            emptyFolderClass,
+            revert ? false : item.file.children.length === 1,
+          );
       }
       this._updateIcon(path, revert, item);
     } else if (revert === !!item.isFolderNote) {
       item.el.toggleClass(folderNoteClass, !revert);
       item.isFolderNote = revert ? undefined : true;
     }
+  };
+  setMark = (target: AFItem | TAbstractFile | string, revert = false) => {
+    if (!target) return;
+    if (target instanceof TAbstractFile) {
+      this.setMarkQueue.set(target.path, revert);
+    } else if (typeof target === "string") {
+      this.setMarkQueue.set(target, revert);
+    } else {
+      this.setMarkQueue.set(target.file.path, revert);
+    }
+    this.updateMark();
+  };
+
+  private setClickQueue: Map<
+    string,
+    [folder: AFItem | TFolder, revert: boolean]
+  > = new Map();
+  private updateClick = debounce(
+    () => {
+      if (this.setClickQueue.size > 0) {
+        this.setClickQueue.forEach((param) => this._setClick(...param));
+        this.setClickQueue.clear();
+      }
+    },
+    200,
+    true,
+  );
+  /**
+   * @param revert when revert is true, set item.evtDone to undefined
+   */
+  _setClick = (target: AFItem | TFolder, revert = false) => {
+    const item: afItemMark | null =
+      target instanceof TFolder ? this.getAfItem(target.path) : target;
+    if (!item) {
+      console.error("item not found with path %s", target);
+      return;
+    }
+    if (isFolder(item)) {
+      if (revert) {
+        item.evtDone = undefined;
+      } else if (!item.evtDone) {
+        const { titleInnerEl } = item;
+        // handle regular click
+        this.plugin.registerDomEvent(titleInnerEl, "click", this.clickHandler);
+        // handle middle click
+        this.plugin.registerDomEvent(
+          titleInnerEl,
+          "auxclick",
+          this.clickHandler,
+        );
+        item.evtDone = true;
+      }
+    }
+  };
+  setClick = (target: AFItem | TFolder, revert = false) => {
+    if (!target) return;
+    if (target instanceof TFolder) {
+      this.setClickQueue.set(target.path, [target, revert]);
+    } else {
+      this.setClickQueue.set(target.file.path, [target, revert]);
+    }
+    this.updateClick();
+  };
+
+  private setChangedFolderQueue: Set<string> = new Set();
+  private updateChangedFolder = debounce(
+    () => {
+      if (this.setChangedFolderQueue.size > 0) {
+        console.log(this.setChangedFolderQueue);
+        this.setChangedFolderQueue.forEach((path) => {
+          let note = this.fncApi.getFolderNote(path);
+          if (note) {
+            (this.getAfItem(path) as FolderItem)?.el.toggleClass(
+              emptyFolderClass,
+              note.parent.children.length === 1,
+            );
+          }
+        });
+        this.setChangedFolderQueue.clear();
+      }
+    },
+    200,
+    true,
+  );
+  setChangedFolder = (folderPath: string) => {
+    if (!folderPath || folderPath === "/") return;
+    this.setChangedFolderQueue.add(folderPath);
+    this.updateChangedFolder();
   };
 
   private _updateIcon(path: string, revert: boolean, item: afItemMark) {
@@ -166,57 +262,8 @@ export default class FEHandler {
     }
   }
 
-  setMark = (target: AFItem | TAbstractFile | string, revert = false) => {
-    if (!target) return;
-    if (target instanceof TAbstractFile) {
-      this.setMarkQueue.set(target.path, revert);
-    } else if (typeof target === "string") {
-      this.setMarkQueue.set(target, revert);
-    } else {
-      this.setMarkQueue.set(target.file.path, revert);
-    }
-    this.updateMark();
-  };
-
   getAfItem = (path: string): afItemMark | null =>
     this.fileExplorer.fileItems[path] ?? null;
-
-  setClick = (target: AFItem | TFolder, revert = false) => {
-    if (!target) return;
-    if (target instanceof TFolder) {
-      this.setClickQueue.set(target.path, [target, revert]);
-    } else {
-      this.setClickQueue.set(target.file.path, [target, revert]);
-    }
-    this.updateClick();
-  };
-  /**
-   * @param revert when revert is true, set item.evtDone to undefined
-   */
-  _setClick = (target: AFItem | TFolder, revert = false) => {
-    const item: afItemMark | null =
-      target instanceof TFolder ? this.getAfItem(target.path) : target;
-    if (!item) {
-      console.error("item not found with path %s", target);
-      return;
-    }
-    if (isFolder(item)) {
-      if (revert) {
-        item.evtDone = undefined;
-      } else if (!item.evtDone) {
-        const { titleInnerEl } = item;
-        // handle regular click
-        this.plugin.registerDomEvent(titleInnerEl, "click", this.clickHandler);
-        // handle middle click
-        this.plugin.registerDomEvent(
-          titleInnerEl,
-          "auxclick",
-          this.clickHandler,
-        );
-        item.evtDone = true;
-      }
-    }
-  };
 
   markAll = (revert = false) => {
     this.iterateItems((item: AFItem) => {
