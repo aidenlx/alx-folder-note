@@ -9,6 +9,9 @@ declare module "obsidian" {
     getViewType(): string;
     getDisplayText(): string;
     onClose(): Promise<void>;
+    dom: {
+      navFileContainerEl: HTMLDivElement;
+    };
   }
 
   type AFItem = FolderItem | FileItem;

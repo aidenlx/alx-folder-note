@@ -1,4 +1,5 @@
 import "./folder-icon.less";
+import "./focus.less";
 
 import { getApi } from "@aidenlx/obsidian-icon-shortcodes";
 import { around } from "monkey-around";
@@ -23,6 +24,9 @@ const folderNoteClass = "alx-folder-note";
 const folderClass = "alx-folder-with-note";
 const emptyFolderClass = "alx-empty-folder";
 
+const focusedFolderCls = "alx-focused-folder";
+const focusModeCls = "alx-folder-focus";
+
 /** File Explorer Handler */
 export default class FEHandler {
   plugin: ALxFolderNote;
@@ -42,17 +46,62 @@ export default class FEHandler {
     return this.fileExplorer.files;
   }
 
+  private _focusedFolder: FolderItem | null = null;
+  get focusedFolder() {
+    return this._focusedFolder;
+  }
+  set focusedFolder(val: FolderItem | null) {
+    this._focusedFolder = val;
+    this.fileExplorer.dom.navFileContainerEl.toggleClass(focusModeCls, !!val);
+  }
+  toggleFocusFolder(folder: TFolder | null) {
+    const folderItem = folder
+      ? (this.getAfItem(folder.path) as FolderItem | null)
+      : null;
+    if (this.focusedFolder) {
+      this._focusFolder(this.focusedFolder, true);
+    }
+    // if given same folder as current cached, toggle it off
+    if (folderItem && folderItem.file.path === this.focusedFolder?.file.path) {
+      this.focusedFolder = null;
+    } else {
+      folderItem && this._focusFolder(folderItem, false);
+      this.focusedFolder = folderItem;
+    }
+  }
+  private _focusFolder(folder: FolderItem, revert = false) {
+    if (folder.file.isRoot()) throw new Error("Cannot focus on root dir");
+    folder.el.toggleClass(focusedFolderCls, !revert);
+  }
+
   constructor(plugin: ALxFolderNote, explorer: FileExplorer) {
     this.plugin = plugin;
     this.clickHandler = getClickHandler(plugin);
     this.fileExplorer = explorer;
-    const { vault, metadataCache } = plugin.app;
+    const { vault, metadataCache, workspace } = plugin.app;
     let refs = [] as EventRef[];
     const updateIcon = () => {
       for (const path of this.foldersWithIcon) {
         this.setMark(path);
       }
     };
+    // focus folder setup
+    refs.push(
+      workspace.on("file-menu", (menu, af, source) => {
+        if (!(af instanceof TFolder) || af.isRoot()) return;
+        menu.addItem((item) =>
+          item
+            .setTitle("Toggle Focus")
+            .setIcon("crossed-star")
+            .onClick(() => this.toggleFocusFolder(af)),
+        );
+      }),
+    );
+    this.plugin.register(
+      () => this.focusedFolder && this.toggleFocusFolder(null),
+    );
+
+    // folder note events setup
     refs.push(
       vault.on("create", (af) => af instanceof TFolder && this.setClick(af)),
       vault.on("folder-note:create", (note: TFile, folder: TFolder) => {
@@ -80,6 +129,7 @@ export default class FEHandler {
       vault.on("iconsc:initialized", updateIcon),
       vault.on("iconsc:changed", updateIcon),
     );
+
     if (this.plugin.settings.hideCollapseIndicator) {
       refs.push(
         // empty folder detection
