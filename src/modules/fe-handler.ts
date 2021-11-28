@@ -2,7 +2,6 @@ import "./folder-icon.less";
 import "./focus.less";
 
 import { getApi } from "@aidenlx/obsidian-icon-shortcodes";
-import { around } from "monkey-around";
 import {
   AFItem,
   CachedMetadata,
@@ -27,57 +26,33 @@ const emptyFolderClass = "alx-empty-folder";
 const focusedFolderCls = "alx-focused-folder";
 const focusModeCls = "alx-folder-focus";
 
-/** File Explorer Handler */
-export default class FEHandler {
-  plugin: ALxFolderNote;
-  fileExplorer: FileExplorer;
-  clickHandler: (evt: MouseEvent) => void;
-
-  foldersWithIcon = new Set<string>();
-
-  private get shouldSetIcon(): boolean {
-    return this.plugin.settings.folderIcon && !!getApi(this.plugin);
-  }
-
+class FEHandler_Base {
+  constructor(
+    public plugin: ALxFolderNote,
+    public fileExplorer: FileExplorer,
+  ) {}
   get fncApi() {
     return this.plugin.CoreApi;
   }
   get files() {
     return this.fileExplorer.files;
   }
+  getAfItem = (path: string): afItemMark | null =>
+    this.fileExplorer.fileItems[path] ?? null;
+  iterateItems = (callback: (item: AFItem) => any): void => {
+    const items = this.fileExplorer.fileItems;
+    if (items)
+      for (const key in items) {
+        if (!Object.prototype.hasOwnProperty.call(items, key)) continue;
+        callback(items[key]);
+      }
+  };
+}
 
-  private _focusedFolder: FolderItem | null = null;
-  get focusedFolder() {
-    return this._focusedFolder;
-  }
-  set focusedFolder(val: FolderItem | null) {
-    this._focusedFolder = val;
-    this.fileExplorer.dom.navFileContainerEl.toggleClass(focusModeCls, !!val);
-  }
-  toggleFocusFolder(folder: TFolder | null) {
-    const folderItem = folder
-      ? (this.getAfItem(folder.path) as FolderItem | null)
-      : null;
-    if (this.focusedFolder) {
-      this._focusFolder(this.focusedFolder, true);
-    }
-    // if given same folder as current cached, toggle it off
-    if (folderItem && folderItem.file.path === this.focusedFolder?.file.path) {
-      this.focusedFolder = null;
-    } else {
-      folderItem && this._focusFolder(folderItem, false);
-      this.focusedFolder = folderItem;
-    }
-  }
-  private _focusFolder(folder: FolderItem, revert = false) {
-    if (folder.file.isRoot()) throw new Error("Cannot focus on root dir");
-    folder.el.toggleClass(focusedFolderCls, !revert);
-  }
-
+/** File Explorer Handler */
+export default class FEHandler extends FEHandler_Base {
   constructor(plugin: ALxFolderNote, explorer: FileExplorer) {
-    this.plugin = plugin;
-    this.clickHandler = getClickHandler(plugin);
-    this.fileExplorer = explorer;
+    super(plugin, explorer);
     const { vault, metadataCache, workspace } = plugin.app;
     let refs = [] as EventRef[];
     const updateIcon = () => {
@@ -85,7 +60,7 @@ export default class FEHandler {
         this.setMark(path);
       }
     };
-    // focus folder setup
+    //#region focus folder setup
     refs.push(
       workspace.on("file-menu", (menu, af, source) => {
         if (!(af instanceof TFolder) || af.isRoot()) return;
@@ -100,8 +75,9 @@ export default class FEHandler {
     this.plugin.register(
       () => this.focusedFolder && this.toggleFocusFolder(null),
     );
+    //#endregion
 
-    // folder note events setup
+    //#region folder note events setup
     refs.push(
       vault.on("create", (af) => af instanceof TFolder && this.setClick(af)),
       vault.on("folder-note:create", (note: TFile, folder: TFolder) => {
@@ -129,10 +105,11 @@ export default class FEHandler {
       vault.on("iconsc:initialized", updateIcon),
       vault.on("iconsc:changed", updateIcon),
     );
+    //#endregion
 
+    //#region empty folder detection
     if (this.plugin.settings.hideCollapseIndicator) {
       refs.push(
-        // empty folder detection
         vault.on("create", (file) => this.setChangedFolder(file.parent.path)),
         vault.on("delete", (file) => {
           let parent = dirname(file.path);
@@ -145,9 +122,11 @@ export default class FEHandler {
         }),
       );
     }
+    //#endregion
     refs.forEach((ref) => this.plugin.registerEvent(ref));
   }
 
+  //#region set class mark for folder notes and folders
   private setMarkQueue: Map<string, boolean> = new Map();
   private updateMark = debounce(
     () => {
@@ -194,7 +173,35 @@ export default class FEHandler {
     }
     this.updateMark();
   };
+  markAll = (revert = false) => {
+    this.iterateItems((item: AFItem) => {
+      if (isFolder(item) && !revert) {
+        this.markFolderNote(item.file);
+      } else if (revert) {
+        this.setMark(item, true);
+      }
+    });
+  };
+  markFolderNote = (af: TAbstractFile): boolean => {
+    if (af instanceof TFolder && af.isRoot()) return false;
+    const { getFolderNote, getFolderFromNote } = this.fncApi;
 
+    let found: TAbstractFile | null = null;
+    if (af instanceof TFile) found = getFolderFromNote(af);
+    else if (af instanceof TFolder) found = getFolderNote(af);
+
+    if (found) {
+      this.setMark(found);
+      this.setMark(af);
+    } else {
+      this.setMark(af, true);
+    }
+    return !!found;
+  };
+  // #endregion
+
+  //#region set click handler for folders with folder note
+  private clickHandler = getClickHandler(this.plugin);
   private setClickQueue: Map<
     string,
     [folder: AFItem | TFolder, revert: boolean]
@@ -245,7 +252,9 @@ export default class FEHandler {
     }
     this.updateClick();
   };
+  //#endregion
 
+  //#region set hide collapse indicator
   private setChangedFolderQueue: Set<string> = new Set();
   private updateChangedFolder = debounce(
     () => {
@@ -271,7 +280,13 @@ export default class FEHandler {
     this.setChangedFolderQueue.add(folderPath);
     this.updateChangedFolder();
   };
+  //#endregion
 
+  //#region folder icon setup
+  foldersWithIcon = new Set<string>();
+  private get shouldSetIcon(): boolean {
+    return this.plugin.settings.folderIcon && !!getApi(this.plugin);
+  }
   private _updateIcon(path: string, revert: boolean, item: afItemMark) {
     if (!this.shouldSetIcon) return;
     const api = getApi(this.plugin) as NonNullable<ReturnType<typeof getApi>>;
@@ -311,64 +326,35 @@ export default class FEHandler {
       }
     }
   }
+  //#endregion
 
-  getAfItem = (path: string): afItemMark | null =>
-    this.fileExplorer.fileItems[path] ?? null;
-
-  markAll = (revert = false) => {
-    this.iterateItems((item: AFItem) => {
-      if (isFolder(item) && !revert) {
-        this.markFolderNote(item.file);
-      } else if (revert) {
-        this.setMark(item, true);
-      }
-    });
-  };
-
-  markFolderNote = (af: TAbstractFile): boolean => {
-    if (af instanceof TFolder && af.isRoot()) return false;
-    const { getFolderNote, getFolderFromNote } = this.fncApi;
-
-    let found: TAbstractFile | null = null;
-    if (af instanceof TFile) found = getFolderFromNote(af);
-    else if (af instanceof TFolder) found = getFolderNote(af);
-
-    if (found) {
-      this.setMark(found);
-      this.setMark(af);
-    } else {
-      this.setMark(af, true);
-    }
-    return !!found;
-  };
-
-  iterateItems = (callback: (item: AFItem) => any): void => {
-    const items = this.fileExplorer.fileItems;
-    if (items)
-      for (const key in items) {
-        if (!Object.prototype.hasOwnProperty.call(items, key)) continue;
-        callback(items[key]);
-      }
-  };
-}
-
-export const PatchRevealInExplorer = (plugin: ALxFolderNote) => {
-  const { getFolderFromNote } = plugin.CoreApi;
-
-  const feInstance =
-    plugin.app.internalPlugins.plugins["file-explorer"]?.instance;
-  if (feInstance) {
-    const remover = around(feInstance, {
-      revealInFolder: (next) => {
-        return function (this: any, ...args: any[]) {
-          if (args[0] instanceof TFile && plugin.settings.hideNoteInExplorer) {
-            const findResult = getFolderFromNote(args[0]);
-            if (findResult) args[0] = findResult;
-          }
-          return next.apply(this, args);
-        };
-      },
-    });
-    plugin.register(remover);
+  //#region folder focus setup
+  private _focusedFolder: FolderItem | null = null;
+  get focusedFolder() {
+    return this._focusedFolder;
   }
-};
+  set focusedFolder(val: FolderItem | null) {
+    this._focusedFolder = val;
+    this.fileExplorer.dom.navFileContainerEl.toggleClass(focusModeCls, !!val);
+  }
+  toggleFocusFolder(folder: TFolder | null) {
+    const folderItem = folder
+      ? (this.getAfItem(folder.path) as FolderItem | null)
+      : null;
+    if (this.focusedFolder) {
+      this._focusFolder(this.focusedFolder, true);
+    }
+    // if given same folder as current cached, toggle it off
+    if (folderItem && folderItem.file.path === this.focusedFolder?.file.path) {
+      this.focusedFolder = null;
+    } else {
+      folderItem && this._focusFolder(folderItem, false);
+      this.focusedFolder = folderItem;
+    }
+  }
+  private _focusFolder(folder: FolderItem, revert = false) {
+    if (folder.file.isRoot()) throw new Error("Cannot focus on root dir");
+    folder.el.toggleClass(focusedFolderCls, !revert);
+  }
+  //#endregion
+}

@@ -1,9 +1,9 @@
 import { around } from "monkey-around";
-import { AFItem, FileExplorer } from "obsidian";
+import { AFItem, FileExplorer, TFile } from "obsidian";
 
 import ALxFolderNote from "./fn-main";
 import { isFolder } from "./misc";
-import FEHandler, { PatchRevealInExplorer } from "./modules/fe-handler";
+import FEHandler from "./modules/fe-handler";
 import { folderIconMark, noHideNoteMark } from "./settings";
 
 export default function initialize(this: ALxFolderNote, revert = false) {
@@ -75,3 +75,24 @@ export default function initialize(this: ALxFolderNote, revert = false) {
 
   doWithFileExplorer(getViewHandler(revert));
 }
+
+const PatchRevealInExplorer = (plugin: ALxFolderNote) => {
+  const { getFolderFromNote } = plugin.CoreApi;
+
+  const feInstance =
+    plugin.app.internalPlugins.plugins["file-explorer"]?.instance;
+  if (feInstance) {
+    const remover = around(feInstance, {
+      revealInFolder: (next) => {
+        return function (this: any, ...args: any[]) {
+          if (args[0] instanceof TFile && plugin.settings.hideNoteInExplorer) {
+            const findResult = getFolderFromNote(args[0]);
+            if (findResult) args[0] = findResult;
+          }
+          return next.apply(this, args);
+        };
+      },
+    });
+    plugin.register(remover);
+  }
+};
