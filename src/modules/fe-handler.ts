@@ -329,13 +329,35 @@ export default class FEHandler extends FEHandler_Base {
   //#endregion
 
   //#region folder focus setup
-  private _focusedFolder: FolderItem | null = null;
+  private _focusedFolder: {
+    folder: FolderItem;
+    collapsedCache: boolean;
+  } | null = null;
   get focusedFolder() {
-    return this._focusedFolder;
+    return this._focusedFolder?.folder ?? null;
   }
-  set focusedFolder(val: FolderItem | null) {
-    this._focusedFolder = val;
-    this.fileExplorer.dom.navFileContainerEl.toggleClass(focusModeCls, !!val);
+  set focusedFolder(item: FolderItem | null) {
+    // restore previous folder collapse state
+    if (this._focusedFolder) {
+      const { folder, collapsedCache } = this._focusedFolder;
+      if (folder.collapsed !== collapsedCache)
+        folder.setCollapsed(collapsedCache);
+    }
+    this._focusedFolder = item
+      ? { folder: item, collapsedCache: item.collapsed }
+      : null;
+    // unfold folder if it's collapsed
+    if (item && item.collapsed) {
+      item.setCollapsed(false);
+      // @ts-ignore
+      this.plugin.app.nextFrame(() => {
+        // @ts-ignore
+        this.fileExplorer.dom.infinityScroll.computeSync();
+        // @ts-ignore
+        this.fileExplorer.dom.infinityScroll.scrollIntoView(item);
+      });
+    }
+    this.fileExplorer.dom.navFileContainerEl.toggleClass(focusModeCls, !!item);
   }
   toggleFocusFolder(folder: TFolder | null) {
     const folderItem = folder

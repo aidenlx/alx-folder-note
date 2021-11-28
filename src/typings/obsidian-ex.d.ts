@@ -10,6 +10,7 @@ declare module "obsidian" {
     getDisplayText(): string;
     onClose(): Promise<void>;
     dom: {
+      infinityScroll: HTMLDivElement;
       navFileContainerEl: HTMLDivElement;
     };
   }
@@ -37,6 +38,7 @@ declare module "obsidian" {
     collapseIndicatorEl: HTMLDivElement;
     collapsed: boolean;
     pusherEl: HTMLDivElement;
+    setCollapsed(collapsed: boolean): Promise<void>;
   }
 
   interface Vault {
