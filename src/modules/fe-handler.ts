@@ -18,6 +18,7 @@ import { dirname } from "path";
 import ALxFolderNote from "../fn-main";
 import { afItemMark, isFolder } from "../misc";
 import getClickHandler from "./click-handler";
+import AddLongPressEvt, { LongPressEvent } from "./long-press";
 
 const folderNoteClass = "alx-folder-note";
 const folderClass = "alx-folder-with-note";
@@ -27,12 +28,25 @@ const focusedFolderCls = "alx-focused-folder";
 const focusModeCls = "alx-folder-focus";
 
 class FEHandler_Base {
-  constructor(
-    public plugin: ALxFolderNote,
-    public fileExplorer: FileExplorer,
-  ) {}
+  private _fe: FileExplorer;
+  constructor(public plugin: ALxFolderNote, fe: FileExplorer) {
+    this._fe = fe;
+    AddLongPressEvt(plugin, fe.dom.navFileContainerEl);
+  }
+  get fileExplorer() {
+    return this._fe;
+  }
+  set fileExplorer(fe: FileExplorer) {
+    if (this._fe !== fe) {
+      AddLongPressEvt(this.plugin, fe.dom.navFileContainerEl);
+    }
+    this._fe = fe;
+  }
   get fncApi() {
     return this.plugin.CoreApi;
+  }
+  get app() {
+    return this.plugin.app;
   }
   get files() {
     return this.fileExplorer.files;
@@ -201,7 +215,7 @@ export default class FEHandler extends FEHandler_Base {
   // #endregion
 
   //#region set click handler for folders with folder note
-  private clickHandler = getClickHandler(this.plugin);
+  private clickHandler = getClickHandler(this);
   private setClickQueue: Map<
     string,
     [folder: AFItem | TFolder, revert: boolean]
@@ -232,12 +246,23 @@ export default class FEHandler extends FEHandler_Base {
       } else if (!item.evtDone) {
         const { titleInnerEl } = item;
         // handle regular click
-        this.plugin.registerDomEvent(titleInnerEl, "click", this.clickHandler);
+        this.plugin.registerDomEvent(
+          titleInnerEl,
+          "click",
+          this.clickHandler.click,
+        );
         // handle middle click
         this.plugin.registerDomEvent(
           titleInnerEl,
           "auxclick",
-          this.clickHandler,
+          this.clickHandler.click,
+        );
+        // handle double click
+        // @ts-ignore
+        this.plugin.registerDomEvent(
+          titleInnerEl,
+          "long-press",
+          this.clickHandler.press,
         );
         item.evtDone = true;
       }
