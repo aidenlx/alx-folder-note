@@ -6,7 +6,9 @@
  * @license MIT
  */
 
-import { Platform, Plugin } from "obsidian";
+import { Platform } from "obsidian";
+
+import ALxFolderNote from "../fn-main";
 
 // local timer object based on rAF
 let timer: {
@@ -207,9 +209,9 @@ const removeEvtListener = (el: HTMLElement) => {
   el.removeEventListener("pointerdown", mouseDownHandler, true); // <- start
 };
 
-const AddLongPressEvt = (plugin: Plugin, el: HTMLElement) => {
+const AddLongPressEvt = (plugin: ALxFolderNote, el: HTMLElement) => {
   // disable on mobile (conflict with file-menu)
-  if (Platform.isMobileApp) return;
+  if (!plugin.settings.longPressFocus || Platform.isMobileApp) return;
   if (moniterIn) {
     removeEvtListener(moniterIn);
   }

@@ -18,6 +18,7 @@ export interface ALxFolderNoteSettings {
   modifierForNewNote: Modifier;
   hideNoteInExplorer: boolean;
   hideCollapseIndicator: boolean;
+  longPressFocus: boolean;
   folderOverview: {
     h1AsTitleSource: boolean;
     briefMax: number;
@@ -36,6 +37,7 @@ export const DEFAULT_SETTINGS: ALxFolderNoteSettings = {
   modifierForNewNote: "Mod",
   hideNoteInExplorer: true,
   hideCollapseIndicator: false,
+  longPressFocus: false,
   folderOverview: {
     h1AsTitleSource: true,
     briefMax: 128,
@@ -81,6 +83,7 @@ export class ALxFolderNoteSettingTab extends PluginSettingTab {
     this.setFolderIcon();
     this.setModifier();
     this.setHide();
+    this.setFocus();
 
     new Setting(containerEl).setHeading().setName("Folder Overview");
     this.setH1AsTitle();
@@ -207,6 +210,22 @@ export class ALxFolderNoteSettingTab extends PluginSettingTab {
           .onChange(async (value) => {
             this.plugin.settings.folderIcon = value;
             document.body.toggleClass(folderIconMark, value);
+            await this.plugin.saveSettings();
+          }),
+      );
+  }
+  setFocus() {
+    new Setting(this.containerEl)
+      .setName("Long Press on Folder to Focus")
+      .setDesc(
+        "Long press with mouse on folder name inside file explorer to focus the folder. " +
+          "Only work on Desktop, reload obsidian to take effects",
+      )
+      .addToggle((toggle) =>
+        toggle
+          .setValue(this.plugin.settings.longPressFocus)
+          .onChange(async (value) => {
+            this.plugin.settings.longPressFocus = value;
             await this.plugin.saveSettings();
           }),
       );
