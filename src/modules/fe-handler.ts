@@ -284,7 +284,6 @@ export default class FEHandler extends FEHandler_Base {
   private updateChangedFolder = debounce(
     () => {
       if (this.setChangedFolderQueue.size > 0) {
-        console.log(this.setChangedFolderQueue);
         this.setChangedFolderQueue.forEach((path) => {
           let note = this.fncApi.getFolderNote(path);
           if (note) {
