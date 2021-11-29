@@ -1,3 +1,14 @@
+## [0.12.2](https://github.com/aidenlx/alx-folder-note/compare/0.12.1...0.12.2) (2021-11-29)
+
+
+### Features
+
+* **fe-handler:** add focus on folder for file explorer ([1759c82](https://github.com/aidenlx/alx-folder-note/commit/1759c827a80b88894ca653b7478f4bfb372ebbe2))
+* **fe-handler:** focused folder now auto unfold and scroll into view ([a872028](https://github.com/aidenlx/alx-folder-note/commit/a872028d05423fc18051972dfb7382c2478897c0))
+* **focus:** long press (0.8s) on folder to toggle focus ([e5d96b9](https://github.com/aidenlx/alx-folder-note/commit/e5d96b9e231a0ae0a0817fc698e0a84640012c3f))
+* **focus:** non-focused folders are now dimmed instead of being hidden ([529f685](https://github.com/aidenlx/alx-folder-note/commit/529f685792e524ad0828cc481924e5b68d616e18))
+* **settings:** add option to disable long press to toggle focus ([a948d56](https://github.com/aidenlx/alx-folder-note/commit/a948d56ae1536844b29876ba550cac091772b208))
+
 ## [0.12.1](https://github.com/aidenlx/alx-folder-note/compare/0.12.0...0.12.1) (2021-11-27)
 
 
