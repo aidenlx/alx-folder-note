@@ -1,3 +1,11 @@
+## [0.12.3](https://github.com/aidenlx/alx-folder-note/compare/0.12.2...0.12.3) (2021-12-04)
+
+
+### Bug Fixes
+
+* **fe-handler:** remove unintended console output ([25e79db](https://github.com/aidenlx/alx-folder-note/commit/25e79db1f41748e2e01b91dfea02b14e925f9eb1))
+* **folder-icon:** fix subfolder icon var polluted by parent folder's icon ([5ff6cc9](https://github.com/aidenlx/alx-folder-note/commit/5ff6cc95e6c5f6b8e18839151613b92b8e8cefe5))
+
 ## [0.12.2](https://github.com/aidenlx/alx-folder-note/compare/0.12.1...0.12.2) (2021-11-29)
 
 
