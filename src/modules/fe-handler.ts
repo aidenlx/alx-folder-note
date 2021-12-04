@@ -342,7 +342,7 @@ export default class FEHandler extends FEHandler_Base {
           item.el.style.setProperty("--alx-folder-icon-url", `url("${icon}")`);
           item.el.style.setProperty("--alx-folder-icon-txt", '"  "');
         } else {
-          item.el.style.removeProperty("--alx-folder-icon-url");
+          item.el.style.setProperty("--alx-folder-icon-url", '""');
           item.el.style.setProperty("--alx-folder-icon-txt", `"${icon}"`);
         }
       } else if (item.el.dataset.icon) {
