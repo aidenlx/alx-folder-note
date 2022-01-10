@@ -265,7 +265,7 @@ const getTags = (file: TFile, app: App): Set<string> => {
   if (!cache) {
     console.log("no meta for file %o, fallback to null", file);
     return new Set();
-  } else return new Set(cache.tags?.map((v) => v.tag));
+  } else return new Set((cache.frontmatter?.tags?.split(', ').map(v => '#' + v) || []).concat(cache.tags?.map((v) => v.tag) || []));
 };
 
 const FileInfo = ({
