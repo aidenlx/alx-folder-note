@@ -48,7 +48,12 @@ declare module "obsidian" {
       enabledPlugins: Set<string>;
       plugins: {
         [id: string]: any;
+        "alx-folder-note-folderv"?: {
+          renderFoldervSettings(containerEl: HTMLElement): void;
+        };
       };
+      enablePlugin(id: string): Promise<void>;
+      disablePlugin(id: string): Promise<void>;
     };
     internalPlugins: {
       plugins: {

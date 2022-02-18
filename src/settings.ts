@@ -53,18 +53,70 @@ export class ALxFolderNoteSettingTab extends PluginSettingTab {
     return old.every((key) => this.plugin.settings[key] === null);
   }
 
+  getInitGuide(
+    desc: string,
+    targetPluginID: string,
+    container: HTMLElement,
+  ): Setting {
+    return new Setting(container)
+      .setDesc(
+        desc +
+          "use the buttons to install & enable it then reload alx-folder-note to take effects",
+      )
+      .addButton((btn) =>
+        btn
+          .setIcon("down-arrow-with-tail")
+          .setTooltip("Go to Plugin Page")
+          .onClick(() =>
+            window.open(`obsidian://show-plugin?id=${targetPluginID}`),
+          ),
+      )
+      .addButton((btn) =>
+        btn
+          .setIcon("reset")
+          .setTooltip("Reload alx-folder-note")
+          .onClick(async () => {
+            await this.app.plugins.disablePlugin(this.plugin.manifest.id);
+            await this.app.plugins.enablePlugin(this.plugin.manifest.id);
+          }),
+      );
+  }
+
   display(): void {
     let { containerEl } = this;
     containerEl.empty();
 
     new Setting(containerEl).setHeading().setName("Core");
-    if (this.checkMigrated()) {
-      this.plugin.CoreApi.renderCoreSettings(containerEl);
-    } else this.setMigrate();
+    try {
+      this.plugin.CoreApi; // throw error when not available
+      if (this.checkMigrated()) {
+        this.plugin.CoreApi.renderCoreSettings(containerEl);
+      } else this.setMigrate();
+    } catch (error) {
+      this.getInitGuide(
+        "Seems like Folder Note Core is not enabled, ",
+        "folder-note-core",
+        containerEl,
+      );
+      return;
+    }
+
     this.setFolderIcon();
     this.setModifier();
     this.setHide();
     this.setFocus();
+
+    new Setting(containerEl).setHeading().setName("Folder Overview");
+    const folderv = this.app.plugins.plugins["alx-folder-note-folderv"];
+    if (folderv?.renderFoldervSettings) {
+      folderv.renderFoldervSettings(containerEl);
+    } else {
+      this.getInitGuide(
+        "Folder Overview (folderv) is now an optional component, ",
+        "alx-folder-note-folderv",
+        containerEl,
+      );
+    }
 
     new Setting(containerEl).setHeading().setName("Debug");
     this.plugin.CoreApi.renderLogLevel(containerEl);

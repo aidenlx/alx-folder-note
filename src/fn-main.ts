@@ -51,15 +51,12 @@ export default class ALxFolderNote extends Plugin {
 
   get CoreApi(): FolderNoteAPI {
     let message;
-    if (isPluginEnabled(this)) {
-      const api = getApi(this);
-      if (!api) {
-        message = "Error: folder-note-core api not available";
-        throw new Error(message);
-      } else return api;
+    const api = getApi(this);
+    if (api) {
+      return api;
     } else {
       message =
-        "Failed to initialize alx-folder-note: folder-note-core plugin not enabled";
+        "Failed to initialize alx-folder-note: Check out the Setting Tab for more details";
       new Notice(message);
       throw new Error(message);
     }
