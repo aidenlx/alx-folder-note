@@ -65,5 +65,11 @@ declare module "obsidian" {
         };
       };
     };
+    setting: {
+      openTabById(id: string): any;
+    };
+  }
+  interface Notice {
+    noticeEl: HTMLElement;
   }
 }

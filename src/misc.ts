@@ -3,6 +3,7 @@ import {
   AFItem,
   FolderItem,
   Modifier,
+  Notice,
   Platform,
   TAbstractFile,
   TFile,
@@ -57,3 +58,14 @@ export const getParentPath = (src: string) => {
   if (path === ".") return "/";
   else return path;
 };
+
+export class ClickNotice extends Notice {
+  constructor(
+    message: string,
+    action: (evt: MouseEvent) => any,
+    timeout?: number,
+  ) {
+    super(message, timeout);
+    this.noticeEl.addEventListener("click", action);
+  }
+}

@@ -1,13 +1,10 @@
 import "./styles/main.css";
 
-import {
-  FolderNoteAPI,
-  getApi,
-  isPluginEnabled,
-} from "@aidenlx/folder-note-core";
+import { FolderNoteAPI, getApi } from "@aidenlx/folder-note-core";
 import { debounce, Debouncer, Notice, Plugin } from "obsidian";
 
 import initialize from "./initialize";
+import { ClickNotice } from "./misc";
 import FEHandler from "./modules/fe-handler";
 import {
   ALxFolderNoteSettings,
@@ -56,8 +53,10 @@ export default class ALxFolderNote extends Plugin {
       return api;
     } else {
       message =
-        "Failed to initialize alx-folder-note: Check out the Setting Tab for more details";
-      new Notice(message);
+        "Failed to initialize alx-folder-note: Click here for more details";
+      new ClickNotice(message, () =>
+        this.app.setting.openTabById(this.manifest.id),
+      );
       throw new Error(message);
     }
   }

@@ -78,6 +78,7 @@ export class ALxFolderNoteSettingTab extends PluginSettingTab {
           .onClick(async () => {
             await this.app.plugins.disablePlugin(this.plugin.manifest.id);
             await this.app.plugins.enablePlugin(this.plugin.manifest.id);
+            this.app.setting.openTabById(this.plugin.manifest.id);
           }),
       );
   }
