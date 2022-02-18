@@ -6,7 +6,10 @@ alx-folder-note is a maintained, completely rewritten, and improved folder note 
 
 ![demo](https://user-images.githubusercontent.com/31102694/128635308-0a58279e-8bf0-4608-9330-fe11180953dd.png)
 
-Note: Starting from v0.11.0, this plugin require [folder-note-core](https://github.com/aidenlx/folder-note-core) to work properly. For old user, check [here](https://github.com/aidenlx/alx-folder-note/wiki/migrate-from-v0.10.0-and-lower) for migration guide.
+Note:
+
+1. Starting from v0.13.0, Folder Overview (folderv) has become an optional component, you can go to the Folder Overview section of the setting tab to install it
+2. Starting from v0.11.0, this plugin require [folder-note-core](https://github.com/aidenlx/folder-note-core) to work properly. For old user, check [here](https://github.com/aidenlx/alx-folder-note/wiki/migrate-from-v0.10.0-and-lower) for migration guide.
 
 ## Intro
 
@@ -17,7 +20,7 @@ Note: Starting from v0.11.0, this plugin require [folder-note-core](https://gith
   - [folder note hidden from file explorer](https://github.com/aidenlx/alx-folder-note/wiki/core-settings#hide-note-in-explorer)
   - [reveal linked folder in file explorer](https://github.com/aidenlx/alx-folder-note/wiki/core-settings#hide-note-in-explorer)<br><img width="300px" src="https://user-images.githubusercontent.com/31102694/128694966-6517df3b-8994-408d-bf6c-49a5ea16b7be.gif"/>
   - [delete folder within folder note](https://github.com/aidenlx/alx-folder-note/wiki/delete-folder-from-folder-note)
-- [create folder overview](https://github.com/aidenlx/alx-folder-note/wiki/folder-overview) with codeblock `folderv`
+- [create folder overview](https://github.com/aidenlx/alx-folder-note/wiki/folder-overview) with codeblock `folderv` (Optional)
   - view all files within folder with brief cards
   - specify title and description in frontmatter (with [customizable field name](https://github.com/aidenlx/alx-folder-note/wiki/folderv-settings#field-names))
   - [fetch title from h1](https://github.com/aidenlx/alx-folder-note/wiki/folderv-settings#h1-as-title-source) if title not specified
@@ -40,7 +43,7 @@ The required API feature is only available for Obsidian v0.12.5+.
 
 ## Installation
 
-Note: Starting from v0.11.0, this plugin require [folder-note-core](https://github.com/aidenlx/folder-note-core) to work properly, which is also available on community plugins list. 
+Note: Starting from v0.11.0, this plugin require [folder-note-core](https://github.com/aidenlx/folder-note-core) to work properly, which is also available on community plugins list.
 
 ### From Obsidian
 
