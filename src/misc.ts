@@ -61,11 +61,17 @@ export const getParentPath = (src: string) => {
 
 export class ClickNotice extends Notice {
   constructor(
-    message: string,
+    message: string | ((desc: DocumentFragment) => void),
     action: (evt: MouseEvent) => any,
     timeout?: number,
   ) {
-    super(message, timeout);
+    super(typeof message === "string" ? message : "", timeout);
     this.noticeEl.addEventListener("click", action);
+    if (typeof message === "function") {
+      this.noticeEl.empty();
+      let frag = new DocumentFragment();
+      message(frag);
+      this.noticeEl.append(frag);
+    }
   }
 }

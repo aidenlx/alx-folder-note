@@ -12,6 +12,8 @@ import {
   DEFAULT_SETTINGS,
 } from "./settings";
 
+const foldervNotifiedKey = "foldervNotified";
+
 export default class ALxFolderNote extends Plugin {
   settings: ALxFolderNoteSettings = DEFAULT_SETTINGS;
   feHandler?: FEHandler;
@@ -61,6 +63,34 @@ export default class ALxFolderNote extends Plugin {
     }
   }
 
+  noticeFoldervChange() {
+    if (
+      !this.app.plugins.plugins["alx-folder-note-folderv"] ||
+      !Number(localStorage.getItem(foldervNotifiedKey))
+    ) {
+      new ClickNotice(
+        (frag) => {
+          frag.appendText(
+            "Since v0.13.0, folder overview (folderv) has become an optional component " +
+              "that requires a dedicated plugin, ",
+          );
+          frag
+            .createEl("button", {
+              text: "Go to Folder Overview Section of the Setting Tab to Install",
+            })
+            .addEventListener("click", () =>
+              this.app.setting.openTabById(this.manifest.id),
+            );
+          frag.createEl("button", {
+            text: "Ignore",
+          });
+        },
+        () => localStorage.setItem(foldervNotifiedKey, "1"),
+        5e3,
+      );
+    }
+  }
+
   async onload() {
     console.log("loading alx-folder-note");
 
@@ -75,6 +105,7 @@ export default class ALxFolderNote extends Plugin {
     this.addSettingTab(tab);
 
     this.app.workspace.onLayoutReady(this.initialize);
+    this.noticeFoldervChange();
   }
 
   onunload() {

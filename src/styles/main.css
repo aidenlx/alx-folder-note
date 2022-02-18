@@ -24,3 +24,7 @@ body:not(.alx-no-hide-note) .nav-file.alx-folder-note > .nav-file-title {
 input.incorrect {
   color: #eb3223;
 }
+
+.notice button {
+  margin: 5px 0;
+}
