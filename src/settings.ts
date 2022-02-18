@@ -1,12 +1,5 @@
-import { isPluginEnabled } from "@aidenlx/obsidian-icon-shortcodes";
-import {
-  App,
-  debounce,
-  Modifier,
-  Platform,
-  PluginSettingTab,
-  Setting,
-} from "obsidian";
+import { getApi } from "@aidenlx/obsidian-icon-shortcodes";
+import { App, Modifier, Platform, PluginSettingTab, Setting } from "obsidian";
 
 import ALxFolderNote from "./fn-main";
 import { NoteLoc } from "./misc";
@@ -19,12 +12,6 @@ export interface ALxFolderNoteSettings {
   hideNoteInExplorer: boolean;
   hideCollapseIndicator: boolean;
   longPressFocus: boolean;
-  folderOverview: {
-    h1AsTitleSource: boolean;
-    briefMax: number;
-    titleField: string;
-    descField: string;
-  };
   folderIcon: boolean;
   folderNotePref: NoteLoc | null;
   deleteOutsideNoteWithFolder: boolean | null;
@@ -38,12 +25,6 @@ export const DEFAULT_SETTINGS: ALxFolderNoteSettings = {
   hideNoteInExplorer: true,
   hideCollapseIndicator: false,
   longPressFocus: false,
-  folderOverview: {
-    h1AsTitleSource: true,
-    briefMax: 128,
-    titleField: "title",
-    descField: "description",
-  },
   folderIcon: true,
   folderNotePref: null,
   deleteOutsideNoteWithFolder: null,
@@ -84,11 +65,6 @@ export class ALxFolderNoteSettingTab extends PluginSettingTab {
     this.setModifier();
     this.setHide();
     this.setFocus();
-
-    new Setting(containerEl).setHeading().setName("Folder Overview");
-    this.setH1AsTitle();
-    this.setBriefMax();
-    this.setTitleDescField();
 
     new Setting(containerEl).setHeading().setName("Debug");
     this.plugin.CoreApi.renderLogLevel(containerEl);
@@ -197,8 +173,7 @@ export class ALxFolderNoteSettingTab extends PluginSettingTab {
             text: "Icon Shortcodes v0.5.1+",
           });
           el.appendText(" Required. ");
-          if (!isPluginEnabled(this.plugin))
-            el.appendText("(Currently not enabled)");
+          if (!getApi(this.plugin)) el.appendText("(Currently not enabled)");
           el.createEl("br");
 
           el.appendText("Restart obsidian to take effects");
@@ -229,83 +204,5 @@ export class ALxFolderNoteSettingTab extends PluginSettingTab {
             await this.plugin.saveSettings();
           }),
       );
-  }
-
-  setBriefMax() {
-    const isPositiveInteger = (number: string) =>
-      Number.isInteger(+number) && +number > 0;
-    const { settings } = this.plugin;
-    new Setting(this.containerEl)
-      .setName("Maximum Brief Length")
-      .setDesc(
-        "Maximum length of brief generated from 1st paragraph of notes when not description field is set in frontmatter",
-      )
-      .addText((text) => {
-        const save = debounce(
-          async (value: string) => {
-            settings.folderOverview.briefMax = +value;
-            await this.plugin.saveSettings();
-          },
-          500,
-          true,
-        );
-        text
-          .setValue(settings.folderOverview.briefMax.toString())
-          .onChange(async (value: string) => {
-            text.inputEl.toggleClass("incorrect", !isPositiveInteger(value));
-            if (isPositiveInteger(value)) save(value);
-          });
-      });
-  }
-  setH1AsTitle() {
-    const { settings } = this.plugin;
-    new Setting(this.containerEl)
-      .setName("Use First Heading 1 as File Title")
-      .setDesc(
-        "Applied when title field is not set in the frontmatter, fallback to filename when no Heading 1 found",
-      )
-      .addToggle((toggle) =>
-        toggle
-          .setValue(settings.folderOverview.h1AsTitleSource)
-          .onChange(async (value) => {
-            settings.folderOverview.h1AsTitleSource = value;
-            await this.plugin.saveSettings();
-          }),
-      );
-  }
-  setTitleDescField() {
-    const { settings } = this.plugin;
-    new Setting(this.containerEl)
-      .setName("Title Field Name")
-      .setDesc("Used to find title set in note's frontmatter")
-      .addText((text) => {
-        const save = debounce(
-          async (value: string) => {
-            settings.folderOverview.titleField = value;
-            await this.plugin.saveSettings();
-          },
-          500,
-          true,
-        );
-        text
-          .setValue(settings.folderOverview.titleField)
-          .onChange(async (value: string) => save(value));
-      });
-    new Setting(this.containerEl)
-      .setName("Description Field Name")
-      .setDesc("Used to find description set in note's frontmatter")
-      .addText((text) => {
-        const save = debounce(
-          async (value: string) => {
-            settings.folderOverview.descField = value;
-            await this.plugin.saveSettings();
-          },
-          500,
-          true,
-        );
-        text
-          .setValue(settings.folderOverview.descField)
-          .onChange(async (value: string) => save(value));
-      });
   }
 }

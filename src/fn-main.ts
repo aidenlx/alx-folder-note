@@ -7,7 +7,6 @@ import {
 } from "@aidenlx/folder-note-core";
 import { debounce, Debouncer, Notice, Plugin } from "obsidian";
 
-import { FOLDERV_ID, GetFolderVHandler } from "./components/load";
 import initialize from "./initialize";
 import FEHandler from "./modules/fe-handler";
 import {
@@ -80,11 +79,6 @@ export default class ALxFolderNote extends Plugin {
     this.addSettingTab(tab);
 
     this.app.workspace.onLayoutReady(this.initialize);
-
-    this.registerMarkdownCodeBlockProcessor(
-      FOLDERV_ID,
-      GetFolderVHandler(this),
-    );
   }
 
   onunload() {
