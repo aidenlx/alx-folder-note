@@ -1,3 +1,22 @@
+# [0.13.0](https://github.com/aidenlx/alx-folder-note/compare/0.12.3...0.13.0) (2022-02-19)
+
+
+### Features
+
+* add notice about folderv changes ([22ede5e](https://github.com/aidenlx/alx-folder-note/commit/22ede5efa74b581236c56886ad179042f589d3f2))
+* **settings:** add clickable notice that jump to setting tab when folder-note-core not enabled ([156d1b3](https://github.com/aidenlx/alx-folder-note/commit/156d1b3c1a607677560805d1708f0ffc02a298f0))
+* **settings:** add guide to install dependencies ([8ea9769](https://github.com/aidenlx/alx-folder-note/commit/8ea9769fff29fb622f44f9ae0133bdc3a55c2f1a))
+
+
+### Performance Improvements
+
+* separate folderv code from main repo to boost loading ([73e2149](https://github.com/aidenlx/alx-folder-note/commit/73e214987de2ef767877d06127fd364fa4893f06))
+
+
+### BREAKING CHANGES
+
+* folder overview (folderv) is now an optional component that requires a dedicated plugin, go to setting tab to install it
+
 ## [0.12.3](https://github.com/aidenlx/alx-folder-note/compare/0.12.2...0.12.3) (2021-12-04)
 
 
