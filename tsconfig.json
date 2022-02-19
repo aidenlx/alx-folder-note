@@ -1,19 +1,4 @@
 {
-  "compilerOptions": {
-    "baseUrl": "src",
-    "outDir": "",
-    "inlineSourceMap": true,
-    "jsx": "react",
-    "inlineSources": true,
-    "module": "ESNext",
-    "target": "es6",
-    "allowJs": true,
-    "noImplicitAny": true,
-    "moduleResolution": "node",
-    "importHelpers": true,
-    "strict": true,
-    "allowSyntheticDefaultImports": true,
-    "lib": ["dom", "es5", "scripthost", "es2015"]
-  },
-  "include": ["src/**/*"]
+  "extends": "@aidenlx/ts-config/tsconfig.json",
+  "include": ["src/**/*.ts"]
 }

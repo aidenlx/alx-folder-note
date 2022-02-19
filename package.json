@@ -2,11 +2,11 @@
   "name": "@aidenlx/folder-note",
   "version": "0.13.1",
   "description": "Add description, summary and more info to folders with folder notes.",
-  "main": "",
+  "packageManager": "yarn@3.1.1",
   "scripts": {
-    "dev": "cross-env BUILD=dev node esbuild.js",
+    "dev": "cross-env BUILD=dev node esbuild.config.mjs",
     "check": "tsc --noEmit",
-    "build": "cross-env BUILD=production node esbuild.js",
+    "build": "cross-env BUILD=production node esbuild.config.mjs",
     "prettier": "prettier --write 'src/**/*.+(ts|tsx|json|html|css)'",
     "eslint": "eslint . --ext .ts,.tsx --fix",
     "release": "release-it"
@@ -15,8 +15,11 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
-    "@aidenlx/folder-note-core": "^1.3.1",
-    "@aidenlx/obsidian-icon-shortcodes": "^0.6.0",
+    "@aidenlx/eslint-config": "^0.1.0",
+    "@aidenlx/folder-note-core": "^1.3.2",
+    "@aidenlx/obsidian-icon-shortcodes": "^0.6.3",
+    "@aidenlx/prettier-config": "^0.1.0",
+    "@aidenlx/ts-config": "^0.1.1",
     "@release-it/bumper": "^3.0.1",
     "@release-it/conventional-changelog": "^3.3.0",
     "@types/array.prototype.flat": "^1.2.1",
@@ -39,10 +42,11 @@
     "eslint-plugin-simple-import-sort": "^7.0.0",
     "fast-deep-equal": "^3.1.3",
     "monkey-around": "^2.2.0",
-    "obsidian": "^0.12.17",
+    "obsidian": "github:obsidianmd/obsidian-api",
     "path-browserify": "^1.0.1",
     "prettier": "^2.5.0",
     "release-it": "^14.11.8",
+    "semver": "^7.3.5",
     "tslib": "^2.3.1",
     "typescript": "^4.5.2"
   },
@@ -56,13 +60,8 @@
         "npm run eslint"
       ],
       "after:bump": [
-        "json -I -f manifest.json -e \"this.version='${version}'\"",
-        "json -I -f versions.json -e \"this['${version}']='$(cat manifest.json | json minAppVersion)'\"",
-        "sed -i '' \"s/available for Obsidian v.*$/available for Obsidian v$(cat manifest.json | json minAppVersion)+./\" README.md",
-        "git add .",
         "npm run build"
       ],
-      "after:git:release": "echo After git push, before github release",
       "after:release": "echo Successfully released ${name} v${version} to ${repo.repository}."
     },
     "npm": {
@@ -90,6 +89,9 @@
       "@release-it/conventional-changelog": {
         "preset": "angular",
         "infile": "CHANGELOG.md"
+      },
+      "./scripts/version-bump.js": {
+        "indent": 2
       }
     }
   },
