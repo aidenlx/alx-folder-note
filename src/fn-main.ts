@@ -65,8 +65,8 @@ export default class ALxFolderNote extends Plugin {
 
   noticeFoldervChange() {
     if (
-      !this.app.plugins.plugins["alx-folder-note-folderv"] ||
-      !Number(localStorage.getItem(foldervNotifiedKey))
+      !this.app.plugins.plugins["alx-folder-note-folderv"] && // not installed
+      !Number(localStorage.getItem(foldervNotifiedKey)) // not notified
     ) {
       new ClickNotice(
         (frag) => {
@@ -82,7 +82,7 @@ export default class ALxFolderNote extends Plugin {
               this.app.setting.openTabById(this.manifest.id),
             );
           frag.createEl("button", {
-            text: "Ignore",
+            text: "Don't show this again",
           });
         },
         () => localStorage.setItem(foldervNotifiedKey, "1"),
