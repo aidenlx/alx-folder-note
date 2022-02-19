@@ -1,3 +1,10 @@
+## [0.13.1](https://github.com/aidenlx/alx-folder-note/compare/0.13.0...0.13.1) (2022-02-19)
+
+
+### Bug Fixes
+
+* fix folderv change notice keep popup after ignore it ([ca000ed](https://github.com/aidenlx/alx-folder-note/commit/ca000ed89e54e33e4a285f18dd5c427749d6b129))
+
 # [0.13.0](https://github.com/aidenlx/alx-folder-note/compare/0.12.3...0.13.0) (2022-02-19)
 
 
