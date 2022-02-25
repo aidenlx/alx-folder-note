@@ -1,4 +1,4 @@
-import { debounce, TFolder } from "obsidian";
+import { Platform, TFolder } from "obsidian";
 
 import { isModifier } from "../misc";
 import FEHandler from "./fe-handler";
@@ -22,6 +22,8 @@ const getClickHandler = (feHandler: FEHandler) => {
   };
 
   const clickHanlder = (evt: MouseEvent) => {
+    if (Platform.isMobile && !feHandler.plugin.settings.mobileClickToOpen)
+      return;
     evt.stopPropagation();
 
     const titleInnerEl = evt.target as HTMLDivElement;

@@ -18,6 +18,7 @@ export interface ALxFolderNoteSettings {
   indexName: string | null;
   autoRename: boolean | null;
   folderNoteTemplate: string | null;
+  mobileClickToOpen: boolean;
 }
 
 export const DEFAULT_SETTINGS: ALxFolderNoteSettings = {
@@ -31,7 +32,14 @@ export const DEFAULT_SETTINGS: ALxFolderNoteSettings = {
   indexName: null,
   autoRename: null,
   folderNoteTemplate: null,
+  mobileClickToOpen: true,
 };
+
+type SettingKeyWithType<T> = {
+  [K in keyof ALxFolderNoteSettings]: ALxFolderNoteSettings[K] extends T
+    ? K
+    : never;
+}[keyof ALxFolderNoteSettings];
 
 const old = [
   "folderNotePref",
@@ -105,6 +113,7 @@ export class ALxFolderNoteSettingTab extends PluginSettingTab {
     this.setFolderIcon();
     this.setModifier();
     this.setHide();
+    this.setMobile();
     this.setFocus();
 
     new Setting(containerEl).setHeading().setName("Folder Overview");
@@ -149,6 +158,15 @@ export class ALxFolderNoteSettingTab extends PluginSettingTab {
           await this.plugin.saveSettings();
           this.display();
         }),
+      );
+  }
+
+  setMobile() {
+    if (!Platform.isMobile) return;
+    this.addToggle(this.containerEl, "mobileClickToOpen")
+      .setName("Click folder title to open folder note on mobile")
+      .setDesc(
+        "Disable this if you want to the default action. You can still use context menu to open folder note",
       );
   }
 
@@ -257,5 +275,23 @@ export class ALxFolderNoteSettingTab extends PluginSettingTab {
             await this.plugin.saveSettings();
           }),
       );
+  }
+
+  addToggle(
+    addTo: HTMLElement,
+    key: SettingKeyWithType<boolean>,
+    onSet?: (value: boolean) => any,
+  ): Setting {
+    return new Setting(addTo).addToggle((toggle) => {
+      toggle
+        .setValue(this.plugin.settings[key])
+        .onChange(
+          (value) => (
+            (this.plugin.settings[key] = value),
+            onSet && onSet(value),
+            this.plugin.saveSettings()
+          ),
+        );
+    });
   }
 }
