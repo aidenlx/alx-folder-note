@@ -319,6 +319,7 @@ export default class FEHandler extends FEHandler_Base {
       metadata: CachedMetadata | undefined;
     const revertIcon = () => {
       delete item.el.dataset.icon;
+      delete item.el.dataset["icon-type"];
       this.foldersWithIcon.delete(path);
       item.el.style.removeProperty("--alx-folder-icon-txt");
       item.el.style.removeProperty("--alx-folder-icon-url");
@@ -339,9 +340,11 @@ export default class FEHandler extends FEHandler_Base {
         this.foldersWithIcon.add(path);
         item.el.dataset.icon = iconId.replace(/^:|:$/g, "");
         if (!api.isEmoji(iconId)) {
+          item.el.dataset.iconType = "svg";
           item.el.style.setProperty("--alx-folder-icon-url", `url("${icon}")`);
           item.el.style.setProperty("--alx-folder-icon-txt", '"  "');
         } else {
+          item.el.dataset.iconType = "emoji";
           item.el.style.setProperty("--alx-folder-icon-url", '""');
           item.el.style.setProperty("--alx-folder-icon-txt", `"${icon}"`);
         }
