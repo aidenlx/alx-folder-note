@@ -9,6 +9,7 @@ import { folderIconMark, noHideNoteMark } from "./settings";
 export default function initialize(this: ALxFolderNote, revert = false) {
   if (!revert) {
     PatchRevealInExplorer(this);
+    this.setupActiveFolderHandlers();
   }
 
   const doWithFileExplorer = (callback: (view: FileExplorer) => void) => {

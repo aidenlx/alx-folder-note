@@ -1,7 +1,16 @@
 import "./styles/main.css";
 
 import { FolderNoteAPI, getApi } from "@aidenlx/folder-note-core";
-import { debounce, Debouncer, Notice, Plugin } from "obsidian";
+import {
+  debounce,
+  Debouncer,
+  MarkdownView,
+  Notice,
+  Plugin,
+  TFile,
+  TFolder,
+  WorkspaceLeaf,
+} from "obsidian";
 
 import initialize from "./initialize";
 import { ClickNotice } from "./misc";
@@ -120,4 +129,47 @@ export default class ALxFolderNote extends Plugin {
   async saveSettings() {
     await this.saveData(this.settings);
   }
+
+  private _activeFolder: TFolder | null = null;
+  public set activeFolder(folder: TFolder | null) {
+    const getTitleEl = (folder: TFolder | null) =>
+      folder
+        ? this.feHandler?.fileExplorer.fileItems[folder.path].titleEl
+        : undefined;
+    if (!folder) {
+      getTitleEl(this._activeFolder)?.removeClass(isActiveClass);
+    } else if (folder !== this._activeFolder) {
+      getTitleEl(this._activeFolder)?.removeClass(isActiveClass);
+      getTitleEl(folder)?.addClass(isActiveClass);
+    }
+    this._activeFolder = folder;
+  }
+  public get activeFolder(): TFolder | null {
+    return this._activeFolder;
+  }
+  setupActiveFolderHandlers() {
+    const { workspace } = this.app;
+    this.handleActiveLeafChange(workspace.activeLeaf);
+    this.registerEvent(
+      workspace.on(
+        "active-leaf-change",
+        this.handleActiveLeafChange.bind(this),
+      ),
+    );
+    this.register(() => (this.activeFolder = null));
+  }
+  handleActiveLeafChange(leaf: WorkspaceLeaf | null) {
+    let folder;
+    if (
+      leaf &&
+      leaf.view instanceof MarkdownView &&
+      (folder = this.CoreApi.getFolderFromNote(leaf.view.file))
+    ) {
+      this.activeFolder = folder;
+    } else {
+      this.activeFolder = null;
+    }
+  }
 }
+
+const isActiveClass = "is-active";
