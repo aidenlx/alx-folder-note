@@ -203,34 +203,21 @@ export class ALxFolderNoteSettingTab extends PluginSettingTab {
   };
 
   setHide() {
-    new Setting(this.containerEl)
+    this.addToggle(this.containerEl, "hideNoteInExplorer", (value) =>
+      document.body.toggleClass(noHideNoteMark, !value),
+    )
       .setName("Hide Folder Note")
-      .setDesc("Hide folder note files from file explorer")
-      .addToggle((toggle) =>
-        toggle
-          .setValue(this.plugin.settings.hideNoteInExplorer)
-          .onChange(async (value) => {
-            this.plugin.settings.hideNoteInExplorer = value;
-            document.body.toggleClass(noHideNoteMark, !value);
-            await this.plugin.saveSettings();
-          }),
-      );
-    new Setting(this.containerEl)
+      .setDesc("Hide folder note files from file explorer");
+    this.addToggle(this.containerEl, "hideCollapseIndicator")
       .setName("Hide Collapse Indicator")
       .setDesc(
         "Hide collapse indicator when folder contains only folder note, reload obsidian to take effects",
-      )
-      .addToggle((toggle) =>
-        toggle
-          .setValue(this.plugin.settings.hideCollapseIndicator)
-          .onChange(async (value) => {
-            this.plugin.settings.hideCollapseIndicator = value;
-            await this.plugin.saveSettings();
-          }),
       );
   }
   setFolderIcon() {
-    new Setting(this.containerEl)
+    this.addToggle(this.containerEl, "folderIcon", (value) =>
+      document.body.toggleClass(folderIconMark, value),
+    )
       .setName("Set Folder Icon in Folder Notes")
       .setDesc(
         createFragment((el) => {
@@ -249,32 +236,24 @@ export class ALxFolderNoteSettingTab extends PluginSettingTab {
 
           el.appendText("Restart obsidian to take effects");
         }),
-      )
-      .addToggle((toggle) =>
-        toggle
-          .setValue(this.plugin.settings.folderIcon)
-          .onChange(async (value) => {
-            this.plugin.settings.folderIcon = value;
-            document.body.toggleClass(folderIconMark, value);
-            await this.plugin.saveSettings();
-          }),
       );
   }
   setFocus() {
     new Setting(this.containerEl)
-      .setName("Long Press on Folder to Focus")
+      .setHeading()
+      .setName("Focus")
       .setDesc(
-        "Long press with mouse on folder name inside file explorer to focus the folder. " +
-          "Only work on Desktop, reload obsidian to take effects",
-      )
-      .addToggle((toggle) =>
-        toggle
-          .setValue(this.plugin.settings.longPressFocus)
-          .onChange(async (value) => {
-            this.plugin.settings.longPressFocus = value;
-            await this.plugin.saveSettings();
-          }),
+        `You can use "Toggle Focus" option in folder context menu${
+          Platform.isMobile ? "" : " or long press on folder title"
+        } to focus on a specific folder`,
       );
+    if (!Platform.isMobile)
+      this.addToggle(this.containerEl, "longPressFocus")
+        .setName("Long Press on Folder to Focus")
+        .setDesc(
+          "Long press with mouse on folder name inside file explorer to focus the folder. " +
+            "Only work on Desktop, reload obsidian to take effects",
+        );
   }
 
   addToggle(

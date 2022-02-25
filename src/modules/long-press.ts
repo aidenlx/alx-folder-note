@@ -211,7 +211,7 @@ const removeEvtListener = (el: HTMLElement) => {
 
 const AddLongPressEvt = (plugin: ALxFolderNote, el: HTMLElement) => {
   // disable on mobile (conflict with file-menu)
-  if (!plugin.settings.longPressFocus || Platform.isMobileApp) return;
+  if (!plugin.settings.longPressFocus || Platform.isMobile) return;
   if (moniterIn) {
     removeEvtListener(moniterIn);
   }
