@@ -124,6 +124,7 @@ export default class ALxFolderNote extends Plugin {
 
   async loadSettings() {
     this.settings = { ...this.settings, ...(await this.loadData()) };
+    this.setupLongPressDelay();
   }
 
   async saveSettings() {
@@ -170,6 +171,20 @@ export default class ALxFolderNote extends Plugin {
       this.activeFolder = null;
     }
   }
+
+  get longPressDelay(): number {
+    return this.settings.longPressDelay;
+  }
+  set longPressDelay(delay: number) {
+    this.settings.longPressDelay = delay;
+    document.body.dataset[longPressDelayDataKey] = `${delay}`;
+  }
+  setupLongPressDelay() {
+    // set long press delay to the body
+    this.longPressDelay = this.longPressDelay;
+    this.register(() => delete document.body.dataset[longPressDelayDataKey]);
+  }
 }
 
 const isActiveClass = "is-active";
+const longPressDelayDataKey = "longPressDelay";

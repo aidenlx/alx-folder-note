@@ -19,6 +19,7 @@ export interface ALxFolderNoteSettings {
   autoRename: boolean | null;
   folderNoteTemplate: string | null;
   mobileClickToOpen: boolean;
+  longPressDelay: number;
 }
 
 export const DEFAULT_SETTINGS: ALxFolderNoteSettings = {
@@ -33,6 +34,7 @@ export const DEFAULT_SETTINGS: ALxFolderNoteSettings = {
   autoRename: null,
   folderNoteTemplate: null,
   mobileClickToOpen: true,
+  longPressDelay: 800,
 };
 
 type SettingKeyWithType<T> = {
@@ -254,6 +256,23 @@ export class ALxFolderNoteSettingTab extends PluginSettingTab {
           "Long press with mouse on folder name inside file explorer to focus the folder. " +
             "Only work on Desktop, reload obsidian to take effects",
         );
+    new Setting(this.containerEl)
+      .addText((text) => {
+        Object.assign(text.inputEl, {
+          type: "number",
+          min: "0.2",
+          step: "0.1",
+        });
+        text.inputEl.insertAdjacentText("afterend", " second(s)");
+        text
+          .setValue(`${this.plugin.longPressDelay / 1e3}`)
+          .onChange(async (val) => {
+            const delay = +val * 1e3;
+            this.plugin.longPressDelay = delay;
+            await this.plugin.saveSettings();
+          });
+      })
+      .setName("Long Press Delay");
   }
 
   addToggle(
