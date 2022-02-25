@@ -62,6 +62,7 @@ __metadata:
     "@typescript-eslint/parser": ^5.4.0
     array.prototype.flat: ^1.2.5
     assert-never: ^1.2.1
+    conventional-changelog-angular: ^5.0.13
     cross-env: ^7.0.3
     cz-conventional-changelog: ^3.3.0
     esbuild: ^0.13.0
@@ -1443,6 +1444,16 @@ __metadata:
 "conventional-changelog-angular@npm:^5.0.12":
   version: 5.0.13
   resolution: "conventional-changelog-angular@npm:5.0.13::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2Fconventional-changelog-angular%2F-%2Fconventional-changelog-angular-5.0.13.tgz"
+  dependencies:
+    compare-func: ^2.0.0
+    q: ^1.5.1
+  checksum: 6ed4972fce25a50f9f038c749cc9db501363131b0fb2efc1fccecba14e4b1c80651d0d758d4c350a609f32010c66fa343eefd49c02e79e911884be28f53f3f90
+  languageName: node
+  linkType: hard
+
+"conventional-changelog-angular@npm:^5.0.13":
+  version: 5.0.13
+  resolution: "conventional-changelog-angular@npm:5.0.13"
   dependencies:
     compare-func: ^2.0.0
     q: ^1.5.1

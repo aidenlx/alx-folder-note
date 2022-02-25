@@ -31,6 +31,7 @@
     "@typescript-eslint/parser": "^5.4.0",
     "array.prototype.flat": "^1.2.5",
     "assert-never": "^1.2.1",
+    "conventional-changelog-angular": "^5.0.13",
     "cross-env": "^7.0.3",
     "cz-conventional-changelog": "^3.3.0",
     "esbuild": "^0.13.0",
