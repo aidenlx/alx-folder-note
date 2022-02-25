@@ -1,3 +1,17 @@
+# [0.14.0](https://github.com/aidenlx/alx-folder-note/compare/0.13.1...0.14.0) (2022-02-25)
+
+
+### Bug Fixes
+
+* **folder-icon:** fix basic styles broken in some themes; svg and emoji icons are now aligned properly ([12e28b4](https://github.com/aidenlx/alx-folder-note/commit/12e28b438dcb71304d19d3bf25d0ff5eca8a490a)), closes [#61](https://github.com/aidenlx/alx-folder-note/issues/61)
+
+
+### Features
+
+* add `is-active` class on active folder's titleEl ([eccb473](https://github.com/aidenlx/alx-folder-note/commit/eccb4737b0557a807763da711e5cd3edd5591984)), closes [#53](https://github.com/aidenlx/alx-folder-note/issues/53)
+* **click-handler:** add option to disable click folder title to open folder note on mobile ([2d2bad6](https://github.com/aidenlx/alx-folder-note/commit/2d2bad6f4a84baa6ff935edf8e77d12f628da6f3)), closes [#56](https://github.com/aidenlx/alx-folder-note/issues/56) [#52](https://github.com/aidenlx/alx-folder-note/issues/52)
+* **settings:** add option to configure long press delay ([745680a](https://github.com/aidenlx/alx-folder-note/commit/745680a2f64539b7678713f2f64376373b62381a)), closes [#42](https://github.com/aidenlx/alx-folder-note/issues/42)
+
 ## [0.13.1](https://github.com/aidenlx/alx-folder-note/compare/0.13.0...0.13.1) (2022-02-19)
 
 
