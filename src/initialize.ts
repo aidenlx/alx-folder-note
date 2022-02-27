@@ -1,8 +1,7 @@
 import { around } from "monkey-around";
-import { AFItem, FileExplorer, TFile } from "obsidian";
+import { FileExplorer, TFile } from "obsidian";
 
 import ALxFolderNote from "./fn-main";
-import { isFolder } from "./misc";
 import FEHandler from "./modules/fe-handler";
 import { folderIconMark, noHideNoteMark } from "./settings";
 
@@ -30,14 +29,7 @@ export default function initialize(this: ALxFolderNote, revert = false) {
     };
     tryGetView();
   };
-  /** get all AbstractFile (file+folder) and attach event */
-  const setupClick = (feHandler: FEHandler, re: boolean) => {
-    feHandler.iterateItems((item: AFItem) => {
-      if (isFolder(item)) {
-        feHandler.setClick(item, re);
-      }
-    });
-  };
+
   const getViewHandler = (revert: boolean) => (view: FileExplorer) => {
     let feHandler: FEHandler;
     if (!this.feHandler) {
@@ -48,7 +40,7 @@ export default function initialize(this: ALxFolderNote, revert = false) {
       this.feHandler.fileExplorer = view;
       feHandler = this.feHandler;
     }
-    setupClick(feHandler, revert);
+    feHandler.setupClick(revert);
     feHandler.markAll(revert);
     document.body.toggleClass(
       noHideNoteMark,

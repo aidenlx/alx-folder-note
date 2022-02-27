@@ -277,6 +277,14 @@ export default class FEHandler extends FEHandler_Base {
     }
     this.updateClick();
   };
+  /** get all AbstractFile (file+folder) and attach event */
+  setupClick(re: boolean) {
+    this.iterateItems((item: AFItem) => {
+      if (isFolder(item)) {
+        this.setClick(item, re);
+      }
+    });
+  }
   //#endregion
 
   //#region set hide collapse indicator
