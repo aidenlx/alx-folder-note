@@ -33,6 +33,45 @@ export default class FolderMark extends FEHandler_Base {
       this.initHideCollapseIndicator();
     }
   }
+  queues = {
+    mark: {
+      queue: new Map<string, [revert: boolean]>(),
+      action: (path: string, revert: boolean) => {
+        const item = this.getAfItem(path);
+        if (!item) {
+          console.warn("no afitem found for path %s, escaping...", path);
+          return;
+        }
+        if (isFolder(item)) {
+          if (revert === !!item.isFolderWithNote) {
+            item.el.toggleClass(folderClass, !revert);
+            item.isFolderWithNote = revert ? undefined : true;
+            if (this.plugin.settings.hideCollapseIndicator)
+              item.el.toggleClass(
+                emptyFolderClass,
+                revert ? false : item.file.children.length === 1,
+              );
+          }
+          this._updateIcon(path, revert, item);
+        } else if (revert === !!item.isFolderNote) {
+          item.el.toggleClass(folderNoteClass, !revert);
+          item.isFolderNote = revert ? undefined : true;
+        }
+      },
+    },
+    changedFolder: {
+      queue: new Set<string>(),
+      action: (path: string) => {
+        let note = this.fncApi.getFolderNote(path);
+        if (note) {
+          (this.getAfItem(path) as FolderItem)?.el.toggleClass(
+            emptyFolderClass,
+            note.parent.children.length === 1,
+          );
+        }
+      },
+    },
+  };
   private initFolderMark() {
     const { vault, metadataCache } = this.app;
     this.markAll();
@@ -62,48 +101,24 @@ export default class FolderMark extends FEHandler_Base {
     ].forEach(this.plugin.registerEvent.bind(this.plugin));
   }
   //#region set class mark for folder notes and folders
-  private setMarkQueue: Map<string, boolean> = new Map();
-  private _updateMark = () => {
-    if (this.setMarkQueue.size > 0) {
-      this.setMarkQueue.forEach((revert, path) => this._setMark(path, revert));
-      this.setMarkQueue.clear();
-    }
-  };
-  private updateMark = debounce(this._updateMark, 200, true);
-  private _setMark = (path: string, revert: boolean) => {
-    const item = this.getAfItem(path);
-    if (!item) {
-      console.warn("no afitem found for path %s, escaping...", path);
-      return;
-    }
-    if (isFolder(item)) {
-      if (revert === !!item.isFolderWithNote) {
-        item.el.toggleClass(folderClass, !revert);
-        item.isFolderWithNote = revert ? undefined : true;
-        if (this.plugin.settings.hideCollapseIndicator)
-          item.el.toggleClass(
-            emptyFolderClass,
-            revert ? false : item.file.children.length === 1,
-          );
-      }
-      this._updateIcon(path, revert, item);
-    } else if (revert === !!item.isFolderNote) {
-      item.el.toggleClass(folderNoteClass, !revert);
-      item.isFolderNote = revert ? undefined : true;
-    }
-  };
-  setMark = (target: AFItem | TAbstractFile | string, revert = false) => {
+  public setMark = (
+    target: AFItem | TAbstractFile | string,
+    revert = false,
+  ) => {
     if (!target) return;
+    const { queue } = this.queues.mark;
+    let path: string;
     if (target instanceof TAbstractFile) {
-      this.setMarkQueue.set(target.path, revert);
+      path = target.path;
     } else if (typeof target === "string") {
-      this.setMarkQueue.set(target, revert);
+      path = target;
     } else {
-      this.setMarkQueue.set(target.file.path, revert);
+      path = target.file.path;
     }
-    this.updateMark();
+    queue.set(path, [revert]);
+    this.execQueue("mark");
   };
-  markAll = (revert = false) => {
+  public markAll = (revert = false) => {
     this.iterateItems((item: AFItem) => {
       if (isFolder(item) && !revert) {
         this.markFolderNote(item.file);
@@ -191,7 +206,6 @@ export default class FolderMark extends FEHandler_Base {
   }
   //#endregion
   //#region set hide collapse indicator
-
   private initHideCollapseIndicator() {
     if (!this.plugin.settings.hideCollapseIndicator) return;
     const { vault } = this.app;
@@ -209,26 +223,10 @@ export default class FolderMark extends FEHandler_Base {
     ].forEach(this.plugin.registerEvent.bind(this.plugin));
   }
 
-  private setChangedFolderQueue: Set<string> = new Set();
-  private _updateChangedFolder = () => {
-    if (this.setChangedFolderQueue.size > 0) {
-      this.setChangedFolderQueue.forEach((path) => {
-        let note = this.fncApi.getFolderNote(path);
-        if (note) {
-          (this.getAfItem(path) as FolderItem)?.el.toggleClass(
-            emptyFolderClass,
-            note.parent.children.length === 1,
-          );
-        }
-      });
-      this.setChangedFolderQueue.clear();
-    }
-  };
-  private updateChangedFolder = debounce(this._updateChangedFolder, 200, true);
   setChangedFolder = (folderPath: string) => {
     if (!folderPath || folderPath === "/") return;
-    this.setChangedFolderQueue.add(folderPath);
-    this.updateChangedFolder();
+    this.queues.changedFolder.queue.add(folderPath);
+    this.execQueue("changedFolder");
   };
   //#endregion
 }

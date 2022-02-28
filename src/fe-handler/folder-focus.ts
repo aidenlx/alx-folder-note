@@ -8,6 +8,7 @@ const focusedFolderCls = "alx-focused-folder";
 const focusModeCls = "alx-folder-focus";
 
 export default class FolderFocus extends FEHandler_Base {
+  queues = {};
   constructor(plugin: ALxFolderNote, fileExplorer: FileExplorerView) {
     super(plugin, fileExplorer);
     const { workspace } = plugin.app;

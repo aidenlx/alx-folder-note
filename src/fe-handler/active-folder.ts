@@ -10,6 +10,7 @@ import FEHandler_Base from "./base";
 const isActiveClass = "is-active";
 
 export default class ActiveFolder extends FEHandler_Base {
+  queues = {};
   constructor(plugin: ALxFolderNote, fileExplorer: FileExplorerView) {
     super(plugin, fileExplorer);
     const { workspace } = plugin.app;
