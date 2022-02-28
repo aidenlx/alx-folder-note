@@ -6,10 +6,11 @@ import type {
   FileExplorerPlugin as FEPluginCls,
 } from "obsidian";
 
-import ALxFolderNote from "../fn-main";
-import { getViewOfType } from "../misc";
-import AddLongPressEvt, { LongPressEvent } from "./long-press";
-import getClickHandler from "./click-handler";
+import ALxFolderNote from "./fn-main";
+import { getViewOfType } from "./misc";
+import AddLongPressEvt, { LongPressEvent } from "./modules/long-press";
+import { getClickHandler, pressHandler } from "./click-handler";
+import getFileExplorerHandlers from "./fe-handler";
 
 const getFolderItemFromEl = (navEl: HTMLElement, view: FEViewCls) => {
   const folder = view.files.get(navEl);
@@ -30,7 +31,7 @@ const resetFileExplorer = async (plugin: ALxFolderNote) => {
 
 export const monkeyPatch = (plugin: ALxFolderNote) => {
   const { getFolderFromNote } = plugin.CoreApi,
-    { press, click } = getClickHandler(plugin.feHandler);
+    clickHandler = getClickHandler(plugin);
 
   let FileExplorerViewInst: FEViewCls | null = getViewOfType<FEViewCls>(
       "file-explorer",
@@ -52,26 +53,28 @@ export const monkeyPatch = (plugin: ALxFolderNote) => {
 
   const uninstallers: ReturnType<typeof around>[] = [
     around(FileExplorerView.prototype, {
-      onOpen: (next) =>
+      load: (next) =>
         function (this: FEViewCls) {
-          AddLongPressEvt(plugin, this.dom.navFileContainerEl);
-          this.containerEl.on(
+          const self = this;
+          next.call(self);
+          self.folderNoteUtils = getFileExplorerHandlers(plugin, self);
+          AddLongPressEvt(plugin, self.dom.navFileContainerEl);
+          self.containerEl.on(
             "auxclick",
             ".nav-folder",
             (evt: MouseEvent, navEl: HTMLElement) => {
-              const item = getFolderItemFromEl(navEl, this);
-              item && click.call(item, evt);
+              const item = getFolderItemFromEl(navEl, self);
+              item && clickHandler(item, evt);
             },
           );
-          this.containerEl.on(
+          self.containerEl.on(
             "long-press" as any,
             ".nav-folder",
             (evt: LongPressEvent, navEl: HTMLElement) => {
-              const item = getFolderItemFromEl(navEl, this);
-              item && press.call(item, evt);
+              const item = getFolderItemFromEl(navEl, self);
+              item && pressHandler(item, evt);
             },
           );
-          return next.call(this);
         },
     }),
     // patch reveal in folder to alter folder note target to linked folder
@@ -90,7 +93,7 @@ export const monkeyPatch = (plugin: ALxFolderNote) => {
         async function (this: FolderItemCls, evt) {
           // if folder note click not success,
           // fallback to default
-          if (!(await click.call(this, evt))) next.call(this, evt);
+          if (!(await clickHandler(this, evt))) next.call(this, evt);
         },
     }),
   ];

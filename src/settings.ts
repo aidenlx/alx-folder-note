@@ -1,11 +1,11 @@
 import { getApi } from "@aidenlx/obsidian-icon-shortcodes";
 import { App, Modifier, Platform, PluginSettingTab, Setting } from "obsidian";
+import { folderIconMark } from "./fe-handler/folder-mark";
 
 import ALxFolderNote from "./fn-main";
 import { NoteLoc } from "./misc";
 
 export const noHideNoteMark = "alx-no-hide-note";
-export const folderIconMark = "alx-folder-icons";
 export const MobileNoClickMark = "alx-no-click-on-mobile";
 
 export interface ALxFolderNoteSettings {

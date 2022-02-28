@@ -1,4 +1,5 @@
 import "obsidian";
+import type getFileExplorerHandlers from "../fe-handler";
 
 declare module "obsidian" {
   class FileExplorerView extends ItemView {
@@ -20,6 +21,7 @@ declare module "obsidian" {
     onFileClick(evt: MouseEvent, navEl: HTMLDivElement): void;
     handleFileClick(evt: MouseEvent, item: AFItem): boolean;
     createFolderDom(folder: TFolder): FolderItem;
+    folderNoteUtils?: ReturnType<typeof getFileExplorerHandlers>;
   }
 
   interface ViewRegistry {

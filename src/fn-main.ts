@@ -1,33 +1,22 @@
 import "./styles/main.css";
 
 import { FolderNoteAPI, getApi } from "@aidenlx/folder-note-core";
-import {
-  debounce,
-  Debouncer,
-  MarkdownView,
-  Notice,
-  Plugin,
-  TFolder,
-  WorkspaceLeaf,
-} from "obsidian";
+import { debounce, Debouncer, Notice, Plugin } from "obsidian";
 
 import { ClickNotice } from "./misc";
-import FEHandler from "./modules/fe-handler";
 import {
   ALxFolderNoteSettings,
   ALxFolderNoteSettingTab,
   DEFAULT_SETTINGS,
-  folderIconMark,
   MobileNoClickMark,
   noHideNoteMark,
 } from "./settings";
-import { monkeyPatch } from "./modules/fe-patch";
+import { monkeyPatch } from "./fe-patch";
 
 const foldervNotifiedKey = "foldervNotified";
 
 export default class ALxFolderNote extends Plugin {
   settings: ALxFolderNoteSettings = DEFAULT_SETTINGS;
-  feHandler = new FEHandler(this);
 
   private _notify = (
     id: string,
@@ -102,18 +91,19 @@ export default class ALxFolderNote extends Plugin {
     }
   }
 
-  initialize(revert = false) {
-    const setGlobalClass = (className: string, value: boolean) => {
-      document.body.toggleClass(className, revert ? false : value);
-    };
-    if (!revert) {
-      monkeyPatch(this);
-      this.setupActiveFolderHandlers();
-    }
-    this.feHandler.markAll(revert);
-    setGlobalClass(MobileNoClickMark, !this.settings.mobileClickToOpen);
-    setGlobalClass(noHideNoteMark, !this.settings.hideNoteInExplorer);
-    setGlobalClass(folderIconMark, this.settings.folderIcon);
+  initialized = false;
+  initialize() {
+    if (this.initialized) return;
+    monkeyPatch(this);
+    document.body.toggleClass(
+      MobileNoClickMark,
+      !this.settings.mobileClickToOpen,
+    );
+    document.body.toggleClass(
+      noHideNoteMark,
+      !this.settings.hideNoteInExplorer,
+    );
+    this.initialized = true;
   }
 
   async onload() {
@@ -133,11 +123,6 @@ export default class ALxFolderNote extends Plugin {
     this.noticeFoldervChange();
   }
 
-  onunload() {
-    console.log("unloading alx-folder-note");
-    this.initialize(true);
-  }
-
   async loadSettings() {
     this.settings = { ...this.settings, ...(await this.loadData()) };
     this.setupLongPressDelay();
@@ -145,47 +130,6 @@ export default class ALxFolderNote extends Plugin {
 
   async saveSettings() {
     await this.saveData(this.settings);
-  }
-
-  private _activeFolder: TFolder | null = null;
-  public set activeFolder(folder: TFolder | null) {
-    const getTitleEl = (folder: TFolder | null) =>
-      folder
-        ? this.feHandler.fileExplorer.fileItems[folder.path]?.titleEl
-        : undefined;
-    if (!folder) {
-      getTitleEl(this._activeFolder)?.removeClass(isActiveClass);
-    } else if (folder !== this._activeFolder) {
-      getTitleEl(this._activeFolder)?.removeClass(isActiveClass);
-      getTitleEl(folder)?.addClass(isActiveClass);
-    }
-    this._activeFolder = folder;
-  }
-  public get activeFolder(): TFolder | null {
-    return this._activeFolder;
-  }
-  setupActiveFolderHandlers() {
-    const { workspace } = this.app;
-    this.handleActiveLeafChange(workspace.activeLeaf);
-    this.registerEvent(
-      workspace.on(
-        "active-leaf-change",
-        this.handleActiveLeafChange.bind(this),
-      ),
-    );
-    this.register(() => (this.activeFolder = null));
-  }
-  handleActiveLeafChange(leaf: WorkspaceLeaf | null) {
-    let folder;
-    if (
-      leaf &&
-      leaf.view instanceof MarkdownView &&
-      (folder = this.CoreApi.getFolderFromNote(leaf.view.file))
-    ) {
-      this.activeFolder = folder;
-    } else {
-      this.activeFolder = null;
-    }
   }
 
   get longPressDelay(): number {
@@ -202,5 +146,4 @@ export default class ALxFolderNote extends Plugin {
   }
 }
 
-const isActiveClass = "is-active";
 const longPressDelayDataKey = "longPressDelay";
