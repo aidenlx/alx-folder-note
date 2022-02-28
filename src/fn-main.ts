@@ -7,26 +7,26 @@ import {
   MarkdownView,
   Notice,
   Plugin,
-  TFile,
   TFolder,
   WorkspaceLeaf,
 } from "obsidian";
 
-import initialize from "./initialize";
 import { ClickNotice } from "./misc";
 import FEHandler from "./modules/fe-handler";
 import {
   ALxFolderNoteSettings,
   ALxFolderNoteSettingTab,
   DEFAULT_SETTINGS,
+  folderIconMark,
+  noHideNoteMark,
 } from "./settings";
+import { monkeyPatch } from "./modules/fe-patch";
 
 const foldervNotifiedKey = "foldervNotified";
 
 export default class ALxFolderNote extends Plugin {
   settings: ALxFolderNoteSettings = DEFAULT_SETTINGS;
-  feHandler?: FEHandler;
-  initialize = initialize.bind(this);
+  feHandler = new FEHandler(this);
 
   private _notify = (
     id: string,
@@ -41,6 +41,7 @@ export default class ALxFolderNote extends Plugin {
     Debouncer<Parameters<ALxFolderNote["notify"]>>
   >();
   /**
+   * debounced notice
    * @param message set to null to cancel message
    */
   notify = (
@@ -100,6 +101,22 @@ export default class ALxFolderNote extends Plugin {
     }
   }
 
+  initialize(revert = false) {
+    if (!revert) {
+      monkeyPatch(this);
+      this.setupActiveFolderHandlers();
+    }
+    this.feHandler.markAll(revert);
+    document.body.toggleClass(
+      noHideNoteMark,
+      revert ? false : !this.settings.hideNoteInExplorer,
+    );
+    document.body.toggleClass(
+      folderIconMark,
+      revert ? false : this.settings.folderIcon,
+    );
+  }
+
   async onload() {
     console.log("loading alx-folder-note");
 
@@ -113,7 +130,7 @@ export default class ALxFolderNote extends Plugin {
       );
     this.addSettingTab(tab);
 
-    this.app.workspace.onLayoutReady(this.initialize);
+    this.app.workspace.onLayoutReady(this.initialize.bind(this));
     this.noticeFoldervChange();
   }
 
@@ -135,7 +152,7 @@ export default class ALxFolderNote extends Plugin {
   public set activeFolder(folder: TFolder | null) {
     const getTitleEl = (folder: TFolder | null) =>
       folder
-        ? this.feHandler?.fileExplorer.fileItems[folder.path].titleEl
+        ? this.feHandler.fileExplorer.fileItems[folder.path]?.titleEl
         : undefined;
     if (!folder) {
       getTitleEl(this._activeFolder)?.removeClass(isActiveClass);

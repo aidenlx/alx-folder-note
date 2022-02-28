@@ -7,7 +7,7 @@ import {
   CachedMetadata,
   debounce,
   EventRef,
-  FileExplorer,
+  FileExplorerView,
   FolderItem,
   TAbstractFile,
   TFile,
@@ -17,8 +17,6 @@ import { dirname } from "path";
 
 import ALxFolderNote from "../fn-main";
 import { afItemMark, isFolder } from "../misc";
-import getClickHandler from "./click-handler";
-import AddLongPressEvt, { LongPressEvent } from "./long-press";
 
 const folderNoteClass = "alx-folder-note";
 const folderClass = "alx-folder-with-note";
@@ -28,19 +26,20 @@ const focusedFolderCls = "alx-focused-folder";
 const focusModeCls = "alx-folder-focus";
 
 class FEHandler_Base {
-  private _fe: FileExplorer;
-  constructor(public plugin: ALxFolderNote, fe: FileExplorer) {
-    this._fe = fe;
-    AddLongPressEvt(plugin, fe.dom.navFileContainerEl);
-  }
+  longPressRegistered = new WeakSet<FileExplorerView>();
+  constructor(public plugin: ALxFolderNote) {}
+
   get fileExplorer() {
-    return this._fe;
-  }
-  set fileExplorer(fe: FileExplorer) {
-    if (this._fe !== fe) {
-      AddLongPressEvt(this.plugin, fe.dom.navFileContainerEl);
+    const { workspace } = this.app,
+      leaves = workspace.getLeavesOfType("file-explorer");
+    let feLeaf = leaves[0];
+    if (!feLeaf) {
+      feLeaf = workspace.getLeftLeaf(true);
+      feLeaf.setViewState({
+        type: "file-explorer",
+      });
     }
-    this._fe = fe;
+    return feLeaf.view as FileExplorerView;
   }
   get fncApi() {
     return this.plugin.CoreApi;
@@ -53,20 +52,14 @@ class FEHandler_Base {
   }
   getAfItem = (path: string): afItemMark | null =>
     this.fileExplorer.fileItems[path] ?? null;
-  iterateItems = (callback: (item: AFItem) => any): void => {
-    const items = this.fileExplorer.fileItems;
-    if (items)
-      for (const key in items) {
-        if (!Object.prototype.hasOwnProperty.call(items, key)) continue;
-        callback(items[key]);
-      }
-  };
+  iterateItems = (callback: (item: AFItem) => any): void =>
+    Object.values(this.fileExplorer.fileItems).forEach(callback);
 }
 
 /** File Explorer Handler */
 export default class FEHandler extends FEHandler_Base {
-  constructor(plugin: ALxFolderNote, explorer: FileExplorer) {
-    super(plugin, explorer);
+  constructor(plugin: ALxFolderNote) {
+    super(plugin);
     const { vault, metadataCache, workspace } = plugin.app;
     let refs = [] as EventRef[];
     const updateIcon = () => {
@@ -93,11 +86,9 @@ export default class FEHandler extends FEHandler_Base {
 
     //#region folder note events setup
     refs.push(
-      vault.on("create", (af) => af instanceof TFolder && this.setClick(af)),
       vault.on("folder-note:create", (note: TFile, folder: TFolder) => {
         this.setMark(note);
         this.setMark(folder);
-        this.setClick(folder);
       }),
       vault.on("folder-note:delete", (note: TFile, folder: TFolder) => {
         this.setMark(note, true);
@@ -213,79 +204,6 @@ export default class FEHandler extends FEHandler_Base {
     return !!found;
   };
   // #endregion
-
-  //#region set click handler for folders with folder note
-  private clickHandler = getClickHandler(this);
-  private setClickQueue: Map<
-    string,
-    [folder: AFItem | TFolder, revert: boolean]
-  > = new Map();
-  private updateClick = debounce(
-    () => {
-      if (this.setClickQueue.size > 0) {
-        this.setClickQueue.forEach((param) => this._setClick(...param));
-        this.setClickQueue.clear();
-      }
-    },
-    200,
-    true,
-  );
-  /**
-   * @param revert when revert is true, set item.evtDone to undefined
-   */
-  _setClick = (target: AFItem | TFolder, revert = false) => {
-    const item: afItemMark | null =
-      target instanceof TFolder ? this.getAfItem(target.path) : target;
-    if (!item) {
-      console.error("item not found with path %s", target);
-      return;
-    }
-    if (isFolder(item)) {
-      if (revert) {
-        item.evtDone = undefined;
-      } else if (!item.evtDone) {
-        const { titleInnerEl } = item;
-        // handle regular click
-        this.plugin.registerDomEvent(
-          titleInnerEl,
-          "click",
-          this.clickHandler.click,
-        );
-        // handle middle click
-        this.plugin.registerDomEvent(
-          titleInnerEl,
-          "auxclick",
-          this.clickHandler.click,
-        );
-        // handle double click
-        // @ts-ignore
-        this.plugin.registerDomEvent(
-          titleInnerEl,
-          "long-press",
-          this.clickHandler.press,
-        );
-        item.evtDone = true;
-      }
-    }
-  };
-  setClick = (target: AFItem | TFolder, revert = false) => {
-    if (!target) return;
-    if (target instanceof TFolder) {
-      this.setClickQueue.set(target.path, [target, revert]);
-    } else {
-      this.setClickQueue.set(target.file.path, [target, revert]);
-    }
-    this.updateClick();
-  };
-  /** get all AbstractFile (file+folder) and attach event */
-  setupClick(re: boolean) {
-    this.iterateItems((item: AFItem) => {
-      if (isFolder(item)) {
-        this.setClick(item, re);
-      }
-    });
-  }
-  //#endregion
 
   //#region set hide collapse indicator
   private setChangedFolderQueue: Set<string> = new Set();

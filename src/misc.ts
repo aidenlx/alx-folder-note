@@ -1,20 +1,29 @@
 import assertNever from "assert-never";
 import {
   AFItem,
+  App,
   FolderItem,
   Modifier,
-  Notice,
-  Platform,
   TAbstractFile,
   TFile,
-  TFolder,
+  View,
+  WorkspaceLeaf,
 } from "obsidian";
+import { Notice, Platform, TFolder } from "obsidian";
 import { dirname, extname, join } from "path";
 
 export type afItemMark = AFItem & {
   evtDone?: true;
   isFolderNote?: true;
   isFolderWithNote?: true;
+};
+
+export const getViewOfType = <V extends View = View>(
+  type: string,
+  app: App,
+): V | null => {
+  const vc = app.viewRegistry.getViewCreatorByType(type);
+  return vc ? (vc(new (WorkspaceLeaf as any)(app)) as V) : null;
 };
 
 export const isFolder = (item: AFItem): item is FolderItem =>
