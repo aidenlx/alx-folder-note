@@ -1,0 +1,16 @@
+.setting-item-control > input[type="number"] {
+  &:invalid {
+    color: var(--text-error);
+    background-color: var(--background-modifier-error);
+    & + span.validity::after {
+      content: "✖";
+      padding-left: 5px;
+    }
+  }
+  &.input-short {
+    width: 5em;
+  }
+  & + span.unit {
+    margin-left: 5px;
+  }
+}

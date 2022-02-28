@@ -1,3 +1,5 @@
+import "./settings.less";
+
 import { getApi } from "@aidenlx/obsidian-icon-shortcodes";
 import { App, Modifier, Platform, PluginSettingTab, Setting } from "obsidian";
 import { folderIconMark } from "./fe-handler/folder-mark";
@@ -265,8 +267,13 @@ export class ALxFolderNoteSettingTab extends PluginSettingTab {
           type: "number",
           min: "0.2",
           step: "0.1",
+          required: true,
         });
-        text.inputEl.insertAdjacentText("afterend", " second(s)");
+        text.inputEl.addClass("input-short");
+        text.inputEl.insertAdjacentElement(
+          "afterend",
+          createSpan({ cls: ["validity", "unit"], text: "second(s)" }),
+        );
         text
           .setValue(`${this.plugin.longPressDelay / 1e3}`)
           .onChange(async (val) => {
