@@ -18,6 +18,7 @@ import {
   ALxFolderNoteSettingTab,
   DEFAULT_SETTINGS,
   folderIconMark,
+  MobileNoClickMark,
   noHideNoteMark,
 } from "./settings";
 import { monkeyPatch } from "./modules/fe-patch";
@@ -102,19 +103,17 @@ export default class ALxFolderNote extends Plugin {
   }
 
   initialize(revert = false) {
+    const setGlobalClass = (className: string, value: boolean) => {
+      document.body.toggleClass(className, revert ? false : value);
+    };
     if (!revert) {
       monkeyPatch(this);
       this.setupActiveFolderHandlers();
     }
     this.feHandler.markAll(revert);
-    document.body.toggleClass(
-      noHideNoteMark,
-      revert ? false : !this.settings.hideNoteInExplorer,
-    );
-    document.body.toggleClass(
-      folderIconMark,
-      revert ? false : this.settings.folderIcon,
-    );
+    setGlobalClass(MobileNoClickMark, !this.settings.mobileClickToOpen);
+    setGlobalClass(noHideNoteMark, !this.settings.hideNoteInExplorer);
+    setGlobalClass(folderIconMark, this.settings.folderIcon);
   }
 
   async onload() {

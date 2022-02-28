@@ -6,6 +6,7 @@ import { NoteLoc } from "./misc";
 
 export const noHideNoteMark = "alx-no-hide-note";
 export const folderIconMark = "alx-folder-icons";
+export const MobileNoClickMark = "alx-no-click-on-mobile";
 
 export interface ALxFolderNoteSettings {
   modifierForNewNote: Modifier;
@@ -165,7 +166,9 @@ export class ALxFolderNoteSettingTab extends PluginSettingTab {
 
   setMobile() {
     if (!Platform.isMobile) return;
-    this.addToggle(this.containerEl, "mobileClickToOpen")
+    this.addToggle(this.containerEl, "mobileClickToOpen", (value) =>
+      document.body.toggleClass(MobileNoClickMark, !value),
+    )
       .setName("Click folder title to open folder note on mobile")
       .setDesc(
         "Disable this if you want to the default action. You can still use context menu to open folder note",

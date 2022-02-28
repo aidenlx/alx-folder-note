@@ -1,5 +1,6 @@
 import "./folder-icon.less";
 import "./focus.less";
+import "./file-explorer.less"
 
 import { getApi } from "@aidenlx/obsidian-icon-shortcodes";
 import {
