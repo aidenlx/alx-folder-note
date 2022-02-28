@@ -1,7 +1,7 @@
-import "./styles/main.css";
+import "./main.less";
 
 import { FolderNoteAPI, getApi } from "@aidenlx/folder-note-core";
-import { debounce, Debouncer, Notice, Plugin } from "obsidian";
+import { Notice, Plugin } from "obsidian";
 
 import { ClickNotice } from "./misc";
 import {
@@ -17,36 +17,6 @@ const foldervNotifiedKey = "foldervNotified";
 
 export default class ALxFolderNote extends Plugin {
   settings: ALxFolderNoteSettings = DEFAULT_SETTINGS;
-
-  private _notify = (
-    id: string,
-    message: string | null,
-    timeout?: number | undefined,
-  ): void => {
-    if (message) new Notice(message, timeout);
-    this._noticeSender.delete(id);
-  };
-  private _noticeSender = new Map<
-    string,
-    Debouncer<Parameters<ALxFolderNote["notify"]>>
-  >();
-  /**
-   * debounced notice
-   * @param message set to null to cancel message
-   */
-  notify = (
-    id: string,
-    message: string | null,
-    timeout?: number | undefined,
-  ) => {
-    let sender = this._noticeSender.get(id);
-    if (sender) sender(id, message, timeout);
-    else if (message) {
-      const debouncer = debounce(this._notify, 1e3, true);
-      this._noticeSender.set(id, debouncer);
-      debouncer(id, message, timeout);
-    }
-  };
 
   get CoreApi(): FolderNoteAPI {
     let message;
