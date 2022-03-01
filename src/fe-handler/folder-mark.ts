@@ -1,6 +1,5 @@
 import "./folder-icon.less";
 
-import { getApi } from "@aidenlx/obsidian-icon-shortcodes";
 import {
   AFItem,
   CachedMetadata,
@@ -159,12 +158,9 @@ export default class FolderMark extends FEHandler_Base {
     ].forEach(this.plugin.registerEvent.bind(this.plugin));
   }
   foldersWithIcon = new Set<string>();
-  private get shouldSetIcon(): boolean {
-    return this.plugin.settings.folderIcon && !!getApi(this.plugin);
-  }
   private _updateIcon(path: string, revert: boolean, item: afItemMark) {
-    if (!this.shouldSetIcon) return;
-    const api = getApi(this.plugin) as NonNullable<ReturnType<typeof getApi>>;
+    const api = this.plugin.IconSCAPI;
+    if (!api) return;
 
     let folderNotePath: string | undefined,
       metadata: CachedMetadata | undefined;

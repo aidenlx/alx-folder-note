@@ -1,6 +1,6 @@
 import "./main.less";
 
-import { FolderNoteAPI, getApi } from "@aidenlx/folder-note-core";
+import { FolderNoteAPI, getApi as getFNCApi } from "@aidenlx/folder-note-core";
 import { Notice, Plugin } from "obsidian";
 
 import { monkeyPatch } from "./fe-patch";
@@ -12,6 +12,8 @@ import {
   MobileNoClickMark,
   noHideNoteMark,
 } from "./settings";
+import registerSetFolderIconCmd from "./modules/set-folder-icon";
+import { getApi as getISCApi } from "@aidenlx/obsidian-icon-shortcodes";
 
 const foldervNotifiedKey = "foldervNotified";
 
@@ -20,7 +22,7 @@ export default class ALxFolderNote extends Plugin {
 
   get CoreApi(): FolderNoteAPI {
     let message;
-    const api = getApi(this);
+    const api = getFNCApi(this);
     if (api) {
       return api;
     } else {
@@ -31,6 +33,12 @@ export default class ALxFolderNote extends Plugin {
       );
       throw new Error(message);
     }
+  }
+  get IconSCAPI() {
+    if (this.settings.folderIcon) {
+      return getISCApi(this);
+    }
+    return null;
   }
 
   noticeFoldervChange() {
@@ -88,6 +96,7 @@ export default class ALxFolderNote extends Plugin {
           "Open Settings Tab of ALx Folder Note for details",
       );
     this.addSettingTab(tab);
+    registerSetFolderIconCmd(this);
 
     this.app.workspace.onLayoutReady(this.initialize.bind(this));
     this.noticeFoldervChange();
