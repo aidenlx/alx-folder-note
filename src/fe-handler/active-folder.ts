@@ -1,9 +1,10 @@
 import {
+  FileExplorerView,
+  MarkdownView,
   TFolder,
   WorkspaceLeaf,
-  MarkdownView,
-  FileExplorerView,
 } from "obsidian";
+
 import type ALxFolderNote from "../fn-main";
 import FEHandler_Base from "./base";
 

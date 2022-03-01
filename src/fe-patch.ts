@@ -1,16 +1,16 @@
 import { around } from "monkey-around";
-import { TAbstractFile, TFile, TFolder } from "obsidian";
 import type {
+  FileExplorerPlugin as FEPluginCls,
   FileExplorerView as FEViewCls,
   FolderItem as FolderItemCls,
-  FileExplorerPlugin as FEPluginCls,
 } from "obsidian";
+import { TAbstractFile, TFile, TFolder } from "obsidian";
 
+import { getClickHandler, pressHandler } from "./click-handler";
+import getFileExplorerHandlers from "./fe-handler";
 import ALxFolderNote from "./fn-main";
 import { getViewOfType } from "./misc";
 import AddLongPressEvt, { LongPressEvent } from "./modules/long-press";
-import { getClickHandler, pressHandler } from "./click-handler";
-import getFileExplorerHandlers from "./fe-handler";
 
 const getFolderItemFromEl = (navEl: HTMLElement, view: FEViewCls) => {
   const folder = view.files.get(navEl);

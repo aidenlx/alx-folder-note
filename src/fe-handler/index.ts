@@ -1,4 +1,5 @@
 import type { FileExplorerView } from "obsidian";
+
 import type ALxFolderNote from "../fn-main";
 import ActiveFolder from "./active-folder";
 import FolderFocus from "./folder-focus";

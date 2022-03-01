@@ -3,6 +3,7 @@ import "./main.less";
 import { FolderNoteAPI, getApi } from "@aidenlx/folder-note-core";
 import { Notice, Plugin } from "obsidian";
 
+import { monkeyPatch } from "./fe-patch";
 import { ClickNotice } from "./misc";
 import {
   ALxFolderNoteSettings,
@@ -11,7 +12,6 @@ import {
   MobileNoClickMark,
   noHideNoteMark,
 } from "./settings";
-import { monkeyPatch } from "./fe-patch";
 
 const foldervNotifiedKey = "foldervNotified";
 

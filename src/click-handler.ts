@@ -1,6 +1,6 @@
 import { FolderItem, Platform } from "obsidian";
-import type ALxFolderNote from "./fn-main";
 
+import type ALxFolderNote from "./fn-main";
 import { isModifier } from "./misc";
 import { LongPressEvent } from "./modules/long-press";
 

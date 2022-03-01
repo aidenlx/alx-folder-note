@@ -1,4 +1,5 @@
 import "obsidian";
+
 import type getFileExplorerHandlers from "../fe-handler";
 
 declare module "obsidian" {

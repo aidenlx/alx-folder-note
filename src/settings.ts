@@ -2,8 +2,8 @@ import "./settings.less";
 
 import { getApi } from "@aidenlx/obsidian-icon-shortcodes";
 import { App, Modifier, Platform, PluginSettingTab, Setting } from "obsidian";
-import { folderIconMark } from "./fe-handler/folder-mark";
 
+import { folderIconMark } from "./fe-handler/folder-mark";
 import ALxFolderNote from "./fn-main";
 import { NoteLoc } from "./misc";
 

@@ -4,17 +4,17 @@ import { getApi } from "@aidenlx/obsidian-icon-shortcodes";
 import {
   AFItem,
   CachedMetadata,
-  debounce,
+  FileExplorerView,
+  FolderItem,
   TAbstractFile,
   TFile,
   TFolder,
-  FolderItem,
-  FileExplorerView,
 } from "obsidian";
+import { dirname } from "path";
+
 import type ALxFolderNote from "../fn-main";
 import { afItemMark, isFolder } from "../misc";
 import FEHandler_Base from "./base";
-import { dirname } from "path";
 
 export const folderIconMark = "alx-folder-icons";
 
