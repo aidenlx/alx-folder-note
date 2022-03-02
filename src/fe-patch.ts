@@ -2,6 +2,7 @@ import { around } from "monkey-around";
 import type {
   FileExplorerPlugin as FEPluginCls,
   FileExplorerView as FEViewCls,
+  FileExplorerView,
   FolderItem as FolderItemCls,
 } from "obsidian";
 import { TAbstractFile, TFile, TFolder } from "obsidian";
@@ -75,6 +76,21 @@ export const monkeyPatch = (plugin: ALxFolderNote) => {
               item && pressHandler(item, evt);
             },
           );
+        },
+      onFileMouseover: (next) =>
+        function (this: FileExplorerView, evt, navTitleEl) {
+          next.call(this, evt, navTitleEl);
+          const af = this.currentHoverFile;
+          if (!af || !(af instanceof TFolder)) return;
+          const note = plugin.CoreApi.getFolderNote(af);
+          if (!note) return;
+          this.app.workspace.trigger("hover-link", {
+            event: evt,
+            source: "file-explorer",
+            hoverParent: this,
+            targetEl: navTitleEl,
+            linktext: note.path,
+          });
         },
     }),
     // patch reveal in folder to alter folder note target to linked folder

@@ -23,6 +23,9 @@ declare module "obsidian" {
     handleFileClick(evt: MouseEvent, item: AFItem): boolean;
     createFolderDom(folder: TFolder): FolderItem;
     folderNoteUtils?: ReturnType<typeof getFileExplorerHandlers>;
+    currentHoverFile: TAbstractFile | null;
+    onFileMouseover(evt: MouseEvent, navTitleEl: HTMLElement): void;
+    onFileMouseout(evt: MouseEvent, navTitleEl: HTMLElement): void;
   }
 
   interface ViewRegistry {
