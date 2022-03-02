@@ -19,6 +19,10 @@ const getFolderItemFromEl = (navEl: HTMLElement, view: FEViewCls) => {
     ? (view.fileItems[folder.path] as FolderItemCls)
     : null;
 };
+const Rt = (evt: MouseEvent, target: HTMLElement) => {
+  let n = evt.relatedTarget;
+  return !(n instanceof Node && target.contains(n));
+};
 /**
  * reset existing file explorer views
  */
@@ -80,17 +84,33 @@ export const monkeyPatch = (plugin: ALxFolderNote) => {
       onFileMouseover: (next) =>
         function (this: FileExplorerView, evt, navTitleEl) {
           next.call(this, evt, navTitleEl);
+          if (!Rt(evt, navTitleEl)) return;
           const af = this.currentHoverFile;
-          if (!af || !(af instanceof TFolder)) return;
+          if (
+            !af ||
+            // if event is triggered on same file, do nothing
+            (this._AFN_HOVER && this._AFN_HOVER === af) ||
+            !(af instanceof TFolder)
+          )
+            return;
           const note = plugin.CoreApi.getFolderNote(af);
-          if (!note) return;
-          this.app.workspace.trigger("hover-link", {
-            event: evt,
-            source: "file-explorer",
-            hoverParent: this,
-            targetEl: navTitleEl,
-            linktext: note.path,
-          });
+          if (note) {
+            this.app.workspace.trigger("hover-link", {
+              event: evt,
+              source: "file-explorer",
+              hoverParent: this,
+              targetEl: navTitleEl,
+              linktext: note.path,
+            });
+          }
+          // indicate that this file is handled by monkey patch
+          this._AFN_HOVER = af;
+        },
+      onFileMouseout: (next) =>
+        function (this: FileExplorerView, evt, navTitleEl) {
+          next.call(this, evt, navTitleEl);
+          if (!Rt(evt, navTitleEl)) return;
+          delete this._AFN_HOVER;
         },
     }),
     // patch reveal in folder to alter folder note target to linked folder

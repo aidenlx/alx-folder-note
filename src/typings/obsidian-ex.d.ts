@@ -26,6 +26,7 @@ declare module "obsidian" {
     currentHoverFile: TAbstractFile | null;
     onFileMouseover(evt: MouseEvent, navTitleEl: HTMLElement): void;
     onFileMouseout(evt: MouseEvent, navTitleEl: HTMLElement): void;
+    _AFN_HOVER?: TFolder;
   }
 
   interface ViewRegistry {
