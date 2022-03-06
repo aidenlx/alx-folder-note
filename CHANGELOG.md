@@ -1,3 +1,18 @@
+# [0.15.0](https://github.com/aidenlx/alx-folder-note/compare/0.14.0...0.15.0) (2022-03-06)
+
+
+### Bug Fixes
+
+* **settings:** fix input[number] stylings ([eaeb33a](https://github.com/aidenlx/alx-folder-note/commit/eaeb33ab7648e71c05b8f79c221d5a26d9d16245))
+
+
+### Features
+
+* **fe-handler:** adjust folder title and icon style ([03a8340](https://github.com/aidenlx/alx-folder-note/commit/03a83407afdf310eeccc50a629725299f299efdd))
+* **fe-patch:** support hover on folder to preview its folder note ([aa918ff](https://github.com/aidenlx/alx-folder-note/commit/aa918ff80887f6b1cae2237f5ad86fc43ba000db)), closes [#62](https://github.com/aidenlx/alx-folder-note/issues/62)
+* **folder-icon:** add command and file menu option to set folder icon ([03d4ec1](https://github.com/aidenlx/alx-folder-note/commit/03d4ec1c239476d6047d093afdf237ca29c01aab))
+* increase folder's collapse-indicator size on mobile ([b619b0d](https://github.com/aidenlx/alx-folder-note/commit/b619b0dbb512692383592f93562a75df152725b8))
+
 # [0.14.0](https://github.com/aidenlx/alx-folder-note/compare/0.13.1...0.14.0) (2022-02-25)
 
 
