@@ -1,10 +1,12 @@
 import "./main.less";
 
 import { FolderNoteAPI, getApi as getFNCApi } from "@aidenlx/folder-note-core";
+import { getApi as getISCApi } from "@aidenlx/obsidian-icon-shortcodes";
 import { Notice, Plugin } from "obsidian";
 
 import { monkeyPatch } from "./fe-patch";
 import { ClickNotice } from "./misc";
+import registerSetFolderIconCmd from "./modules/set-folder-icon";
 import {
   ALxFolderNoteSettings,
   ALxFolderNoteSettingTab,
@@ -12,8 +14,6 @@ import {
   MobileNoClickMark,
   noHideNoteMark,
 } from "./settings";
-import registerSetFolderIconCmd from "./modules/set-folder-icon";
-import { getApi as getISCApi } from "@aidenlx/obsidian-icon-shortcodes";
 
 const foldervNotifiedKey = "foldervNotified";
 
