@@ -182,18 +182,19 @@ export class ALxFolderNoteSettingTab extends PluginSettingTab {
       .setName("Modifier for New Note")
       .setDesc("Choose a modifier to click folders with to create folder notes")
       .addDropdown((dropDown) => {
-        const windowsOpts: Record<Modifier, string> = {
+        type NoShift = Exclude<Modifier, "Shift">;
+        const windowsOpts: Record<NoShift, string> = {
           Mod: "Ctrl (Cmd in macOS)",
           Ctrl: "Ctrl (Ctrl in macOS)",
           Meta: "⊞ Win",
-          Shift: "Shift",
+          // Shift: "Shift",
           Alt: "Alt",
         };
-        const macOSOpts: Record<Modifier, string> = {
-          Mod: "⌘ Cmd (Ctrl)",
+        const macOSOpts: Record<NoShift, string> = {
+          Mod: "⌘ Cmd (Ctrl in Windows)",
           Ctrl: "⌃ Control",
-          Meta: "⌘ Cmd (Win)",
-          Shift: "⇧ Shift",
+          Meta: "⌘ Cmd (Win in Windows)",
+          // Shift: "⇧ Shift",
           Alt: "⌥ Option",
         };
 
@@ -201,9 +202,9 @@ export class ALxFolderNoteSettingTab extends PluginSettingTab {
 
         dropDown
           .addOptions(options)
-          .setValue(this.plugin.settings.modifierForNewNote.toString())
+          .setValue(this.plugin.settings.modifierForNewNote)
           .onChange(async (value: string) => {
-            this.plugin.settings.modifierForNewNote = value as Modifier;
+            this.plugin.settings.modifierForNewNote = value as NoShift;
             await this.plugin.saveSettings();
           });
       });

@@ -9,13 +9,17 @@ export const getClickHandler = (plugin: ALxFolderNote) => {
   return async (item: FolderItem, evt: MouseEvent): Promise<boolean> => {
     if (
       !item ||
+      (Platform.isMobile && !plugin.settings.mobileClickToOpen) ||
+      // allow folder shift selection to work
+      evt.shiftKey ||
+      // allow collapse indicator to work
       item.collapseIndicatorEl === evt.target ||
       item.collapseIndicatorEl.contains(evt.target as Node) ||
-      item.fileExplorer.fileBeingRenamed === item.file ||
-      (Platform.isMobile && !plugin.settings.mobileClickToOpen)
+      // ignore file being renamed
+      item.fileExplorer.fileBeingRenamed === item.file
     )
       return false;
-    // check if dblclick is triggered
+
     if (evt.type === "auxclick" && evt.button !== 1) return false;
 
     // get the folder path
