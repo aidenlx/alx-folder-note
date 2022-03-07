@@ -4,7 +4,7 @@ import { FolderNoteAPI, getApi as getFNCApi } from "@aidenlx/folder-note-core";
 import { getApi as getISCApi } from "@aidenlx/obsidian-icon-shortcodes";
 import { Notice, Plugin } from "obsidian";
 
-import { monkeyPatch } from "./fe-patch";
+import PatchFileExplorer from "./fe-patch";
 import { ClickNotice } from "./misc";
 import registerSetFolderIconCmd from "./modules/set-folder-icon";
 import {
@@ -14,6 +14,7 @@ import {
   MobileNoClickMark,
   noHideNoteMark,
 } from "./settings";
+import PatchDragManager from "./drag-patch";
 
 const foldervNotifiedKey = "foldervNotified";
 
@@ -72,7 +73,7 @@ export default class ALxFolderNote extends Plugin {
   initialized = false;
   initialize() {
     if (this.initialized) return;
-    monkeyPatch(this);
+    PatchFileExplorer(this);
     document.body.toggleClass(
       MobileNoClickMark,
       !this.settings.mobileClickToOpen,
@@ -98,6 +99,7 @@ export default class ALxFolderNote extends Plugin {
     this.addSettingTab(tab);
     registerSetFolderIconCmd(this);
 
+    PatchDragManager(this);
     this.app.workspace.onLayoutReady(this.initialize.bind(this));
     this.noticeFoldervChange();
   }

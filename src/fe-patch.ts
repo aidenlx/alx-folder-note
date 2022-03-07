@@ -34,7 +34,7 @@ const resetFileExplorer = async (plugin: ALxFolderNote) => {
   }
 };
 
-export const monkeyPatch = (plugin: ALxFolderNote) => {
+const PatchFileExplorer = (plugin: ALxFolderNote) => {
   const { getFolderFromNote } = plugin.CoreApi,
     clickHandler = getClickHandler(plugin);
 
@@ -140,3 +140,4 @@ export const monkeyPatch = (plugin: ALxFolderNote) => {
     resetFileExplorer(plugin);
   });
 };
+export default PatchFileExplorer;
