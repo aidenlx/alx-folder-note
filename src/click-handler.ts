@@ -48,6 +48,8 @@ export const getClickHandler = (plugin: ALxFolderNote) => {
         createNew || evt.type === "auxclick",
         { active: true },
       );
+      if (plugin.settings.expandFolderOnClick && item.collapsed)
+        await item.setCollapsed(false);
       return true;
     } catch (error) {
       console.error(error);

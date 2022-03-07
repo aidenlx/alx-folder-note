@@ -23,6 +23,7 @@ export interface ALxFolderNoteSettings {
   folderNoteTemplate: string | null;
   mobileClickToOpen: boolean;
   longPressDelay: number;
+  expandFolderOnClick: boolean;
 }
 
 export const DEFAULT_SETTINGS: ALxFolderNoteSettings = {
@@ -38,6 +39,7 @@ export const DEFAULT_SETTINGS: ALxFolderNoteSettings = {
   folderNoteTemplate: null,
   mobileClickToOpen: true,
   longPressDelay: 800,
+  expandFolderOnClick: false,
 };
 
 type SettingKeyWithType<T> = {
@@ -118,6 +120,11 @@ export class ALxFolderNoteSettingTab extends PluginSettingTab {
     this.setFolderIcon();
     this.setModifier();
     this.setHide();
+    this.addToggle(this.containerEl, "expandFolderOnClick")
+      .setName("Expand Folder on Click")
+      .setDesc(
+        "Expand collapsed folders with note while opening them by clicking on folder title",
+      );
     this.setMobile();
     this.setFocus();
 
