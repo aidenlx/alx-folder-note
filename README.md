@@ -39,7 +39,7 @@ Check [wiki](https://github.com/aidenlx/alx-folder-note/wiki) for more details
 
 ## Compatibility
 
-The required API feature is only available for Obsidian v0.12.5+.
+The required API feature is only available for Obsidian v0.13.24+.
 
 ## Installation
 

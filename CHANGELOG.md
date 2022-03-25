@@ -1,4 +1,18 @@
-# [0.15.0](https://github.com/aidenlx/alx-folder-note/compare/0.14.0...0.15.0) (2022-03-06)
+
+
+# [0.16.0](https://github.com/aidenlx/alx-folder-note/compare/0.15.0...0.16.0) (2022-03-25)
+
+
+### Bug Fixes
+
+* **click-handler:** fix shift selection not working on folder with note ([a4742e1](https://github.com/aidenlx/alx-folder-note/commit/a4742e1d90d6e277b48e6c6ea2e33d7e3c44f21b))
+
+
+### Features
+
+* **click handler:** add option to expand collasped folder with note while opening it ([3f98380](https://github.com/aidenlx/alx-folder-note/commit/3f9838017f5ea9a8ee5449c5b85e52f572db6522)), closes [#32](https://github.com/aidenlx/alx-folder-note/issues/32)
+* **click-handler:** folder note is triggered only when click on folder title again ([f145d5a](https://github.com/aidenlx/alx-folder-note/commit/f145d5a3552a23fdf10e409ed511f4c0aee89e9e)), closes [#64](https://github.com/aidenlx/alx-folder-note/issues/64)
+* support drag folder to editor to insert link ([26e6cf9](https://github.com/aidenlx/alx-folder-note/commit/26e6cf96bd51355a3c71cc7bec892d989df0c62e)), closes [#45](https://github.com/aidenlx/alx-folder-note/issues/45)# [0.15.0](https://github.com/aidenlx/alx-folder-note/compare/0.14.0...0.15.0) (2022-03-06)
 
 
 ### Bug Fixes
@@ -271,4 +285,3 @@
 * support create new folder note ([2a1026f](https://github.com/alx-plugins/alx-folder-note/commit/2a1026f36670df846394963b02ab82fc59bc2bde))
 * update method to unload and load when layout is already ready ([521294b](https://github.com/alx-plugins/alx-folder-note/commit/521294bfa878697d25bc784fcc59d800038f4ff1))
 * **settings.ts:** port settings from xpgo's ([f8c2e2f](https://github.com/alx-plugins/alx-folder-note/commit/f8c2e2fa9435e49cc7b333b3e61bc8f0920a7cc2))
-
