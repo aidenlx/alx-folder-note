@@ -1,6 +1,8 @@
-import { around } from "monkey-around";
 import "obsidian";
+
+import { around } from "monkey-around";
 import { DragManager, TFile, TFolder } from "obsidian";
+
 import type ALxFolderNote from "./fn-main";
 
 declare module "obsidian" {

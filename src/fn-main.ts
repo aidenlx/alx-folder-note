@@ -4,6 +4,7 @@ import { FolderNoteAPI, getApi as getFNCApi } from "@aidenlx/folder-note-core";
 import { getApi as getISCApi } from "@aidenlx/obsidian-icon-shortcodes";
 import { Notice, Plugin } from "obsidian";
 
+import PatchDragManager from "./drag-patch";
 import PatchFileExplorer from "./fe-patch";
 import { ClickNotice } from "./misc";
 import registerSetFolderIconCmd from "./modules/set-folder-icon";
@@ -14,7 +15,6 @@ import {
   MobileNoClickMark,
   noHideNoteMark,
 } from "./settings";
-import PatchDragManager from "./drag-patch";
 
 const foldervNotifiedKey = "foldervNotified";
 
