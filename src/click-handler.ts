@@ -12,9 +12,11 @@ export const getClickHandler = (plugin: ALxFolderNote) => {
       (Platform.isMobile && !plugin.settings.mobileClickToOpen) ||
       // allow folder shift selection to work
       evt.shiftKey ||
-      // allow collapse indicator to work
-      item.collapseIndicatorEl === evt.target ||
-      item.collapseIndicatorEl.contains(evt.target as Node) ||
+      // triggered only when click on title
+      !(
+        item.titleInnerEl === evt.target ||
+        item.titleInnerEl.contains(evt.target as Node)
+      ) ||
       // ignore file being renamed
       item.fileExplorer.fileBeingRenamed === item.file
     )
