@@ -1,6 +1,11 @@
 
 
-# [0.16.0](https://github.com/aidenlx/alx-folder-note/compare/0.15.0...0.16.0) (2022-03-25)
+## [0.16.1](https://github.com/aidenlx/alx-folder-note/compare/0.16.0...0.16.1) (2022-04-04)
+
+
+### Bug Fixes
+
+* improve handling of loading folder-note-core API ([8d72225](https://github.com/aidenlx/alx-folder-note/commit/8d722255af83ef7e4a2da75ff94ba6fc94751412)), closes [#67](https://github.com/aidenlx/alx-folder-note/issues/67)# [0.16.0](https://github.com/aidenlx/alx-folder-note/compare/0.15.0...0.16.0) (2022-03-25)
 
 
 ### Bug Fixes
