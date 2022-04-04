@@ -23,16 +23,15 @@ export default class ALxFolderNote extends Plugin {
 
   get CoreApi(): FolderNoteAPI {
     let message;
-    const api = getFNCApi(this);
+    let api = getFNCApi(this) || getFNCApi();
     if (api) {
       return api;
     } else {
-      message =
-        "Failed to initialize alx-folder-note: Click here for more details";
-      new ClickNotice(message, () =>
+      message = "Failed to initialize alx-folder-note";
+      new ClickNotice(message + ": Click here for more details", () =>
         this.app.setting.openTabById(this.manifest.id),
       );
-      throw new Error(message);
+      throw new Error(message + ": folder-note-core not available");
     }
   }
   get IconSCAPI() {
@@ -97,11 +96,37 @@ export default class ALxFolderNote extends Plugin {
           "Open Settings Tab of ALx Folder Note for details",
       );
     this.addSettingTab(tab);
-    registerSetFolderIconCmd(this);
 
-    PatchDragManager(this);
-    this.app.workspace.onLayoutReady(this.initialize.bind(this));
-    this.noticeFoldervChange();
+    let initCalled = false;
+    const init = () => {
+      initCalled = true;
+      registerSetFolderIconCmd(this);
+      PatchDragManager(this);
+      this.app.workspace.onLayoutReady(this.initialize.bind(this));
+      this.noticeFoldervChange();
+    };
+
+    if (getFNCApi(this)) {
+      init();
+    } else {
+      if (this.app.plugins.enabledPlugins.has("folder-note-core")) {
+        const timeoutId = window.setTimeout(() => {
+          if (!initCalled) {
+            this.app.vault.offref(evtRef);
+            throw new Error(
+              "folder-note-core enabled but fail to load within 5s",
+            );
+          }
+        }, 5e3);
+        const evtRef = this.app.vault.on("folder-note:api-ready", () => {
+          init();
+          if (timeoutId) window.clearTimeout(timeoutId);
+          this.app.vault.offref(evtRef); // register event only once
+        });
+      } else {
+        this.CoreApi; // prompt to enable folder-note-core
+      }
+    }
   }
 
   async loadSettings() {
