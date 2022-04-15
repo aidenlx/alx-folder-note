@@ -72,6 +72,7 @@ export default class ALxFolderNote extends Plugin {
   initialized = false;
   initialize() {
     if (this.initialized) return;
+    PatchDragManager(this);
     PatchFileExplorer(this);
     document.body.toggleClass(
       MobileNoClickMark,
@@ -101,7 +102,6 @@ export default class ALxFolderNote extends Plugin {
     const init = () => {
       initCalled = true;
       registerSetFolderIconCmd(this);
-      PatchDragManager(this);
       this.app.workspace.onLayoutReady(this.initialize.bind(this));
       this.noticeFoldervChange();
     };

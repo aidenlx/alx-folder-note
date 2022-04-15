@@ -1,19 +1,29 @@
 import "obsidian";
 
 import { around } from "monkey-around";
-import { DragManager, TFile, TFolder } from "obsidian";
+import {
+  ClipboardManager,
+  MarkdownView,
+  Platform,
+  TFolder,
+  WorkspaceLeaf,
+} from "obsidian";
 
 import type ALxFolderNote from "./fn-main";
 
+declare global {
+  var i18next: any;
+}
 declare module "obsidian" {
   interface App {
     dragManager: DragManager;
   }
   interface DragInfo {
-    source: string | undefined;
+    source?: string;
     type: string;
     icon: string;
     title: string;
+    file?: TFolder | TFile;
   }
   interface DragFolderInfo extends DragInfo {
     type: "folder";
@@ -28,6 +38,8 @@ declare module "obsidian" {
     files: TFile[];
   }
   class DragManager {
+    draggable: DragInfo | null;
+    setAction: (action: string) => any;
     dragFile(evt: DragEvent, file: TFile, source?: string): DragFolderInfo;
     dragFiles(evt: DragEvent, files: TFile[], source?: string): DragFilesInfo;
     dragFolder(
@@ -35,65 +47,98 @@ declare module "obsidian" {
       folder: TFolder,
       source?: string,
     ): DragFolderInfo;
+    // handleDrop: (
+    //   el: HTMLElement,
+    //   handler: (
+    //     evt: DragEvent,
+    //     dragable: DragInfo,
+    //     draging: boolean,
+    //   ) => {
+    //     action: string;
+    //     dropEffect: string;
+    //     hoverEl?: HTMLElement;
+    //     hoverClass?: string;
+    //   },
+    //   arg0: boolean,
+    // ) => void;
   }
+  interface MarkdownView {
+    editMode: MarkdownEditView;
+  }
+  interface MarkdownEditView {
+    clipboardManager: ClipboardManager;
+  }
+  class ClipboardManager {
+    app: App;
+    handleDrop: (evt: DragEvent) => boolean;
+    handleDragOver: (evt: DragEvent) => void;
+  }
+}
+
+const HD = {
+  none: [],
+  copy: ["copy"],
+  copyLink: ["copy", "link"],
+  copyMove: ["copy", "move"],
+  link: ["link"],
+  linkMove: ["link", "move"],
+  move: ["move"],
+  all: ["copy", "link", "move"],
+  uninitialized: [],
+} as const;
+function VD(e: DragEvent, t: DataTransfer["dropEffect"]) {
+  t &&
+    (function (e, t) {
+      if ("none" === t) return !0;
+      let n = HD[e.dataTransfer!.effectAllowed];
+      return !!n && (n as any).contains(t);
+    })(e, t) &&
+    (e.dataTransfer!.dropEffect = t);
 }
 
 const PatchDragManager = (plugin: ALxFolderNote) => {
   const { getFolderNote } = plugin.CoreApi;
 
   plugin.register(
-    around(plugin.app.dragManager.constructor.prototype as DragManager, {
-      dragFolder: (next) =>
-        function (this: DragManager, evt, folder, source, ...args) {
-          const fallback = () => next.call(this, evt, folder, source, ...args);
-          try {
-            let note = getFolderNote(folder);
-            if (note) {
-              return this.dragFile(evt, note, source);
+    around(
+      new MarkdownView(new (WorkspaceLeaf as any)(plugin.app)).editMode
+        .clipboardManager.constructor.prototype as ClipboardManager,
+      {
+        handleDragOver: (next) =>
+          function (this: ClipboardManager, evt, ...args) {
+            const { draggable } = this.app.dragManager;
+            if (
+              draggable &&
+              !(Platform.isMacOS ? evt.shiftKey : evt.altKey) &&
+              draggable.file instanceof TFolder &&
+              getFolderNote(draggable.file)
+            ) {
+              evt.preventDefault();
+              VD(evt, "link");
+              this.app.dragManager.setAction(
+                i18next.t("interface.drag-and-drop.insert-link-here"),
+              );
             } else {
-              return fallback();
+              next.call(this, evt, ...args);
             }
-          } catch (error) {
-            console.error(error);
+          },
+        handleDrop: (next) =>
+          function (this: ClipboardManager, evt, ...args) {
+            const fallback = () => next.call(this, evt, ...args);
+            const { draggable } = plugin.app.dragManager;
+            let note;
+            if (
+              draggable?.type === "folder" &&
+              draggable.file instanceof TFolder &&
+              (note = getFolderNote(draggable.file))
+            ) {
+              draggable.file = note;
+              draggable.type = "file";
+            }
             return fallback();
-          }
-        },
-      // dragFiles: (next) =>
-      //   function (this: DragManager, evt, files, source, ...args) {
-      //     const fallback = () => next.call(this, evt, files, source, ...args);
-      //     try {
-      //       let dragedFiles = files as (TFile | number)[];
-      //       let pathFolderNoteMap: Map<string, TFile> = new Map();
-      //       let index = -1;
-      //       // find all folder with note,
-      //       // save folder note in map,
-      //       // and replace them with index to map sequence
-      //       for (let i = 0; i < files.length; i++) {
-      //         const af = dragedFiles[i];
-      //         let note;
-      //         if (af instanceof TFolder && (note = getFolderNote(af))) {
-      //           pathFolderNoteMap.set(note.path, note) && index++;
-      //           dragedFiles[i] = index;
-      //         }
-      //       }
-      //       if (index < 0) return fallback();
-      //       // filter out duplicate folder note
-      //       dragedFiles = dragedFiles.filter(
-      //         (af) => typeof af === "number" || !pathFolderNoteMap.has(af.path),
-      //       );
-      //       // put folder note back to original sequence
-      //       const folderNotes = [...pathFolderNoteMap.values()];
-      //       for (let i = 0; i < dragedFiles.length; i++) {
-      //         const file = dragedFiles[i];
-      //         if (typeof file === "number")
-      //           dragedFiles[file] = folderNotes[file];
-      //       }
-      //     } catch (error) {
-      //       fallback();
-      //     }
-      //     return fallback();
-      //   },
-    }),
+          },
+      },
+    ),
   );
 };
 export default PatchDragManager;
