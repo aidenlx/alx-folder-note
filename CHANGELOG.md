@@ -1,6 +1,11 @@
 
 
-## [0.16.1](https://github.com/aidenlx/alx-folder-note/compare/0.16.0...0.16.1) (2022-04-04)
+## [0.16.2](https://github.com/aidenlx/alx-folder-note/compare/0.16.1...0.16.2) (2022-04-15)
+
+
+### Bug Fixes
+
+* **drag-patch:** fix broken drag folder with folder note into another folder ([d8c5325](https://github.com/aidenlx/alx-folder-note/commit/d8c53254d878091e79f84a3d3fcfc6453afe30dc)), closes [#71](https://github.com/aidenlx/alx-folder-note/issues/71)## [0.16.1](https://github.com/aidenlx/alx-folder-note/compare/0.16.0...0.16.1) (2022-04-04)
 
 
 ### Bug Fixes
