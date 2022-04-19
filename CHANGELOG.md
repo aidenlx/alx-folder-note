@@ -1,6 +1,11 @@
 
 
-## [0.16.2](https://github.com/aidenlx/alx-folder-note/compare/0.16.1...0.16.2) (2022-04-15)
+## [0.16.3](https://github.com/aidenlx/alx-folder-note/compare/0.16.2...0.16.3) (2022-04-19)
+
+
+### Bug Fixes
+
+* **drag-patch:** fix compatibility issue with legacy editor ([91ec54a](https://github.com/aidenlx/alx-folder-note/commit/91ec54a95fec14397c6ba9b18f346c45022bf581)), closes [#73](https://github.com/aidenlx/alx-folder-note/issues/73)## [0.16.2](https://github.com/aidenlx/alx-folder-note/compare/0.16.1...0.16.2) (2022-04-15)
 
 
 ### Bug Fixes
