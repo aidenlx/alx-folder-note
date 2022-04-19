@@ -63,7 +63,8 @@ declare module "obsidian" {
     // ) => void;
   }
   interface MarkdownView {
-    editMode: MarkdownEditView;
+    editMode?: MarkdownEditView;
+    sourceMode?: MarkdownEditView;
   }
   interface MarkdownEditView {
     clipboardManager: ClipboardManager;
@@ -99,10 +100,15 @@ function VD(e: DragEvent, t: DataTransfer["dropEffect"]) {
 const PatchDragManager = (plugin: ALxFolderNote) => {
   const { getFolderNote } = plugin.CoreApi;
 
+  const view = new MarkdownView(new (WorkspaceLeaf as any)(plugin.app)),
+    editMode = view.editMode ?? view.sourceMode;
+
+  if (!editMode)
+    throw new Error("Failed to patch clipboard manager: no edit view found");
+
   plugin.register(
     around(
-      new MarkdownView(new (WorkspaceLeaf as any)(plugin.app)).editMode
-        .clipboardManager.constructor.prototype as ClipboardManager,
+      editMode.clipboardManager.constructor.prototype as ClipboardManager,
       {
         handleDragOver: (next) =>
           function (this: ClipboardManager, evt, ...args) {
