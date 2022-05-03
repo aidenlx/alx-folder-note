@@ -1,6 +1,6 @@
 {
   "name": "@aidenlx/folder-note",
-  "version": "0.16.3",
+  "version": "0.16.4",
   "description": "Add description, summary and more info to folders with folder notes.",
   "packageManager": "yarn@3.1.1",
   "scripts": {

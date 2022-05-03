@@ -1,6 +1,11 @@
 
 
-## [0.16.3](https://github.com/aidenlx/alx-folder-note/compare/0.16.2...0.16.3) (2022-04-19)
+## [0.16.4](https://github.com/aidenlx/alx-folder-note/compare/0.16.3...0.16.4) (2022-05-03)
+
+
+### Bug Fixes
+
+* **drag-patch:** fix no cursor shown on drag folder over editor in v0.14.8+ ([beb8c5e](https://github.com/aidenlx/alx-folder-note/commit/beb8c5e3294b24453b98febc579a1c3860f2bb37))## [0.16.3](https://github.com/aidenlx/alx-folder-note/compare/0.16.2...0.16.3) (2022-04-19)
 
 
 ### Bug Fixes
