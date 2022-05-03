@@ -26,12 +26,13 @@ Note:
   - [fetch title from h1](https://github.com/aidenlx/alx-folder-note/wiki/folderv-settings#h1-as-title-source) if title not specified
   - [filter files](https://github.com/aidenlx/alx-folder-note/wiki/folderv-options#filter) with regex/glob
   - [sort files](https://github.com/aidenlx/alx-folder-note/wiki/folderv-options#sort) by name/create time/last modified time
-
+- folder focus mode: right-click on folder in file explorer and select Toggle Focus can dim other folders and files outside of selected folder, select option again to revert ![CleanShot_2021-11-29_at_18 30 53](https://user-images.githubusercontent.com/31102694/166448049-aea0457a-d19f-4b29-8f7c-b66b5bd26629.gif)
+    - you can also long press with mouse on the folder name in file explorer to toggle folder focus (disabled by default, desktop only) 
+- [folder icon in file explorer](https://github.com/aidenlx/alx-folder-note/issues/11)
 More to come:
 
 - [ ] `folderv`: show [children specified in dataview/frontmatter fields](https://github.com/SkepticMystic/breadcrumbs/wiki/Relationships---Basics) (works with [relation-resolver plugin](https://github.com/aidenlx/relation-resolver))
 - [ ] `folderv`: list view
-- [ ] [folder icon in file explorer](https://github.com/aidenlx/alx-folder-note/issues/11)
 
 ## How to use
 
