@@ -3,6 +3,7 @@ import "obsidian";
 import { around } from "monkey-around";
 import {
   ClipboardManager,
+  DragManager,
   MarkdownView,
   Platform,
   TFolder,
@@ -17,6 +18,7 @@ declare global {
 declare module "obsidian" {
   interface App {
     dragManager: DragManager;
+    getObsidianUrl(file: TFile): string;
   }
   interface DragInfo {
     source?: string;
@@ -107,6 +109,20 @@ const PatchDragManager = (plugin: ALxFolderNote) => {
     throw new Error("Failed to patch clipboard manager: no edit view found");
 
   plugin.register(
+    around(app.dragManager.constructor.prototype as DragManager, {
+      dragFolder: (next) =>
+        function (this: DragManager, evt, folder, source, ...args) {
+          let note;
+          if ((note = getFolderNote(folder))) {
+            const url = app.getObsidianUrl(note);
+            evt.dataTransfer!.setData("text/plain", url);
+            evt.dataTransfer!.setData("text/uri-list", url);
+          }
+          return next.call(this, evt, folder, source, ...args);
+        },
+    }),
+  );
+  plugin.register(
     around(
       editMode.clipboardManager.constructor.prototype as ClipboardManager,
       {
@@ -119,7 +135,7 @@ const PatchDragManager = (plugin: ALxFolderNote) => {
               draggable.file instanceof TFolder &&
               getFolderNote(draggable.file)
             ) {
-              evt.preventDefault();
+              // evt.preventDefault();
               VD(evt, "link");
               this.app.dragManager.setAction(
                 i18next.t("interface.drag-and-drop.insert-link-here"),
