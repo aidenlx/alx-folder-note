@@ -99,14 +99,76 @@ function VD(e: DragEvent, t: DataTransfer["dropEffect"]) {
     (e.dataTransfer!.dropEffect = t);
 }
 
+const getMarkdownView = () => {
+  const leaves = app.workspace.getLeavesOfType("markdown");
+  if (leaves.length > 0) {
+    return leaves[0].view as MarkdownView;
+  } else return null;
+};
+
 const PatchDragManager = (plugin: ALxFolderNote) => {
   const { getFolderNote } = plugin.CoreApi;
 
-  const view = new MarkdownView(new (WorkspaceLeaf as any)(plugin.app)),
-    editMode = view.editMode ?? view.sourceMode;
+  const patchClipboardManager = (): boolean => {
+    const view = getMarkdownView();
+    if (!view) return false;
+    const editMode = view.editMode ?? view.sourceMode;
 
-  if (!editMode)
-    throw new Error("Failed to patch clipboard manager: no edit view found");
+    if (!editMode)
+      throw new Error("Failed to patch clipboard manager: no edit view found");
+
+    plugin.register(
+      around(
+        editMode.clipboardManager.constructor.prototype as ClipboardManager,
+        {
+          handleDragOver: (next) =>
+            function (this: ClipboardManager, evt, ...args) {
+              const { draggable } = this.app.dragManager;
+              if (
+                draggable &&
+                !(Platform.isMacOS ? evt.shiftKey : evt.altKey) &&
+                draggable.file instanceof TFolder &&
+                getFolderNote(draggable.file)
+              ) {
+                // evt.preventDefault();
+                VD(evt, "link");
+                this.app.dragManager.setAction(
+                  i18next.t("interface.drag-and-drop.insert-link-here"),
+                );
+              } else {
+                next.call(this, evt, ...args);
+              }
+            },
+          handleDrop: (next) =>
+            function (this: ClipboardManager, evt, ...args) {
+              const fallback = () => next.call(this, evt, ...args);
+              const { draggable } = plugin.app.dragManager;
+              let note;
+              if (
+                draggable?.type === "folder" &&
+                draggable.file instanceof TFolder &&
+                (note = getFolderNote(draggable.file))
+              ) {
+                draggable.file = note;
+                draggable.type = "file";
+              }
+              return fallback();
+            },
+        },
+      ),
+    );
+    console.log("alx-folder-note: clipboard manager patched");
+    return true;
+  };
+
+  plugin.app.workspace.onLayoutReady(() => {
+    if (!patchClipboardManager()) {
+      const evt = app.workspace.on("layout-change", () => {
+        patchClipboardManager() && app.workspace.offref(evt);
+      });
+      plugin.registerEvent(evt);
+    }
+  });
 
   plugin.register(
     around(app.dragManager.constructor.prototype as DragManager, {
@@ -121,46 +183,6 @@ const PatchDragManager = (plugin: ALxFolderNote) => {
           return next.call(this, evt, folder, source, ...args);
         },
     }),
-  );
-  plugin.register(
-    around(
-      editMode.clipboardManager.constructor.prototype as ClipboardManager,
-      {
-        handleDragOver: (next) =>
-          function (this: ClipboardManager, evt, ...args) {
-            const { draggable } = this.app.dragManager;
-            if (
-              draggable &&
-              !(Platform.isMacOS ? evt.shiftKey : evt.altKey) &&
-              draggable.file instanceof TFolder &&
-              getFolderNote(draggable.file)
-            ) {
-              // evt.preventDefault();
-              VD(evt, "link");
-              this.app.dragManager.setAction(
-                i18next.t("interface.drag-and-drop.insert-link-here"),
-              );
-            } else {
-              next.call(this, evt, ...args);
-            }
-          },
-        handleDrop: (next) =>
-          function (this: ClipboardManager, evt, ...args) {
-            const fallback = () => next.call(this, evt, ...args);
-            const { draggable } = plugin.app.dragManager;
-            let note;
-            if (
-              draggable?.type === "folder" &&
-              draggable.file instanceof TFolder &&
-              (note = getFolderNote(draggable.file))
-            ) {
-              draggable.file = note;
-              draggable.type = "file";
-            }
-            return fallback();
-          },
-      },
-    ),
   );
 };
 export default PatchDragManager;
