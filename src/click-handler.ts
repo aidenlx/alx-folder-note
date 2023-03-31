@@ -14,8 +14,8 @@ export const getClickHandler = (plugin: ALxFolderNote) => {
       evt.shiftKey ||
       // triggered only when click on title
       !(
-        (getFileItemInnerTitleEl(item) === evt.target ||
-        getFileItemInnerTitleEl(item).contains(evt.target as Node))
+        getFileItemInnerTitleEl(item) === evt.target ||
+        getFileItemInnerTitleEl(item).contains(evt.target as Node)
       ) ||
       // ignore file being renamed
       item.fileExplorer.fileBeingRenamed === item.file
