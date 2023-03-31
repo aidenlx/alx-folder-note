@@ -131,6 +131,12 @@ const PatchFileExplorer = (plugin: ALxFolderNote) => {
           // fallback to default
           if (!(await clickHandler(this, evt))) next.call(this, evt);
         },
+      onSelfClick: (next) =>
+        async function (this: FolderItemCls, evt) {
+          // if folder note click not success,
+          // fallback to default
+          if (!(await clickHandler(this, evt))) next.call(this, evt);
+        },
     }),
   ];
   resetFileExplorer(plugin);

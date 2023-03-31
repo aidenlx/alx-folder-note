@@ -83,7 +83,11 @@ declare module "obsidian" {
     collapsed: boolean;
     pusherEl: HTMLDivElement;
     setCollapsed(collapsed: boolean): Promise<void>;
-    onTitleElClick(evt: MouseEvent): any;
+    /**
+     * @deprecated After Obsidian 1.2.0, use `onSelfClick` instead.
+     */
+    onTitleElClick?(evt: MouseEvent): any;
+    onSelfClick(evt: MouseEvent): any;
   }
 
   interface Vault {
