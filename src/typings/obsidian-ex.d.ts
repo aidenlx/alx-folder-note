@@ -50,16 +50,32 @@ declare module "obsidian" {
     file: TFile;
     fileExplorer: FileExplorerView;
     info: any;
-    titleEl: HTMLDivElement;
-    titleInnerEl: HTMLDivElement;
+    /**
+     * @deprecated After Obsidian 1.2.0, use `selfEl` instead.
+     */
+    titleEl?: HTMLDivElement;
+    /**
+     * @deprecated After Obsidian 1.2.0, use `innerEl` instead.
+     */
+    titleInnerEl?: HTMLDivElement;
+    selfEl: HTMLDivElement;
+    innerEl: HTMLDivElement;
   }
 
   class FolderItem {
     el: HTMLDivElement;
     fileExplorer: FileExplorerView;
     info: any;
-    titleEl: HTMLDivElement;
-    titleInnerEl: HTMLDivElement;
+    /**
+     * @deprecated After Obsidian 1.2.0, use `selfEl` instead.
+     */
+    titleEl?: HTMLDivElement;
+    /**
+     * @deprecated After Obsidian 1.2.0, use `innerEl` instead.
+     */
+    titleInnerEl?: HTMLDivElement;
+    selfEl: HTMLDivElement;
+    innerEl: HTMLDivElement;
     file: TFolder;
     children: AFItem[];
     childrenEl: HTMLDivElement;

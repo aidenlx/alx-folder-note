@@ -1,7 +1,7 @@
 import { FolderItem, Platform } from "obsidian";
 
 import type ALxFolderNote from "./fn-main";
-import { isModifier } from "./misc";
+import { isModifier, getFileItemInnerTitleEl } from "./misc";
 import { LongPressEvent } from "./modules/long-press";
 
 export const getClickHandler = (plugin: ALxFolderNote) => {
@@ -14,8 +14,8 @@ export const getClickHandler = (plugin: ALxFolderNote) => {
       evt.shiftKey ||
       // triggered only when click on title
       !(
-        item.titleInnerEl === evt.target ||
-        item.titleInnerEl.contains(evt.target as Node)
+        (getFileItemInnerTitleEl(item) === evt.target ||
+        getFileItemInnerTitleEl(item).contains(evt.target as Node))
       ) ||
       // ignore file being renamed
       item.fileExplorer.fileBeingRenamed === item.file

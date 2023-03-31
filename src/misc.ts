@@ -9,7 +9,7 @@ import {
   View,
   WorkspaceLeaf,
 } from "obsidian";
-import { Notice, Platform, TFolder } from "obsidian";
+import { Notice, Platform, TFolder, FileItem } from "obsidian";
 import { dirname, extname, join } from "path";
 
 export type afItemMark = AFItem & {
@@ -83,4 +83,12 @@ export class ClickNotice extends Notice {
       this.noticeEl.append(frag);
     }
   }
+}
+
+export function getFileItemTitleEl(fileItem: FileItem): HTMLElement {
+  return fileItem.titleEl ?? fileItem.selfEl;
+}
+
+export function getFileItemInnerTitleEl(fileItem: FileItem): HTMLElement {
+  return fileItem.titleInnerEl ?? fileItem.innerEl;
 }
