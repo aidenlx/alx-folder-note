@@ -1,11 +1,12 @@
 import "./settings.less";
 
 import { getApi } from "@aidenlx/obsidian-icon-shortcodes";
-import { App, Modifier, Platform, PluginSettingTab, Setting } from "obsidian";
+import type { App, Modifier } from "obsidian";
+import { Platform, PluginSettingTab, Setting } from "obsidian";
 
 import { folderIconMark } from "./fe-handler/folder-mark";
-import ALxFolderNote from "./fn-main";
-import { NoteLoc } from "./misc";
+import type ALxFolderNote from "./fn-main";
+import type { NoteLoc } from "./misc";
 
 export const noHideNoteMark = "alx-no-hide-note";
 export const MobileNoClickMark = "alx-no-click-on-mobile";
@@ -99,7 +100,7 @@ export class ALxFolderNoteSettingTab extends PluginSettingTab {
   }
 
   display(): void {
-    let { containerEl } = this;
+    const { containerEl } = this;
     containerEl.empty();
 
     new Setting(containerEl).setHeading().setName("Core");

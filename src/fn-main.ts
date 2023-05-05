@@ -1,6 +1,7 @@
 import "./main.less";
 
-import { FolderNoteAPI, getApi as getFNCApi } from "@aidenlx/folder-note-core";
+import type { FolderNoteAPI } from "@aidenlx/folder-note-core";
+import { getApi as getFNCApi } from "@aidenlx/folder-note-core";
 import { getApi as getISCApi } from "@aidenlx/obsidian-icon-shortcodes";
 import { Notice, Plugin } from "obsidian";
 
@@ -8,8 +9,8 @@ import PatchDragManager from "./drag-patch";
 import PatchFileExplorer from "./fe-patch";
 import { ClickNotice } from "./misc";
 import registerSetFolderIconCmd from "./modules/set-folder-icon";
+import type { ALxFolderNoteSettings } from "./settings";
 import {
-  ALxFolderNoteSettings,
   ALxFolderNoteSettingTab,
   DEFAULT_SETTINGS,
   MobileNoClickMark,
@@ -23,7 +24,7 @@ export default class ALxFolderNote extends Plugin {
 
   get CoreApi(): FolderNoteAPI {
     let message;
-    let api = getFNCApi(this) || getFNCApi();
+    const api = getFNCApi(this) || getFNCApi();
     if (api) {
       return api;
     } else {
@@ -89,7 +90,7 @@ export default class ALxFolderNote extends Plugin {
 
     await this.loadSettings();
 
-    let tab = new ALxFolderNoteSettingTab(this.app, this);
+    const tab = new ALxFolderNoteSettingTab(this.app, this);
     if (!tab.checkMigrated())
       new Notice(
         "Old config not yet migrated, \n" +

@@ -1,6 +1,7 @@
 import "./focus.less";
 
-import { FileExplorerView, FolderItem, TFolder } from "obsidian";
+import type { FileExplorerView, FolderItem } from "obsidian";
+import { TFolder } from "obsidian";
 
 import type ALxFolderNote from "../fn-main";
 import FEHandler_Base from "./base";

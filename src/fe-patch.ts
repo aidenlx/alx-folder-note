@@ -4,14 +4,16 @@ import type {
   FileExplorerView as FEViewCls,
   FileExplorerView,
   FolderItem as FolderItemCls,
+  TAbstractFile,
 } from "obsidian";
-import { TAbstractFile, TFile, TFolder } from "obsidian";
+import { TFile, TFolder } from "obsidian";
 
 import { getClickHandler, pressHandler } from "./click-handler";
 import getFileExplorerHandlers from "./fe-handler";
-import ALxFolderNote from "./fn-main";
+import type ALxFolderNote from "./fn-main";
 import { getViewOfType } from "./misc";
-import AddLongPressEvt, { LongPressEvent } from "./modules/long-press";
+import type { LongPressEvent } from "./modules/long-press";
+import AddLongPressEvt from "./modules/long-press";
 
 const getFolderItemFromEl = (navEl: HTMLElement, view: FEViewCls) => {
   const folder = view.files.get(navEl);
@@ -20,7 +22,7 @@ const getFolderItemFromEl = (navEl: HTMLElement, view: FEViewCls) => {
     : null;
 };
 const Rt = (evt: MouseEvent, target: HTMLElement) => {
-  let n = evt.relatedTarget;
+  const n = evt.relatedTarget;
   return !(n instanceof Node && target.contains(n));
 };
 /**
@@ -28,7 +30,7 @@ const Rt = (evt: MouseEvent, target: HTMLElement) => {
  */
 const resetFileExplorer = async (plugin: ALxFolderNote) => {
   for (const leaf of plugin.app.workspace.getLeavesOfType("file-explorer")) {
-    let state = leaf.getViewState();
+    const state = leaf.getViewState();
     await leaf.setViewState({ type: "empty" });
     leaf.setViewState(state);
   }

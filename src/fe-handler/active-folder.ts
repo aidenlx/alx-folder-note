@@ -1,13 +1,9 @@
-import {
-  FileExplorerView,
-  MarkdownView,
-  TFolder,
-  WorkspaceLeaf,
-} from "obsidian";
+import type { FileExplorerView, TFolder, WorkspaceLeaf } from "obsidian";
+import { MarkdownView } from "obsidian";
 
 import type ALxFolderNote from "../fn-main";
+import { getFileItemTitleEl } from "../misc";
 import FEHandler_Base from "./base";
-import { getFileItemTitleEl } from '../misc';
 
 const isActiveClass = "is-active";
 
@@ -28,7 +24,9 @@ export default class ActiveFolder extends FEHandler_Base {
   private _activeFolder: TFolder | null = null;
   public set activeFolder(folder: TFolder | null) {
     const getTitleEl = (folder: TFolder | null) =>
-      folder && this.fileExplorer.fileItems[folder.path] ? getFileItemTitleEl(this.fileExplorer.fileItems[folder.path]) : undefined;
+      folder && this.fileExplorer.fileItems[folder.path]
+        ? getFileItemTitleEl(this.fileExplorer.fileItems[folder.path])
+        : undefined;
     if (!folder) {
       getTitleEl(this._activeFolder)?.removeClass(isActiveClass);
     } else if (folder !== this._activeFolder) {

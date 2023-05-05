@@ -1,14 +1,6 @@
-import "obsidian";
-
 import { around } from "monkey-around";
-import {
-  ClipboardManager,
-  DragManager,
-  MarkdownView,
-  Platform,
-  TFolder,
-  WorkspaceLeaf,
-} from "obsidian";
+import type { ClipboardManager, DragManager, MarkdownView } from "obsidian";
+import { Platform, TFolder, WorkspaceLeaf } from "obsidian";
 
 import type ALxFolderNote from "./fn-main";
 
@@ -93,7 +85,7 @@ function VD(e: DragEvent, t: DataTransfer["dropEffect"]) {
   t &&
     (function (e, t) {
       if ("none" === t) return !0;
-      let n = HD[e.dataTransfer!.effectAllowed];
+      const n = HD[e.dataTransfer!.effectAllowed];
       return !!n && (n as any).contains(t);
     })(e, t) &&
     (e.dataTransfer!.dropEffect = t);

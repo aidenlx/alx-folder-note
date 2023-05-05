@@ -1,8 +1,9 @@
-import { FolderItem, Platform } from "obsidian";
+import type { FolderItem } from "obsidian";
+import { Platform } from "obsidian";
 
 import type ALxFolderNote from "./fn-main";
 import { isModifier, getFileItemInnerTitleEl } from "./misc";
-import { LongPressEvent } from "./modules/long-press";
+import type { LongPressEvent } from "./modules/long-press";
 
 export const getClickHandler = (plugin: ALxFolderNote) => {
   const { getFolderNote, getFolderNotePath, getNewFolderNote } = plugin.CoreApi;

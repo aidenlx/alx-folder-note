@@ -1,18 +1,17 @@
 import "./folder-icon.less";
 
-import {
+import { dirname } from "path";
+import type {
   AFItem,
   CachedMetadata,
   FileExplorerView,
   FolderItem,
-  TAbstractFile,
-  TFile,
-  TFolder,
 } from "obsidian";
-import { dirname } from "path";
+import { TAbstractFile, TFile, TFolder } from "obsidian";
 
 import type ALxFolderNote from "../fn-main";
-import { afItemMark, isFolder } from "../misc";
+import type { afItemMark } from "../misc";
+import { isFolder } from "../misc";
 import FEHandler_Base from "./base";
 
 export const folderIconMark = "alx-folder-icons";
@@ -61,7 +60,7 @@ export default class FolderMark extends FEHandler_Base {
     changedFolder: {
       queue: new Set<string>(),
       action: (path: string) => {
-        let note = this.fncApi.getFolderNote(path);
+        const note = this.fncApi.getFolderNote(path);
         if (note) {
           (this.getAfItem(path) as FolderItem)?.el.toggleClass(
             emptyFolderClass,
@@ -74,7 +73,7 @@ export default class FolderMark extends FEHandler_Base {
   private initFolderMark() {
     const { vault, metadataCache } = this.app;
     this.markAll();
-    //#region folder note events setup
+    // #region folder note events setup
     [
       vault.on("folder-note:create", (note: TFile, folder: TFolder) => {
         this.setMark(note);
@@ -99,7 +98,7 @@ export default class FolderMark extends FEHandler_Base {
       }),
     ].forEach(this.plugin.registerEvent.bind(this.plugin));
   }
-  //#region set class mark for folder notes and folders
+  // #region set class mark for folder notes and folders
   public setMark = (
     target: AFItem | TAbstractFile | string,
     revert = false,
@@ -143,7 +142,7 @@ export default class FolderMark extends FEHandler_Base {
     return !!found;
   };
   // #endregion
-  //#region folder icon setup
+  // #region folder icon setup
   private initFolderIcon() {
     document.body.toggleClass(folderIconMark, this.plugin.settings.folderIcon);
     const { vault } = this.app;
@@ -200,20 +199,20 @@ export default class FolderMark extends FEHandler_Base {
       }
     }
   }
-  //#endregion
-  //#region set hide collapse indicator
+  // #endregion
+  // #region set hide collapse indicator
   private initHideCollapseIndicator() {
     if (!this.plugin.settings.hideCollapseIndicator) return;
     const { vault } = this.app;
     [
       vault.on("create", (file) => this.setChangedFolder(file.parent.path)),
       vault.on("delete", (file) => {
-        let parent = dirname(file.path);
+        const parent = dirname(file.path);
         this.setChangedFolder(parent === "." ? "/" : parent);
       }),
       vault.on("rename", (file, oldPath) => {
         this.setChangedFolder(file.parent.path);
-        let parent = dirname(oldPath);
+        const parent = dirname(oldPath);
         this.setChangedFolder(parent === "." ? "/" : parent);
       }),
     ].forEach(this.plugin.registerEvent.bind(this.plugin));
@@ -224,5 +223,5 @@ export default class FolderMark extends FEHandler_Base {
     this.queues.changedFolder.queue.add(folderPath);
     this.execQueue("changedFolder");
   };
-  //#endregion
+  // #endregion
 }

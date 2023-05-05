@@ -8,7 +8,7 @@
 
 import { Platform } from "obsidian";
 
-import ALxFolderNote from "../fn-main";
+import type ALxFolderNote from "../fn-main";
 
 // local timer object based on rAF
 let timer: {
@@ -18,8 +18,8 @@ let timer: {
 // track number of pixels the mouse moves during long press
 let startX = 0; // mouse x position when timer started
 let startY = 0; // mouse y position when timer started
-let maxDiffX = 10; // max number of X pixels the mouse can move during long press before it is canceled
-let maxDiffY = 10; // max number of Y pixels the mouse can move during long press before it is canceled
+const maxDiffX = 10; // max number of X pixels the mouse can move during long press before it is canceled
+const maxDiffY = 10; // max number of Y pixels the mouse can move during long press before it is canceled
 
 /**
  * Behaves the same as setTimeout except uses requestAnimationFrame() where possible for better performance
@@ -28,12 +28,12 @@ let maxDiffY = 10; // max number of Y pixels the mouse can move during long pres
  * @returns {object} handle to the timeout object
  */
 const requestTimeout = (fn: Function, delay: number): { value: number } => {
-  let start = new Date().getTime();
-  let handle: { value?: number } = {};
+  const start = new Date().getTime();
+  const handle: { value?: number } = {};
 
-  let loop = () => {
-    let current = new Date().getTime();
-    let delta = current - start;
+  const loop = () => {
+    const current = new Date().getTime();
+    const delta = current - start;
 
     if (delta >= delay) {
       fn();
@@ -76,7 +76,7 @@ const fireLongPressEvent = (originalEvent: PointerEvent): void => {
   clearLongPressTimer();
 
   // fire the long-press event
-  let allowClickEvent = originalEvent.target?.dispatchEvent(
+  const allowClickEvent = originalEvent.target?.dispatchEvent(
     new CustomEvent("long-press", {
       bubbles: true,
       cancelable: true,
@@ -119,10 +119,10 @@ const fireLongPressEvent = (originalEvent: PointerEvent): void => {
 const startLongPressTimer = (e: PointerEvent) => {
   clearLongPressTimer();
 
-  let el = e.target as EventTarget;
+  const el = e.target as EventTarget;
 
   // get delay from html attribute if it exists, otherwise default to 800
-  let longPressDelayInMs = parseInt(
+  const longPressDelayInMs = parseInt(
     getNearestAttribute(el, "data-long-press-delay", "800"),
     10,
   ); // default 800
@@ -185,7 +185,7 @@ const getNearestAttribute = (
 ) => {
   // walk up the dom tree looking for data-action and data-trigger
   while (el instanceof Element && el !== document.documentElement) {
-    let attributeValue = el.getAttribute(attributeName);
+    const attributeValue = el.getAttribute(attributeName);
 
     if (attributeValue) {
       return attributeValue;

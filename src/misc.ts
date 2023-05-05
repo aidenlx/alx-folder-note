@@ -1,5 +1,6 @@
+import { dirname, extname, join } from "path";
 import assertNever from "assert-never";
-import {
+import type {
   AFItem,
   App,
   FolderItem,
@@ -7,10 +8,9 @@ import {
   TAbstractFile,
   TFile,
   View,
-  WorkspaceLeaf,
+  FileItem,
 } from "obsidian";
-import { Notice, Platform, TFolder, FileItem } from "obsidian";
-import { dirname, extname, join } from "path";
+import { WorkspaceLeaf, Notice, Platform, TFolder } from "obsidian";
 
 export type afItemMark = AFItem & {
   evtDone?: true;
@@ -78,7 +78,7 @@ export class ClickNotice extends Notice {
     this.noticeEl.addEventListener("click", action);
     if (typeof message === "function") {
       this.noticeEl.empty();
-      let frag = new DocumentFragment();
+      const frag = new DocumentFragment();
       message(frag);
       this.noticeEl.append(frag);
     }

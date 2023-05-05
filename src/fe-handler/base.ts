@@ -1,9 +1,10 @@
 import "./file-explorer.less";
 
-import { AFItem, debounce, FileExplorerView } from "obsidian";
+import type { AFItem, FileExplorerView } from "obsidian";
+import { debounce } from "obsidian";
 
-import ALxFolderNote from "../fn-main";
-import { afItemMark } from "../misc";
+import type ALxFolderNote from "../fn-main";
+import type { afItemMark } from "../misc";
 
 export default abstract class FEHandler_Base {
   longPressRegistered = new WeakSet<FileExplorerView>();
