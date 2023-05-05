@@ -1,6 +1,6 @@
 {
   "name": "@aidenlx/folder-note",
-  "version": "0.16.4",
+  "version": "0.16.5",
   "description": "Add description, summary and more info to folders with folder notes.",
   "scripts": {
     "dev": "cross-env BUILD=dev node esbuild.config.mjs",

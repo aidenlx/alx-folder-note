@@ -1,5 +1,19 @@
 
 
+## [0.16.5](https://github.com/aidenlx/alx-folder-note/compare/0.16.4...0.16.5) (2023-05-05)
+
+
+### Bug Fixes
+
+* click event ([a27e40a](https://github.com/aidenlx/alx-folder-note/commit/a27e40a370e38f55dc9c3b14513fab3cc62f5f12))
+* compatible with Obsidian 1.2.0 version ([1b13e92](https://github.com/aidenlx/alx-folder-note/commit/1b13e926d7f21f85afc8959de0d8ee77f89b4a37))
+
+
+### Performance Improvements
+
+* **drag-patch:** patch drag manager with existing MarkdownView instead of init a new one ([07f64d6](https://github.com/aidenlx/alx-folder-note/commit/07f64d6112a93fd46b97c051520fd16dcc2f79ba))
+* use native frontmatter edit method instead of graymatter ([3948b68](https://github.com/aidenlx/alx-folder-note/commit/3948b68b21d437d9b5a90ae0da762ad52187f23b))
+
 ## [0.16.4](https://github.com/aidenlx/alx-folder-note/compare/0.16.3...0.16.4) (2022-05-03)
 
 
