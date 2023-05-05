@@ -1,5 +1,5 @@
 import obPlugin from "@aidenlx/esbuild-plugin-obsidian";
-import { build } from "esbuild";
+import { build, context } from "esbuild";
 import { lessLoader } from "esbuild-plugin-less";
 
 const banner = `/*
@@ -10,30 +10,44 @@ if you want to view the source visit the plugins github repository
 
 const isProd = process.env.BUILD === "production";
 
-try {
-  await build({
-    entryPoints: ["src/fn-main.ts"],
-    bundle: true,
-    watch: !isProd,
-    platform: "browser",
-    external: ["obsidian"],
-    format: "cjs",
-    mainFields: ["browser", "module", "main"],
-    banner: { js: banner },
-    sourcemap: isProd ? false : "inline",
-    minify: isProd,
-    define: {
-      "process.env.NODE_ENV": JSON.stringify(process.env.BUILD),
-    },
-    outfile: "build/main.js",
-    plugins: [
-      lessLoader({
-        javascriptEnabled: true,
-      }),
-      obPlugin(),
-    ],
-  });
-} catch (err) {
-  console.error(err);
-  process.exit(1);
+const opts = {
+  entryPoints: ["src/fn-main.ts"],
+  bundle: true,
+  platform: "browser",
+  external: ["obsidian"],
+  format: "cjs",
+  mainFields: ["browser", "module", "main"],
+  banner: { js: banner },
+  sourcemap: isProd ? false : "inline",
+  minify: isProd,
+  define: {
+    "process.env.NODE_ENV": JSON.stringify(process.env.BUILD),
+  },
+  outfile: "build/main.js",
+  plugins: [
+    lessLoader({
+      javascriptEnabled: true,
+    }),
+    obPlugin(),
+  ],
+};
+
+if (!isProd) {
+  const ctx = await context({ ...opts, logLevel: "error" });
+  try {
+    await ctx.watch();
+  } catch (err) {
+    console.error(err);
+    await cleanup();
+  }
+  process.on("SIGINT", cleanup);
+  // eslint-disable-next-line no-inner-declarations
+  async function cleanup() {
+    await ctx.dispose();
+    // scheduleOnDisposeCallbacks defer function calls using setTimeout(...,0)
+    // so we need to wait a bit before exiting
+    // setTimeout(() => process.exit(), 100);
+  }
+} else {
+  await build(opts);
 }

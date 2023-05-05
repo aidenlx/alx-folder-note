@@ -1,4 +1,26 @@
 {
-  "extends": "@aidenlx/ts-config/tsconfig.json",
-  "include": ["src/**/*.ts"]
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "compilerOptions": {
+    "baseUrl": "src",
+    "outDir": "dist",
+    "target": "ES2022",
+    "lib": ["dom", "ES2018"],
+    "moduleResolution": "bundler",
+    "module": "ESNext",
+    "strict": true,
+    "useUnknownInCatchVariables": true,
+    "allowJs": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "noEmit": true,
+    "esModuleInterop": false,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "incremental": true,
+    "newLine": "lf"
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx", "src/worker/*/api.ts"],
+  "exclude": ["**/node_modules", "**/.*/", "dist", "build"]
 }
+
