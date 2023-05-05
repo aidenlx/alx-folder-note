@@ -1,20 +1,16 @@
 import type { IconInfo } from "@aidenlx/obsidian-icon-shortcodes/lib/icon-packs/types";
-import matter from "gray-matter";
 import { MarkdownView, TFile, TFolder } from "obsidian";
 
 import type ALxFolderNote from "../fn-main";
 
 const registerSetFolderIconCmd = (plugin: ALxFolderNote) => {
-  const { workspace, vault } = plugin.app;
-  const setIconField = async (icon: IconInfo | null, file: TFile) =>
-    icon &&
-    vault.modify(
-      file,
-      (matter(await vault.read(file)).stringify as any)(
-        { icon: icon.id },
-        { flowLevel: 3, indent: 4 },
-      ),
-    );
+  const { workspace, vault, fileManager } = plugin.app;
+  const setIconField = async (icon: IconInfo | null, file: TFile) => {
+    if (!icon) return;
+    await fileManager.processFrontMatter(file, (fm) => {
+      fm.icon = icon.id;
+    });
+  };
   plugin.addCommand({
     id: "set-folder-icon",
     name: "Set Folder Icon",
