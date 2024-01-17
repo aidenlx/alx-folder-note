@@ -59,7 +59,7 @@ export default class FolderFocus extends FEHandler_Base {
         this.fileExplorer.dom.infinityScroll.scrollIntoView(item);
       });
     }
-    this.fileExplorer.dom.navFileContainerEl.toggleClass(focusModeCls, !!item);
+    this.fileExplorer.dom?.navFileContainerEl?.toggleClass(focusModeCls, !!item);
   }
   toggleFocusFolder(folder: TFolder | null) {
     const folderItem = folder
