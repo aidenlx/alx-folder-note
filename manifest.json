@@ -1,6 +1,6 @@
 {
-  "id": "alx-folder-note-rework",
-  "name": "AidenLx's Folder Note Reworked",
+  "id": "alx-folder-note",
+  "name": "AidenLx's Folder Note",
   "version": "0.17.0",
   "minAppVersion": "1.1.0",
   "description": "Add description, summary and more info to folders with folder notes.",
