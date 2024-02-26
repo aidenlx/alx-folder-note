@@ -49,18 +49,21 @@ export default class FolderFocus extends FEHandler_Base {
       ? { folder: item, collapsedCache: item.collapsed }
       : null;
     // unfold folder if it's collapsed
+
+    //Note: Bug fix introduced in v1.5.4
     if (item && item.collapsed) {
       item.setCollapsed(false);
       // @ts-ignore
       this.plugin.app.nextFrame(() => {
         // @ts-ignore
-        this.fileExplorer.dom.infinityScroll.computeSync();
+        this.fileExplorer.tree.infinityScroll.computeSync();
         // @ts-ignore
-        this.fileExplorer.dom.infinityScroll.scrollIntoView(item);
+        this.fileExplorer.tree.infinityScroll.scrollIntoView(item);
       });
     }
-    this.fileExplorer.dom.navFileContainerEl.toggleClass(focusModeCls, !!item);
+    this.fileExplorer.navFileContainerEl.toggleClass(focusModeCls, !!item);
   }
+  
   toggleFocusFolder(folder: TFolder | null) {
     const folderItem = folder
       ? (this.getAfItem(folder.path) as FolderItem | null)
