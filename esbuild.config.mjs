@@ -1,4 +1,4 @@
-import obPlugin from "@aidenlx/esbuild-plugin-obsidian";
+import obPlugin from "./scripts/obPlugin.mjs";
 import { build, context } from "esbuild";
 import { lessLoader } from "esbuild-plugin-less";
 

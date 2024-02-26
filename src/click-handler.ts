@@ -19,7 +19,9 @@ export const getClickHandler = (plugin: ALxFolderNote) => {
         getFileItemInnerTitleEl(item).contains(evt.target as Node)
       ) ||
       // ignore file being renamed
-      item.fileExplorer.fileBeingRenamed === item.file
+
+      //Note: Bug fix introduced in v1.5.4
+      item.fileExplorer?.fileBeingRenamed === item.file
     )
       return false;
 
