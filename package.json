@@ -1,7 +1,7 @@
 {
-  "name": "@aidenlx/folder-note-patched",
+  "name": "@aidenlx/folder-note",
   "version": "0.16.5",
-  "description": "@aidenlx/folder-note plugin patched for the breaking changes in Obsidian 1.5.4 (and newer)",
+  "description": "Add description, summary and more info to folders with folder notes.",
   "scripts": {
     "dev": "cross-env BUILD=dev node esbuild.config.mjs",
     "check": "tsc --noEmit",
