@@ -1,4 +1,4 @@
-> [!INFO]
+> [!IMPORTANT]
 > 
 > This is a patched version of the Obsidian plugin [aidenlx/alx-folder-note](https://github.com/aidenlx/alx-folder-note)
 >
