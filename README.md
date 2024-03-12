@@ -1,26 +1,3 @@
-> [!INFO]
-> 
-> This is a patched version of the Obsidian plugin [aidenlx/alx-folder-note](https://github.com/aidenlx/alx-folder-note)
->
-> The fix addresses the problem reported under: https://github.com/aidenlx/alx-folder-note/issues/134
->
-> The source of the problem are breaking changes introduced in Obsidian 1.5.4 in File Explorer.
-> They basically renamed the internal field FileExplorerView.fileExplorer to .view thus impacting
-> the (backward) compatibility with this plugin.
-> 
-> My plugin [SebastianMC/obsidian-custom-sort](https://github.com/SebastianMC/obsidian-custom-sort) was also affected.
-> I invested my time to track back via reverse engineering that breaking change.
-> In result I was able to apply relevant fix to my plugin.
-> This forked repo of [aidenlx/alx-folder-note](https://github.com/aidenlx/alx-folder-note) applies exactly the same fix to the plugin.
-> 
-> If you want to install the patched version there are two basic options:
-> - install from this (forked) repository via Obsidian BRAT plugin, or
-> - download this repository and build it by yourself:
->   - command: `npm install`
->   - command: `npm run build`
->   - then copy the `build/main.js` to your vault folder, overriding the `main.js` of the original plugin
->
-
 # AidenLx's Folder Note
 
 Add description, summary and more info to folders with folder notes.
