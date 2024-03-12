@@ -1,7 +1,7 @@
 > [!IMPORTANT]
 > 
 > This is a patched version of the Obsidian plugin [aidenlx/alx-folder-note](https://github.com/aidenlx/alx-folder-note)
->
+> It is compatible with Obsidian 1.5.4 (and newer).
 > The fix addresses the problem reported under: https://github.com/aidenlx/alx-folder-note/issues/134
 >
 > The source of the problem are breaking changes introduced in Obsidian 1.5.4 in File Explorer.
@@ -11,7 +11,7 @@
 > My plugin [SebastianMC/obsidian-custom-sort](https://github.com/SebastianMC/obsidian-custom-sort) was also affected.
 > I invested my time to track back via reverse engineering that breaking change.
 > In result I was able to apply relevant fix to my plugin.
-> This forked repo of [aidenlx/alx-folder-note](https://github.com/aidenlx/alx-folder-note) applies exactly the same fix to the plugin.
+> This forked repo of [aidenlx/alx-folder-note](https://github.com/aidenlx/alx-folder-note) applies exactly the same fix.
 > 
 > If you want to install the patched version there are two basic options:
 > - install from this (forked) repository via Obsidian BRAT plugin, or

@@ -48,7 +48,7 @@ declare module "obsidian" {
   class FileItem {
     el: HTMLDivElement;
     file: TFile;
-    fileExplorer: FileExplorerView;
+    view: FileExplorerView;  // Starting from Obsidian 1.5.4 the .fileExplorer field was renamed to .view
     info: any;
     /**
      * @deprecated After Obsidian 1.2.0, use `selfEl` instead.
@@ -64,7 +64,7 @@ declare module "obsidian" {
 
   class FolderItem {
     el: HTMLDivElement;
-    fileExplorer: FileExplorerView;
+    view: FileExplorerView;  // Starting from Obsidian 1.5.4 the .fileExplorer field was renamed to .view
     info: any;
     /**
      * @deprecated After Obsidian 1.2.0, use `selfEl` instead.

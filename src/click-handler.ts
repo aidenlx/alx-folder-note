@@ -19,7 +19,7 @@ export const getClickHandler = (plugin: ALxFolderNote) => {
         getFileItemInnerTitleEl(item).contains(evt.target as Node)
       ) ||
       // ignore file being renamed
-      item.fileExplorer.fileBeingRenamed === item.file
+      item.view.fileBeingRenamed === item.file
     )
       return false;
 
@@ -64,8 +64,8 @@ export const pressHandler = (
   item: FolderItem,
   _evt: LongPressEvent,
 ): boolean => {
-  if (!item || item.fileExplorer.fileBeingRenamed === item.file) return false;
+  if (!item || item.view.fileBeingRenamed === item.file) return false;
   const folder = item.file;
-  item.fileExplorer.folderNoteUtils?.folderFocus.toggleFocusFolder(folder);
+  item.view.folderNoteUtils?.folderFocus.toggleFocusFolder(folder);
   return true;
 };
