@@ -3,9 +3,6 @@ node_modules
 package-lock.json
 # yarn.lock
 
-# build
-build
-
 # https://yarnpkg.com/getting-started/qa#which-files-should-be-gitignored
 .pnp.*
 .yarn/*
