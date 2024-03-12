@@ -65,7 +65,7 @@ const PatchFileExplorer = (plugin: ALxFolderNote) => {
           const self = this;
           next.call(self);
           self.folderNoteUtils = getFileExplorerHandlers(plugin, self);
-          AddLongPressEvt(plugin, self.dom.navFileContainerEl);
+          AddLongPressEvt(plugin, self.navFileContainerEl);
           self.containerEl.on(
             "auxclick",
             ".nav-folder",

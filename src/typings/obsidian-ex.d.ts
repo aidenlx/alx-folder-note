@@ -14,10 +14,10 @@ declare module "obsidian" {
     getViewType(): string;
     getDisplayText(): string;
     onClose(): Promise<void>;
-    dom: {
+    tree: {
       infinityScroll: HTMLDivElement;
-      navFileContainerEl: HTMLDivElement;
     };
+    navFileContainerEl: HTMLDivElement;
     onOpen(): Promise<void>;
     onFileClick(evt: MouseEvent, navEl: HTMLDivElement): void;
     handleFileClick(evt: MouseEvent, item: AFItem): boolean;
